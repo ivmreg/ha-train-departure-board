@@ -1,71 +1,112 @@
 # Train Departure Board for Home Assistant
 
-This project provides a visualization tile for Home Assistant that displays train departure information in a format similar to the boards used by Transport for London (TFL). The tile is designed to be customizable and user-friendly, allowing users to easily view upcoming train departures.
+A custom Lovelace card for Home Assistant that displays train departure information in a format similar to the boards used by Transport for London (TFL).
 
 ## Features
 
-- Displays real-time train departure information.
-- Customizable settings for train routes and display options.
-- Visually resembles TFL boards for an intuitive user experience.
-- Integrates seamlessly with Home Assistant.
+- 🚆 Real-time train departure information
+- 🎨 Clean, modern design inspired by TFL departure boards
+- ⏱️ Automatic status detection (On Time/Delayed)
+- 🚉 Platform information display
+- 📱 Responsive grid layout
+- ✨ No manual configuration required - appears automatically in card picker
 
 ## Installation
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/ha-train-departure-board.git
-   ```
+### HACS (Recommended)
 
-2. Navigate to the project directory:
-   ```
-   cd ha-train-departure-board
-   ```
+1. Open HACS in your Home Assistant instance
+2. Click on "Frontend"
+3. Click the three dots in the top right corner
+4. Select "Custom repositories"
+5. Add this repository URL: `https://github.com/ivmreg/ha-train-departure-board`
+6. Select category: "Lovelace"
+7. Click "Add"
+8. Find "Train Departure Board" in the list and click "Download"
+9. Restart Home Assistant
 
-3. Install the dependencies:
-   ```
-   npm install
-   ```
+### Manual Installation
 
-4. Build the project:
-   ```
-   npm run build
-   ```
-
-5. Add the custom card to your Home Assistant configuration:
-   ```yaml
-   resources:
-     - url: /local/ha-train-departure-board/dist/train-departure-board.js
-       type: module
-   ```
-
-6. Use the custom card in your Lovelace UI:
-   ```yaml
-   type: 'custom:train-departure-card'
-   title: Train Departures
-   routes:
-     - route: 'YOUR_ROUTE'
-   ```
+1. Download `train-departure-card.js` from the latest release
+2. Copy it to `<config>/www/train-departure-card.js` (create the `www` folder if it doesn't exist)
+3. Add the resource to your Lovelace configuration:
+   - Go to Settings → Dashboards → Resources
+   - Click "Add Resource"
+   - URL: `/local/train-departure-card.js`
+   - Resource type: JavaScript Module
+4. Restart Home Assistant
 
 ## Usage
 
-After installation, you can customize the card settings through the Home Assistant UI. You can select the train routes you want to display and adjust other display options to suit your preferences.
+After installation, the card will automatically appear in your card picker. No need to manually add it to your configuration!
+
+1. Edit your dashboard
+2. Click "Add Card"
+3. Search for "Train Departure Board"
+4. Configure the card with your train sensor
+
+### Configuration Options
+
+```yaml
+type: custom:train-departure-card
+title: Train Departures
+entity: sensor.your_train_sensor
+```
+
+### Expected Data Format
+
+The card expects a sensor that provides an array of train departures with the following structure:
+
+```yaml
+- origin_name: Dartford
+  destination_name: London Charing Cross
+  service_uid: P19333
+  scheduled: "13-11-2025 22:51"
+  estimated: "13-11-2025 22:51"
+  minutes: 14
+  platform: "1"
+  operator_name: Southeastern
+  stops_of_interest:
+    - stop: LBG
+      name: London Bridge
+      scheduled_stop: "13-11-2025 23:03"
+      estimate_stop: "13-11-2025 23:03"
+      journey_time_mins: 12
+      stops: 8
+  stops: 11
+```
 
 ## Development
 
-To contribute to the project or make modifications:
+To contribute or make modifications:
 
-1. Make your changes in the `src` directory.
-2. Run the development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ivmreg/ha-train-departure-board.git
+   cd ha-train-departure-board
    ```
-   npm run start
+
+2. Install dependencies:
+   ```bash
+   npm install
    ```
-3. Test your changes in Home Assistant.
+
+3. Build the project:
+   ```bash
+   npm run build
+   ```
+
+4. Watch for changes during development:
+   ```bash
+   npm run watch
+   ```
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
-- Thanks to the Home Assistant community for their support and contributions.
-- Inspired by the design of Transport for London (TFL) boards.
+- Inspired by Transport for London (TFL) departure boards
+- Built with Lit for efficient web components
+- Thanks to the Home Assistant community

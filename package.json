@@ -2,7 +2,7 @@
   "name": "ha-train-departure-board",
   "version": "1.0.0",
   "description": "A visualization tile for Home Assistant that displays train departure information similar to TFL boards.",
-  "main": "dist/train-departure-board.js",
+  "main": "dist/train-departure-card.js",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",

@@ -6,9 +6,9 @@ import { babel } from '@rollup/plugin-babel';
 import postcss from 'rollup-plugin-postcss';
 
 export default {
-  input: 'src/train-departure-board.ts',
+  input: 'src/train-departure-card.ts',
   output: {
-    dir: 'dist',
+    file: 'dist/train-departure-card.js',
     format: 'es',
     sourcemap: true,
   },

@@ -1,0 +1,7 @@
+{
+  "name": "Train Departure Board",
+  "content_in_root": false,
+  "filename": "train-departure-card.js",
+  "render_readme": true,
+  "country": ["GB"]
+}
