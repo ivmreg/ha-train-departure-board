@@ -52,11 +52,19 @@ class TrainDepartureBoard extends LitElement {
     }
 
     private renderDepartureRow(departure: TrainDeparture) {
+        const scheduledTime = departure.scheduled.split(' ')[1];
+        const estimatedTime = departure.estimated.split(' ')[1];
+        
+        let status = 'On Time';
+        if (estimatedTime !== scheduledTime) {
+            status = 'Delayed';
+        }
+        
         return html`
             <div class="departure-row">
-                <div>${departure.time}</div>
-                <div>${departure.destination}</div>
-                <div>${departure.status}</div>
+                <div>${scheduledTime}</div>
+                <div>${departure.destination_name}</div>
+                <div>${status}</div>
             </div>
         `;
     }
