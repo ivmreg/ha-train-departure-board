@@ -1,8 +1,12 @@
 {
   "name": "ha-train-departure-board",
   "version": "1.0.0",
-  "description": "A visualization tile for Home Assistant that displays train departure information similar to TFL boards.",
+  "description": "A custom Lovelace card for Home Assistant that displays train departure information similar to TFL boards.",
   "main": "dist/train-departure-card.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ivmreg/ha-train-departure-board.git"
+  },
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
@@ -11,12 +15,16 @@
   },
   "keywords": [
     "home-assistant",
+    "lovelace",
+    "custom-card",
     "train",
     "departure",
+    "tfl",
+    "transport",
     "visualization",
-    "tfl"
+    "dashboard"
   ],
-  "author": "Your Name",
+  "author": "ivmreg",
   "license": "MIT",
   "dependencies": {
     "lit": "^2.8.0",

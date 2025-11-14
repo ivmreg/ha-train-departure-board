@@ -2,6 +2,12 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { TrainDeparture } from './types';
 
+declare global {
+    interface HTMLElementTagNameMap {
+        'train-departure-card': TrainDepartureCard;
+    }
+}
+
 @customElement('train-departure-card')
 export class TrainDepartureCard extends LitElement {
     @property({ type: Object }) hass: any;
@@ -14,13 +20,28 @@ export class TrainDepartureCard extends LitElement {
 
     static getStubConfig() {
         return {
-            entity: '',
-            title: 'Train Departures'
+            type: 'custom:train-departure-card',
+            title: 'Train Departures',
+            entity: ''
         };
     }
 
     setConfig(config: any) {
-        this.config = config;
+        if (!config) {
+            throw new Error('Invalid configuration');
+        }
+        this.config = {
+            title: 'Train Departures',
+            ...config,
+        };
+    }
+
+    static get properties() {
+        return {
+            hass: {},
+            config: {},
+            departures: { type: Array }
+        };
     }
 
     static styles = css`
@@ -71,6 +92,11 @@ export class TrainDepartureCard extends LitElement {
         .status.cancelled {
             color: #f44336;
         }
+        .no-departures {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+        }
     `;
 
     render() {
@@ -78,11 +104,25 @@ export class TrainDepartureCard extends LitElement {
             return html`<div class="card">No configuration provided</div>`;
         }
 
+        if (!this.config.entity) {
+            return html`<div class="card">Please configure an entity</div>`;
+        }
+
+        const entity = this.hass?.states?.[this.config.entity];
+        if (!entity) {
+            return html`<div class="card">Entity not found: ${this.config.entity}</div>`;
+        }
+
+        const departures = entity.attributes?.departures || [];
+
         return html`
             <ha-card>
                 <div class="card">
                     ${this.config.title ? html`<h1 class="card-header">${this.config.title}</h1>` : ''}
-                    ${this.departures.map(departure => this.renderDepartureRow(departure))}
+                    ${departures.length > 0 
+                        ? departures.map((departure: TrainDeparture) => this.renderDepartureRow(departure))
+                        : html`<div class="no-departures">No departures available</div>`
+                    }
                 </div>
             </ha-card>
         `;
@@ -114,9 +154,14 @@ export class TrainDepartureCard extends LitElement {
 }
 
 // Register the card with Home Assistant
+customElements.define('train-departure-card', TrainDepartureCard);
+
+// Register with Home Assistant's card registry
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
     type: 'train-departure-card',
     name: 'Train Departure Board',
-    description: 'Display train departure information in a TFL-style board'
+    description: 'Display train departure information in a TFL-style board',
+    preview: false,
+    support_url: 'https://github.com/ivmreg/ha-train-departure-board/issues'
 });
