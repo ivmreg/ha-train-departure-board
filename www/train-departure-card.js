@@ -65,24 +65,26 @@ const nt=(t,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e
                 <div class="status ${s}">${i}</div>
             </div>
         `}};at.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new n(i,t,s)})`
+        ha-card {
+            height: 100%;
+        }
         .card {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 16px;
-            font-family: Arial, sans-serif;
+            padding: 0;
         }
         .card-header {
             margin: 0 0 16px 0;
             font-size: 1.5em;
             font-weight: bold;
+            padding: 12px 16px 0 16px;
         }
         .departure-row {
             display: grid;
             grid-template-columns: 70px 1fr 100px 100px;
             gap: 12px;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+            font-size: 14px;
         }
         .departure-row:last-child {
             border-bottom: none;
@@ -97,7 +99,7 @@ const nt=(t,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e
         .platform {
             text-align: center;
             font-size: 0.9em;
-            color: #666;
+            color: var(--secondary-text-color, #666);
         }
         .status {
             text-align: right;
@@ -113,9 +115,9 @@ const nt=(t,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e
             color: #f44336;
         }
         .no-departures {
-            padding: 20px;
+            padding: 20px 16px;
             text-align: center;
-            color: #999;
+            color: var(--secondary-text-color, #999);
         }
-    `,t([ot({type:Object})],at.prototype,"hass",void 0),t([ot({type:Object})],at.prototype,"config",void 0),t([ot({type:Array})],at.prototype,"departures",void 0),at=t([(t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e):((t,e)=>{const{kind:i,elements:s}=e;return{kind:i,elements:s,finisher(e){customElements.define(t,e)}}})(t,e))("train-departure-card")],at),customElements.define("train-departure-card",at),window.customCards=window.customCards||[],window.customCards.push({type:"train-departure-card",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!1,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{at as TrainDepartureCard};
+    `,t([ot({type:Object})],at.prototype,"hass",void 0),t([ot({type:Object})],at.prototype,"config",void 0),t([ot({type:Array})],at.prototype,"departures",void 0),at=t([(t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e):((t,e)=>{const{kind:i,elements:s}=e;return{kind:i,elements:s,finisher(e){customElements.define(t,e)}}})(t,e))("train-departure-card")],at),window.customCards=window.customCards||[],window.customCards.push({type:"train-departure-card",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!1,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{at as TrainDepartureCard};
 //# sourceMappingURL=train-departure-card.js.map

@@ -45,24 +45,26 @@ export class TrainDepartureCard extends LitElement {
     }
 
     static styles = css`
+        ha-card {
+            height: 100%;
+        }
         .card {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 16px;
-            font-family: Arial, sans-serif;
+            padding: 0;
         }
         .card-header {
             margin: 0 0 16px 0;
             font-size: 1.5em;
             font-weight: bold;
+            padding: 12px 16px 0 16px;
         }
         .departure-row {
             display: grid;
             grid-template-columns: 70px 1fr 100px 100px;
             gap: 12px;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+            font-size: 14px;
         }
         .departure-row:last-child {
             border-bottom: none;
@@ -77,7 +79,7 @@ export class TrainDepartureCard extends LitElement {
         .platform {
             text-align: center;
             font-size: 0.9em;
-            color: #666;
+            color: var(--secondary-text-color, #666);
         }
         .status {
             text-align: right;
@@ -93,9 +95,9 @@ export class TrainDepartureCard extends LitElement {
             color: #f44336;
         }
         .no-departures {
-            padding: 20px;
+            padding: 20px 16px;
             text-align: center;
-            color: #999;
+            color: var(--secondary-text-color, #999);
         }
     `;
 
@@ -152,9 +154,6 @@ export class TrainDepartureCard extends LitElement {
         `;
     }
 }
-
-// Register the card with Home Assistant
-customElements.define('train-departure-card', TrainDepartureCard);
 
 // Register with Home Assistant's card registry
 (window as any).customCards = (window as any).customCards || [];
