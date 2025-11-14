@@ -2,11 +2,13 @@
   "name": "Train Departure Board",
   "codeowners": ["@ivmreg"],
   "content_in_root": false,
-  "filename": "train-departure-card.js",
+  "filename": "www/train-departure-card.js",
   "homeassistant": "2023.1.0",
   "render_readme": true,
   "requirements": [],
   "documentation": "https://github.com/ivmreg/ha-train-departure-board",
   "support": "https://github.com/ivmreg/ha-train-departure-board/issues",
-  "country": ["GB"]
+  "country": ["GB"],
+  "visit_repo": "https://github.com/ivmreg/ha-train-departure-board",
+  "category": "lovelace"
 }

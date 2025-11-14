@@ -8,7 +8,7 @@ import postcss from 'rollup-plugin-postcss';
 export default {
   input: 'src/train-departure-card.ts',
   output: {
-    file: 'dist/train-departure-card.js',
+    file: 'www/train-departure-card.js',
     format: 'es',
     sourcemap: true,
   },
