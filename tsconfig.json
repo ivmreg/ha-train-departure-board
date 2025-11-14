@@ -11,6 +11,7 @@
     "rootDir": "./src",
     "moduleResolution": "node",
     "baseUrl": "./src",
+    "experimentalDecorators": true,
     "paths": {
       "*": ["types/*"]
     }

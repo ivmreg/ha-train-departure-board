@@ -1,10 +1,10 @@
-import { html, css, LitElement, property } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import { TrainDepartureConfig } from './types';
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { TrainDepartureBoardConfig } from './types';
 
 @customElement('train-departure-editor')
 export class TrainDepartureEditor extends LitElement {
-    @property({ type: Object }) public config!: TrainDepartureConfig;
+    @property({ type: Object }) public config!: TrainDepartureBoardConfig;
 
     protected render() {
         return html`
@@ -31,13 +31,17 @@ export class TrainDepartureEditor extends LitElement {
 
     private _onRoutesChange(event: Event) {
         const select = event.target as HTMLSelectElement;
-        this.config.routes = select.value;
+        this.config.routes = [select.value];
         this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
     }
 
     private _onDisplayOptionsChange(event: Event) {
         const select = event.target as HTMLSelectElement;
-        this.config.displayOptions = select.value;
+        this.config.displayOptions = {
+            showPlatform: true,
+            showStatus: true,
+            showJourneyTime: true
+        };
         this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
     }
 

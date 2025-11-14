@@ -1,5 +1,5 @@
-import { html, css, LitElement, property } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 @customElement('platform-indicator')
 export class PlatformIndicator extends LitElement {

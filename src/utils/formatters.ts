@@ -12,7 +12,7 @@ export const formatDepartureTime = (departure: TrainDeparture): string => {
         return 'Departed';
     }
 
-    return `${minutesUntilDeparture} min${minutesUntilDeparture !== 1 ? 's' : ''} to ${departure.destination}`;
+    return `${minutesUntilDeparture} min${minutesUntilDeparture !== 1 ? 's' : ''} to ${departure.destination_name}`;
 };
 
 export const formatTrainStatus = (status: string): string => {

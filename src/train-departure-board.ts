@@ -1,10 +1,9 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import { HomeAssistant } from 'custom-card-helpers';
+import { LitElement, html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { TrainDeparture } from './types';
 
 @customElement('train-departure-board')
 class TrainDepartureBoard extends LitElement {
-    @property({ type: Object }) public hass!: HomeAssistant;
     @property({ type: Array }) public departures: TrainDeparture[] = [];
 
     static get styles() {

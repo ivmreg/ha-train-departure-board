@@ -1,5 +1,5 @@
-import { html, css, LitElement, property } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { TrainDeparture } from '../types';
 
 @customElement('departure-row')
@@ -29,11 +29,19 @@ export class DepartureRow extends LitElement {
     `;
 
     render() {
+        const scheduledTime = this.departure.scheduled.split(' ')[1];
+        const estimatedTime = this.departure.estimated.split(' ')[1];
+        
+        let status = 'On Time';
+        if (estimatedTime !== scheduledTime) {
+            status = 'Delayed';
+        }
+        
         return html`
             <div class="departure-row">
-                <div class="time">${this.departure.time}</div>
-                <div class="destination">${this.departure.destination}</div>
-                <div class="status">${this.departure.status}</div>
+                <div class="time">${scheduledTime}</div>
+                <div class="destination">${this.departure.destination_name}</div>
+                <div class="status">${status}</div>
             </div>
         `;
     }

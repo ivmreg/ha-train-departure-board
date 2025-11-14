@@ -1,5 +1,5 @@
-import { LitElement, html, css, property } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { LitElement, html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { TrainDeparture } from './types';
 
 @customElement('train-departure-card')
