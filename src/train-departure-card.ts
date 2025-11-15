@@ -78,12 +78,14 @@ export class TrainDepartureBoard extends LitElement {
             font-weight: 500;
         }
         .via {
-            font-size: 0.85em;
+            font-size: 0.78em;
             color: var(--secondary-text-color, #777);
-            margin-top: 4px;
+            margin-top: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            letter-spacing: 0.2px;
+            opacity: 0.95;
         }
         .platform {
             text-align: center;
@@ -176,16 +178,19 @@ export class TrainDepartureBoard extends LitElement {
         const stops = departure.stops_of_interest || [];
         if (!stops || stops.length === 0) return html``;
 
-        // Build a compact string with up to 3 stops, use the stop name and the estimated time if available
-        const max = 3;
+        // Build a compact string with up to 2 stops — use the stop code (short) and time to keep it compact
+        const max = 2;
         const items = stops.slice(0, max).map(s => {
             const t = s.estimate_stop || s.scheduled_stop;
             const time = t ? t.split(' ')[1] : '';
-            return `${s.name}${time ? ' ' + time : ''}`;
+            // Prefer stop code for compactness, fallback to name if not present
+            const label = s.stop || (s.name ? s.name.split(' ')[0] : '');
+            return `${label}${time ? ' ' + time : ''}`;
         });
-        if (stops.length > max) items.push(`+${stops.length - max} more`);
+        if (stops.length > max) items.push(`+${stops.length - max}`);
 
-        return html`<div class="via">via ${items.join(' — ')}</div>`;
+        // Use a compact bullet separator
+        return html`<div class="via">via ${items.join(' • ')}</div>`;
     }
 
     private calculateDelayMinutes(scheduled: string, estimated: string): number {

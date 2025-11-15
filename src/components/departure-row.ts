@@ -23,9 +23,12 @@ export class DepartureRow extends LitElement {
             color: #555;
         }
         .via {
-            font-size: 0.85em;
+            font-size: 0.78em;
             color: #777;
-            margin-top: 4px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .status {
             font-style: italic;
@@ -47,7 +50,16 @@ export class DepartureRow extends LitElement {
                 <div class="time">${scheduledTime}</div>
                 <div class="destination">
                     ${this.departure.destination_name}
-                    ${this.departure.stops_of_interest && this.departure.stops_of_interest.length ? html`<div class="via">via ${this.departure.stops_of_interest.map(s => s.name + (s.estimate_stop ? ' ' + s.estimate_stop.split(' ')[1] : '')).slice(0,3).join(' — ')}${this.departure.stops_of_interest.length > 3 ? ` +${this.departure.stops_of_interest.length - 3} more` : ''}</div>` : ''}
+                    ${this.departure.stops_of_interest && this.departure.stops_of_interest.length ? ((): any => {
+                        const stops = this.departure.stops_of_interest.slice(0,2).map(s => {
+                            const time = s.estimate_stop || s.scheduled_stop;
+                            const t = time ? time.split(' ')[1] : '';
+                            const label = s.stop || (s.name ? s.name.split(' ')[0] : '');
+                            return `${label}${t ? ' ' + t : ''}`;
+                        });
+                        if (this.departure.stops_of_interest.length > 2) stops.push(`+${this.departure.stops_of_interest.length - 2}`);
+                        return html`<div class="via">via ${stops.join(' • ')}</div>`;
+                    })() : ''}
                 </div>
                 <div class="status">${status}</div>
             </div>
