@@ -17,10 +17,11 @@ entity: sensor.train_departures
 | `type` | string | required | Must be `custom:train-departure-board` |
 | `title` | string | "Train Departures" | Title displayed at the top of the card |
 | `entity` | string | required | Entity ID that contains the departure data |
+| `attribute` | string | `departures` | Name of the entity attribute that holds the departures array |
 
 ## Expected Entity Data Structure
 
-The card expects a sensor entity with an `attributes.departures` array. Each departure should have:
+The card expects a sensor entity with an array of departures. By default it reads `attributes.departures`, but you can change the attribute name through the `attribute` option if your integration uses something like `Next trains`. Each departure should have:
 
 ```yaml
 state: "updated"

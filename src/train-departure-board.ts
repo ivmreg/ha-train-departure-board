@@ -16,7 +16,8 @@ export class TrainDepartureBoard extends LitElement {
         return {
             type: 'custom:train-departure-board',
             title: 'Train Departures',
-            entity: ''
+            entity: '',
+            attribute: 'departures'
         };
     }
 
@@ -24,10 +25,19 @@ export class TrainDepartureBoard extends LitElement {
         if (!config) {
             throw new Error('Invalid configuration');
         }
-        this.config = {
+        const mergedConfig = {
             title: 'Train Departures',
+            attribute: 'departures',
             ...config,
         };
+
+        if (typeof mergedConfig.attribute === 'string') {
+            mergedConfig.attribute = mergedConfig.attribute.trim() || 'departures';
+        } else {
+            mergedConfig.attribute = 'departures';
+        }
+
+        this.config = mergedConfig;
     }
 
     static get properties() {
@@ -126,7 +136,18 @@ export class TrainDepartureBoard extends LitElement {
             return html`<div class="card">Entity not found: ${this.config.entity}</div>`;
         }
 
-        const departures = entity.attributes?.departures || [];
+        const attributeName = this.config.attribute || 'departures';
+        const attributeValue = entity.attributes?.[attributeName];
+        const departures = Array.isArray(attributeValue) ? attributeValue : [];
+
+        if (attributeValue === undefined) {
+            // eslint-disable-next-line no-console
+            console.warn(`train-departure-board: attribute "${attributeName}" was not found on entity ${this.config.entity}`);
+        }
+        if (!Array.isArray(attributeValue) && attributeValue !== undefined) {
+            // eslint-disable-next-line no-console
+            console.warn(`train-departure-board: attribute "${attributeName}" is not an array, falling back to empty list`);
+        }
 
         return html`
             <ha-card>

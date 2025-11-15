@@ -78,14 +78,22 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         return {
             type: 'custom:train-departure-board',
             title: 'Train Departures',
-            entity: ''
+            entity: '',
+            attribute: 'departures'
         };
     }
     setConfig(config) {
         if (!config) {
             throw new Error('Invalid configuration');
         }
-        this.config = Object.assign({ title: 'Train Departures' }, config);
+        const mergedConfig = Object.assign({ title: 'Train Departures', attribute: 'departures' }, config);
+        if (typeof mergedConfig.attribute === 'string') {
+            mergedConfig.attribute = mergedConfig.attribute.trim() || 'departures';
+        }
+        else {
+            mergedConfig.attribute = 'departures';
+        }
+        this.config = mergedConfig;
     }
     static get properties() {
         return {
@@ -106,7 +114,17 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         if (!entity) {
             return x `<div class="card">Entity not found: ${this.config.entity}</div>`;
         }
-        const departures = ((_c = entity.attributes) === null || _c === void 0 ? void 0 : _c.departures) || [];
+        const attributeName = this.config.attribute || 'departures';
+        const attributeValue = (_c = entity.attributes) === null || _c === void 0 ? void 0 : _c[attributeName];
+        const departures = Array.isArray(attributeValue) ? attributeValue : [];
+        if (attributeValue === undefined) {
+            // eslint-disable-next-line no-console
+            console.warn(`train-departure-board: attribute "${attributeName}" was not found on entity ${this.config.entity}`);
+        }
+        if (!Array.isArray(attributeValue) && attributeValue !== undefined) {
+            // eslint-disable-next-line no-console
+            console.warn(`train-departure-board: attribute "${attributeName}" is not an array, falling back to empty list`);
+        }
         return x `
             <ha-card>
                 <div class="card">

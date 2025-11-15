@@ -51,7 +51,10 @@ After installation, the card will automatically appear in your card picker. No n
 type: custom:train-departure-board
 title: Train Departures
 entity: sensor.your_train_sensor
+attribute: departures # optional; use e.g. "Next trains" if your sensor uses another attribute name
 ```
+
+If your integration exposes the departures array under a different attribute (for example `Next trains`), set the `attribute` field to that exact name so the card can find it.
 
 ### Expected Data Format
 
