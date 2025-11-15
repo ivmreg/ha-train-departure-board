@@ -7,6 +7,7 @@ export class TrainDepartureBoard extends LitElement {
     @property({ type: Object }) hass: any;
     @property({ type: Object }) config: any;
     @property({ type: Array }) departures: TrainDeparture[] = [];
+    private dateCache = new Map<string, Date | null>();
 
     static getConfigElement() {
         return document.createElement('train-departure-board-editor');
@@ -26,7 +27,6 @@ export class TrainDepartureBoard extends LitElement {
             throw new Error('Invalid configuration');
         }
         const mergedConfig = {
-            title: 'Train Departures',
             attribute: 'departures',
             ...config,
         };
@@ -53,13 +53,7 @@ export class TrainDepartureBoard extends LitElement {
             height: 100%;
         }
         .card {
-            padding: 0 12px 12px;
-        }
-        .card-header {
-            margin: 0;
-            padding: 12px 0 4px;
-            font-size: 1.25em;
-            font-weight: 600;
+            padding: 12px;
         }
         .departure-list {
             display: flex;
@@ -155,6 +149,8 @@ export class TrainDepartureBoard extends LitElement {
             return html`<div class="card">Entity not found: ${this.config.entity}</div>`;
         }
 
+        this.dateCache.clear();
+
         const attributeName = this.config.attribute || 'departures';
         const attributeValue = entity.attributes?.[attributeName];
         const departures = Array.isArray(attributeValue) ? attributeValue : [];
@@ -171,7 +167,6 @@ export class TrainDepartureBoard extends LitElement {
         return html`
             <ha-card>
                 <div class="card">
-                    ${this.config.title ? html`<h1 class="card-header">${this.config.title}</h1>` : ''}
                     ${departures.length > 0
                         ? html`<div class="departure-list">
                             ${departures.map((departure: TrainDeparture) => this.renderDepartureRow(departure))}
@@ -325,19 +320,23 @@ export class TrainDepartureBoard extends LitElement {
         if (!datetime) {
             return null;
         }
+        if (this.dateCache.has(datetime)) {
+            return this.dateCache.get(datetime) ?? null;
+        }
         const [datePart, timePart] = datetime.split(' ');
+        let parsed: Date | null = null;
         if (datePart && timePart) {
             const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
-            const parsed = new Date(isoDate);
-            return Number.isNaN(parsed.getTime()) ? null : parsed;
-        }
-        if (/^\d{2}:\d{2}$/.test(datetime)) {
+            const candidate = new Date(isoDate);
+            parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
+        } else if (/^\d{2}:\d{2}$/.test(datetime)) {
             const today = new Date();
             const iso = `${today.toISOString().split('T')[0]}T${datetime}`;
-            const parsedTime = new Date(iso);
-            return Number.isNaN(parsedTime.getTime()) ? null : parsedTime;
+            const candidate = new Date(iso);
+            parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
         }
-        return null;
+        this.dateCache.set(datetime, parsed);
+        return parsed;
     }
 
     private calculateDelayMinutes(scheduled: string, estimated: string): number {

@@ -70,6 +70,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
     constructor() {
         super(...arguments);
         this.departures = [];
+        this.dateCache = new Map();
     }
     static getConfigElement() {
         return document.createElement('train-departure-board-editor');
@@ -86,7 +87,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         if (!config) {
             throw new Error('Invalid configuration');
         }
-        const mergedConfig = Object.assign({ title: 'Train Departures', attribute: 'departures' }, config);
+        const mergedConfig = Object.assign({ attribute: 'departures' }, config);
         if (typeof mergedConfig.attribute === 'string') {
             mergedConfig.attribute = mergedConfig.attribute.trim() || 'departures';
         }
@@ -114,6 +115,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         if (!entity) {
             return x `<div class="card">Entity not found: ${this.config.entity}</div>`;
         }
+        this.dateCache.clear();
         const attributeName = this.config.attribute || 'departures';
         const attributeValue = (_c = entity.attributes) === null || _c === void 0 ? void 0 : _c[attributeName];
         const departures = Array.isArray(attributeValue) ? attributeValue : [];
@@ -128,7 +130,6 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         return x `
             <ha-card>
                 <div class="card">
-                    ${this.config.title ? x `<h1 class="card-header">${this.config.title}</h1>` : ''}
                     ${departures.length > 0
             ? x `<div class="departure-list">
                             ${departures.map((departure) => this.renderDepartureRow(departure))}
@@ -261,22 +262,28 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         return parts.length === 2 ? parts[1] || parts[0] : trimmed;
     }
     parseDateTime(datetime) {
+        var _a;
         if (!datetime) {
             return null;
         }
+        if (this.dateCache.has(datetime)) {
+            return (_a = this.dateCache.get(datetime)) !== null && _a !== void 0 ? _a : null;
+        }
         const [datePart, timePart] = datetime.split(' ');
+        let parsed = null;
         if (datePart && timePart) {
             const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
-            const parsed = new Date(isoDate);
-            return Number.isNaN(parsed.getTime()) ? null : parsed;
+            const candidate = new Date(isoDate);
+            parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
         }
-        if (/^\d{2}:\d{2}$/.test(datetime)) {
+        else if (/^\d{2}:\d{2}$/.test(datetime)) {
             const today = new Date();
             const iso = `${today.toISOString().split('T')[0]}T${datetime}`;
-            const parsedTime = new Date(iso);
-            return Number.isNaN(parsedTime.getTime()) ? null : parsedTime;
+            const candidate = new Date(iso);
+            parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
         }
-        return null;
+        this.dateCache.set(datetime, parsed);
+        return parsed;
     }
     calculateDelayMinutes(scheduled, estimated) {
         const scheduledDate = this.parseDateTime(scheduled);
@@ -302,13 +309,7 @@ TrainDepartureBoard.styles = i$2 `
             height: 100%;
         }
         .card {
-            padding: 0 12px 12px;
-        }
-        .card-header {
-            margin: 0;
-            padding: 12px 0 4px;
-            font-size: 1.25em;
-            font-weight: 600;
+            padding: 12px;
         }
         .departure-list {
             display: flex;
