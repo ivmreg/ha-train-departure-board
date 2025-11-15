@@ -53,70 +53,89 @@ export class TrainDepartureBoard extends LitElement {
             height: 100%;
         }
         .card {
-            padding: 0;
+            padding: 0 16px 16px;
         }
         .card-header {
-            margin: 0 0 16px 0;
-            font-size: 1.5em;
-            font-weight: bold;
-            padding: 12px 16px 0 16px;
-        }
-        .departure-row {
-            display: grid;
-            grid-template-columns: 70px 1fr 70px 100px 100px;
-            gap: 12px;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
-            font-size: 14px;
-        }
-        .departure-row:last-child {
-            border-bottom: none;
-        }
-        .time {
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .minutes {
-            text-align: center;
-            color: var(--secondary-text-color, #666);
+            margin: 0;
+            padding: 16px 0 8px;
+            font-size: 1.4em;
             font-weight: 600;
-            font-size: 0.95em;
         }
-        .destination {
-            font-weight: 500;
+        .departure-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        .via {
-            font-size: 0.78em;
-            color: var(--secondary-text-color, #777);
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            letter-spacing: 0.2px;
-            opacity: 0.95;
+        .train {
+            border: 1px solid var(--divider-color, #e0e0e0);
+            border-radius: 8px;
+            padding: 12px 14px;
+            background: var(--ha-card-background, var(--card-background-color, #fff));
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .top-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .scheduled-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .scheduled {
+            font-size: 1.8em;
+            font-weight: 600;
+            line-height: 1;
+        }
+        .scheduled-status {
+            font-size: 0.85em;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--secondary-text-color, #666);
+        }
+        .scheduled-status.on-time {
+            color: #52aa52;
+        }
+        .scheduled-status.delayed {
+            color: #ffb347;
+        }
+        .scheduled-status.cancelled {
+            color: #f06260;
+        }
+        .platform-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            font-size: 0.85em;
+            color: var(--secondary-text-color, #666);
+        }
+        .platform-label {
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
         .platform {
-            text-align: center;
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--primary-text-color, #111);
+        }
+        .terminus {
+            margin: 0;
+            font-size: 1.25em;
+            font-weight: 600;
+        }
+        .calling-at {
+            margin: 0;
             font-size: 0.9em;
+            font-style: italic;
             color: var(--secondary-text-color, #666);
         }
-        .status {
-            text-align: right;
-            font-weight: 500;
-        }
-        .status.on-time {
-            color: #4caf50;
-        }
-        .status.delayed {
-            color: #ff9800;
-        }
-        .status.cancelled {
-            color: #f44336;
-        }
         .no-departures {
-            padding: 20px 16px;
+            padding: 32px 0;
             text-align: center;
             color: var(--secondary-text-color, #999);
         }
@@ -153,8 +172,10 @@ export class TrainDepartureBoard extends LitElement {
             <ha-card>
                 <div class="card">
                     ${this.config.title ? html`<h1 class="card-header">${this.config.title}</h1>` : ''}
-                    ${departures.length > 0 
-                        ? departures.map((departure: TrainDeparture) => this.renderDepartureRow(departure))
+                    ${departures.length > 0
+                        ? html`<div class="departure-list">
+                            ${departures.map((departure: TrainDeparture) => this.renderDepartureRow(departure))}
+                        </div>`
                         : html`<div class="no-departures">No departures available</div>`
                     }
                 </div>
@@ -168,36 +189,43 @@ export class TrainDepartureBoard extends LitElement {
         const estimatedTime = departure.estimated.split(' ')[1];
         
         // Determine status by comparing scheduled and estimated times
-        let status = 'On Time';
+        let statusLabel = 'On time';
         let statusClass = 'on-time';
-        
+
         if (estimatedTime !== scheduledTime) {
             // Calculate delay in minutes
             const delayMinutes = this.calculateDelayMinutes(departure.scheduled, departure.estimated);
-            status = `Delayed +${delayMinutes} min`;
+            statusLabel = `Delayed +${delayMinutes} min`;
             statusClass = 'delayed';
         }
-        
+
         // Prefer `minutes` attribute from the sensor if present, otherwise calculate from estimated/scheduled
         const minutesUntil = departure.minutes ?? this.calculateMinutesUntil(departure.estimated || departure.scheduled);
+        const countdown = minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due';
+        const statusLine = `${statusLabel} • ${countdown}`;
+        const callingAt = this.getCallingAtSummary(departure);
 
         return html`
-            <div class="departure-row">
-                <div class="time">${scheduledTime}</div>
-                <div class="destination">
-                    ${departure.destination_name}
-                    ${this.renderVia(departure)}
+            <div class="train">
+                <div class="top-heading">
+                    <div class="scheduled-container">
+                        <span class="scheduled">${scheduledTime}</span>
+                        <span class="scheduled-status ${statusClass}">${statusLine}</span>
+                    </div>
+                    <div class="platform-container">
+                        <span class="platform-label">Platform</span>
+                        <span class="platform">${departure.platform || '-'}</span>
+                    </div>
                 </div>
-                <div class="minutes">${minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due'}</div>
-                <div class="platform">Platform ${departure.platform}</div>
-                <div class="status ${statusClass}">${status}</div>
+                <h3 class="terminus">${departure.destination_name}</h3>
+                ${callingAt ? html`<p class="calling-at">Calling at ${callingAt}</p>` : ''}
             </div>
         `;
     }
 
-    private renderVia(departure: TrainDeparture) {
+    private getCallingAtSummary(departure: TrainDeparture): string | null {
         const stops = departure.stops_of_interest || [];
-        if (!stops || stops.length === 0) return html``;
+        if (!stops || stops.length === 0) return null;
 
         const dedupedStops = new Map<string, { label: string; time: number; timeText: string; order: number }>();
 
@@ -231,14 +259,16 @@ export class TrainDepartureBoard extends LitElement {
         });
 
         if (sortedStops.length === 0) {
-            return html``;
+            return null;
         }
 
-        const max = 2;
+        const max = 3;
         const items = sortedStops.slice(0, max).map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`);
-        if (sortedStops.length > max) items.push(`+${sortedStops.length - max}`);
+        if (sortedStops.length > max) {
+            items.push(`+${sortedStops.length - max} more`);
+        }
 
-        return html`<div class="via">via ${items.join(' • ')}</div>`;
+        return items.join(', ');
     }
 
     private parseDateTime(datetime?: string): Date | null {
