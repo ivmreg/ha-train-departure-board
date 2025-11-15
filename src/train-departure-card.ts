@@ -59,7 +59,7 @@ export class TrainDepartureCard extends LitElement {
         }
         .departure-row {
             display: grid;
-            grid-template-columns: 70px 1fr 100px 100px;
+            grid-template-columns: 70px 1fr 70px 100px 100px;
             gap: 12px;
             align-items: center;
             padding: 12px 16px;
@@ -73,8 +73,23 @@ export class TrainDepartureCard extends LitElement {
             font-weight: bold;
             font-size: 1.1em;
         }
+
+        .minutes {
+            text-align: center;
+            color: var(--secondary-text-color, #666);
+            font-weight: 600;
+            font-size: 0.95em;
+        }
         .destination {
             font-weight: 500;
+        }
+        .via {
+            font-size: 0.85em;
+            color: var(--secondary-text-color, #777);
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .platform {
             text-align: center;
@@ -140,27 +155,78 @@ export class TrainDepartureCard extends LitElement {
         let statusClass = 'on-time';
         
         if (estimatedTime !== scheduledTime) {
-            status = 'Delayed';
+            // Calculate delay in minutes
+            const delayMinutes = this.calculateDelayMinutes(departure.scheduled, departure.estimated);
+            status = `Delayed +${delayMinutes} min`;
             statusClass = 'delayed';
         }
         
+        // Prefer `minutes` attribute from the sensor if present, otherwise calculate from estimated/scheduled
+        const minutesUntil = departure.minutes ?? this.calculateMinutesUntil(departure.estimated || departure.scheduled);
+
         return html`
             <div class="departure-row">
                 <div class="time">${scheduledTime}</div>
-                <div class="destination">${departure.destination_name}</div>
+                <div class="destination">
+                    ${departure.destination_name}
+                    ${this.renderVia(departure)}
+                </div>
+                <div class="minutes">${minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due'}</div>
                 <div class="platform">Platform ${departure.platform}</div>
                 <div class="status ${statusClass}">${status}</div>
             </div>
         `;
+    }
+
+    private renderVia(departure: TrainDeparture) {
+        const stops = departure.stops_of_interest || [];
+        if (!stops || stops.length === 0) return html``;
+
+        // Build a compact string with up to 3 stops, use the stop name and the estimated time if available
+        const max = 3;
+        const items = stops.slice(0, max).map(s => {
+            const t = s.estimate_stop || s.scheduled_stop;
+            const time = t ? t.split(' ')[1] : '';
+            return `${s.name}${time ? ' ' + time : ''}`;
+        });
+        if (stops.length > max) items.push(`+${stops.length - max} more`);
+
+        return html`<div class="via">via ${items.join(' — ')}</div>`;
+    }
+
+    private calculateDelayMinutes(scheduled: string, estimated: string): number {
+        // Parse datetime strings in format "13-11-2025 22:51"
+        const scheduledParts = scheduled.split(' ');
+        const estimatedParts = estimated.split(' ');
+        
+        const scheduledDate = new Date(`${scheduledParts[0].split('-').reverse().join('-')}T${scheduledParts[1]}`);
+        const estimatedDate = new Date(`${estimatedParts[0].split('-').reverse().join('-')}T${estimatedParts[1]}`);
+        
+        const delayMs = estimatedDate.getTime() - scheduledDate.getTime();
+        return Math.round(delayMs / (1000 * 60)); // Convert milliseconds to minutes
+    }
+
+    private calculateMinutesUntil(datetime: string): number {
+        // Parse datetime strings in format "13-11-2025 22:51"
+        const parts = datetime.split(' ');
+        const date = new Date(`${parts[0].split('-').reverse().join('-')}T${parts[1]}`);
+
+        const now = new Date();
+        const diffMs = date.getTime() - now.getTime();
+        return Math.max(0, Math.round(diffMs / (1000 * 60))); // minutes until departure; don't return negative
     }
 }
 
 // Register with Home Assistant's card registry
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-    type: 'train-departure-card',
+    // Register with the `custom:` prefix so Home Assistant's card picker
+    // recognizes the YAML type `custom:train-departure-card`.
+    type: 'custom:train-departure-card',
     name: 'Train Departure Board',
     description: 'Display train departure information in a TFL-style board',
-    preview: false,
+    // Enable preview so the card is discoverable in the card picker
+    // and shows a preview in the UI.
+    preview: true,
     support_url: 'https://github.com/ivmreg/ha-train-departure-board/issues'
 });
