@@ -169,19 +169,53 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const stops = departure.stops_of_interest || [];
         if (!stops || stops.length === 0)
             return x ``;
-        // Build a compact string with up to 2 stops — use the stop code (short) and time to keep it compact
-        const max = 2;
-        const items = stops.slice(0, max).map(s => {
-            const t = s.estimate_stop || s.scheduled_stop;
-            const time = t ? t.split(' ')[1] : '';
-            // Prefer stop code for compactness, fallback to name if not present
-            const label = s.stop || (s.name ? s.name.split(' ')[0] : '');
-            return `${label}${time ? ' ' + time : ''}`;
+        const dedupedStops = new Map();
+        stops.forEach((stop, index) => {
+            var _a;
+            const label = (stop.stop || (stop.name ? stop.name.split(' ')[0] : '') || '').trim();
+            if (!label) {
+                return;
+            }
+            const datetime = stop.estimate_stop || stop.scheduled_stop;
+            const parsedDate = this.parseDateTime(datetime);
+            const timestamp = (_a = parsedDate === null || parsedDate === void 0 ? void 0 : parsedDate.getTime()) !== null && _a !== void 0 ? _a : Number.POSITIVE_INFINITY;
+            const timeText = datetime ? (datetime.split(' ')[1] || '').trim() : '';
+            const existing = dedupedStops.get(label);
+            if (!existing || timestamp < existing.time) {
+                dedupedStops.set(label, {
+                    label,
+                    time: timestamp,
+                    timeText,
+                    order: index,
+                });
+            }
         });
-        if (stops.length > max)
-            items.push(`+${stops.length - max}`);
-        // Use a compact bullet separator
+        const sortedStops = Array.from(dedupedStops.values()).sort((a, b) => {
+            if (a.time === b.time) {
+                return a.order - b.order;
+            }
+            return a.time - b.time;
+        });
+        if (sortedStops.length === 0) {
+            return x ``;
+        }
+        const max = 2;
+        const items = sortedStops.slice(0, max).map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`);
+        if (sortedStops.length > max)
+            items.push(`+${sortedStops.length - max}`);
         return x `<div class="via">via ${items.join(' • ')}</div>`;
+    }
+    parseDateTime(datetime) {
+        if (!datetime) {
+            return null;
+        }
+        const [datePart, timePart] = datetime.split(' ');
+        if (!datePart || !timePart) {
+            return null;
+        }
+        const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
+        const parsed = new Date(isoDate);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
     calculateDelayMinutes(scheduled, estimated) {
         // Parse datetime strings in format "13-11-2025 22:51"

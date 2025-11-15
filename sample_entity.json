@@ -1,0 +1,84 @@
+{
+    "entity_id": "sensor.blackheath_station",
+    "state": "11.0",
+    "attributes": {
+        "journey_start": "BKH",
+        "platforms_of_interest": [
+            "1"
+        ],
+        "next_trains": [
+            {
+                "origin_name": "Barnehurst",
+                "destination_name": "London Charing Cross",
+                "service_uid": "P16684",
+                "scheduled": "15-11-2025 21:51",
+                "estimated": "15-11-2025 21:51",
+                "minutes": 11,
+                "platform": "1",
+                "operator_name": "Southeastern",
+                "stops_of_interest": [
+                    {
+                        "stop": "LBG",
+                        "name": "London Bridge",
+                        "scheduled_stop": "15-11-2025 22:03",
+                        "estimate_stop": "15-11-2025 22:03",
+                        "journey_time_mins": 12,
+                        "stops": 7
+                    }
+                ],
+                "stops": 10
+            },
+            {
+                "origin_name": "Gravesend",
+                "destination_name": "London Victoria",
+                "service_uid": "P15897",
+                "scheduled": "15-11-2025 21:58",
+                "estimated": "15-11-2025 21:58",
+                "minutes": 18,
+                "platform": "1",
+                "operator_name": "Southeastern",
+                "stops_of_interest": [],
+                "stops": 14
+            },
+            {
+                "origin_name": "London Cannon Street",
+                "destination_name": "London Cannon Street",
+                "service_uid": "P16177",
+                "scheduled": "15-11-2025 22:05",
+                "estimated": "15-11-2025 22:05",
+                "minutes": 25,
+                "platform": "1",
+                "operator_name": "Southeastern",
+                "stops_of_interest": [
+                    {
+                        "stop": "LBG",
+                        "name": "London Bridge",
+                        "scheduled_stop": "16-11-2025 20:59",
+                        "estimate_stop": "16-11-2025 20:58",
+                        "journey_time_mins": 1373,
+                        "stops": 0
+                    },
+                    {
+                        "stop": "LBG",
+                        "name": "London Bridge",
+                        "scheduled_stop": "15-11-2025 22:19",
+                        "estimate_stop": "15-11-2025 22:19",
+                        "journey_time_mins": 14,
+                        "stops": 23
+                    }
+                ],
+                "stops": 25
+            }
+        ],
+        "unit_of_measurement": "min",
+        "icon": "mdi:train",
+        "friendly_name": "blackheath_station"
+    },
+    "context": {
+        "id": "01KA4QA41HA3XJQT2PAWHDXFPC",
+        "parent_id": null,
+        "user_id": null
+    },
+    "last_changed": "2025-11-15T21:39:01.809Z",
+    "last_updated": "2025-11-15T21:39:01.809Z"
+}

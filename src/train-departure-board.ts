@@ -199,19 +199,59 @@ export class TrainDepartureBoard extends LitElement {
         const stops = departure.stops_of_interest || [];
         if (!stops || stops.length === 0) return html``;
 
-        // Build a compact string with up to 2 stops — use the stop code (short) and time to keep it compact
-        const max = 2;
-        const items = stops.slice(0, max).map(s => {
-            const t = s.estimate_stop || s.scheduled_stop;
-            const time = t ? t.split(' ')[1] : '';
-            // Prefer stop code for compactness, fallback to name if not present
-            const label = s.stop || (s.name ? s.name.split(' ')[0] : '');
-            return `${label}${time ? ' ' + time : ''}`;
-        });
-        if (stops.length > max) items.push(`+${stops.length - max}`);
+        const dedupedStops = new Map<string, { label: string; time: number; timeText: string; order: number }>();
 
-        // Use a compact bullet separator
+        stops.forEach((stop, index) => {
+            const label = (stop.stop || (stop.name ? stop.name.split(' ')[0] : '') || '').trim();
+            if (!label) {
+                return;
+            }
+
+            const datetime = stop.estimate_stop || stop.scheduled_stop;
+            const parsedDate = this.parseDateTime(datetime);
+            const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
+            const timeText = datetime ? (datetime.split(' ')[1] || '').trim() : '';
+
+            const existing = dedupedStops.get(label);
+            if (!existing || timestamp < existing.time) {
+                dedupedStops.set(label, {
+                    label,
+                    time: timestamp,
+                    timeText,
+                    order: index,
+                });
+            }
+        });
+
+        const sortedStops = Array.from(dedupedStops.values()).sort((a, b) => {
+            if (a.time === b.time) {
+                return a.order - b.order;
+            }
+            return a.time - b.time;
+        });
+
+        if (sortedStops.length === 0) {
+            return html``;
+        }
+
+        const max = 2;
+        const items = sortedStops.slice(0, max).map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`);
+        if (sortedStops.length > max) items.push(`+${sortedStops.length - max}`);
+
         return html`<div class="via">via ${items.join(' • ')}</div>`;
+    }
+
+    private parseDateTime(datetime?: string): Date | null {
+        if (!datetime) {
+            return null;
+        }
+        const [datePart, timePart] = datetime.split(' ');
+        if (!datePart || !timePart) {
+            return null;
+        }
+        const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
+        const parsed = new Date(isoDate);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
 
     private calculateDelayMinutes(scheduled: string, estimated: string): number {
