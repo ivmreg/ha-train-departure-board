@@ -139,26 +139,12 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         `;
     }
     renderDepartureRow(departure) {
-        var _a;
-        // Extract time from datetime string (format: "13-11-2025 22:51")
-        const scheduledTime = departure.scheduled.split(' ')[1];
-        const estimatedTime = departure.estimated.split(' ')[1];
-        // Determine status by comparing scheduled and estimated times
-        let statusLabel = 'On time';
-        let statusClass = 'on-time';
-        if (estimatedTime !== scheduledTime) {
-            // Calculate delay in minutes
-            const delayMinutes = this.calculateDelayMinutes(departure.scheduled, departure.estimated);
-            statusLabel = `Delayed +${delayMinutes} min`;
-            statusClass = 'delayed';
-        }
-        // Prefer `minutes` attribute from the sensor if present, otherwise calculate from estimated/scheduled
-        const minutesUntil = (_a = departure.minutes) !== null && _a !== void 0 ? _a : this.calculateMinutesUntil(departure.estimated || departure.scheduled);
-        const countdown = minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due';
-        const statusLine = `${statusLabel} • ${countdown}`;
+        const scheduledTime = this.extractTimeLabel(departure.scheduled);
+        const { statusClass, statusLabel, countdown } = this.getStatusMeta(departure);
+        const statusLine = countdown ? `${statusLabel} • ${countdown}` : statusLabel;
         const callingAt = this.getCallingAtSummary(departure);
         return x `
-            <div class="train">
+            <div class="train ${callingAt ? '' : 'no-calling-data'}">
                 <div class="top-heading">
                     <div class="scheduled-container">
                         <span class="scheduled">${scheduledTime}</span>
@@ -170,7 +156,9 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                     </div>
                 </div>
                 <h3 class="terminus">${departure.destination_name}</h3>
-                ${callingAt ? x `<p class="calling-at">Calling at ${callingAt}</p>` : ''}
+                ${callingAt
+            ? x `<p class="calling-at">Calling at ${callingAt}</p>`
+            : x `<p class="calling-at empty">Calling pattern unavailable</p>`}
             </div>
         `;
     }
@@ -215,34 +203,100 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         }
         return items.join(', ');
     }
+    getStatusMeta(departure) {
+        const scheduledRaw = departure.scheduled || '';
+        const estimatedRaw = departure.estimated || '';
+        const scheduledTime = this.extractTimeLabel(scheduledRaw);
+        const estimatedTime = this.extractTimeLabel(estimatedRaw);
+        const countdown = this.formatCountdown(departure);
+        if (!estimatedRaw) {
+            return { statusLabel: 'Awaiting update', statusClass: 'delayed', countdown };
+        }
+        const normalizedEstimate = estimatedRaw.toLowerCase();
+        if (normalizedEstimate.includes('cancel')) {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
+        if (estimatedTime && scheduledTime && estimatedTime !== scheduledTime) {
+            const delayMinutes = this.calculateDelayMinutes(scheduledRaw, estimatedRaw);
+            const label = Number.isFinite(delayMinutes) ? `Delayed +${delayMinutes} min` : 'Delayed';
+            return { statusLabel: label, statusClass: 'delayed', countdown };
+        }
+        if (!/\d{2}:\d{2}/.test(estimatedTime) && estimatedRaw) {
+            return { statusLabel: estimatedRaw, statusClass: 'delayed', countdown };
+        }
+        return { statusLabel: 'On time', statusClass: 'on-time', countdown };
+    }
+    formatCountdown(departure) {
+        var _a;
+        const referenceTime = this.pickReferenceTime(departure);
+        const minutesUntil = (_a = departure.minutes) !== null && _a !== void 0 ? _a : (referenceTime ? this.calculateMinutesUntil(referenceTime) : Number.NaN);
+        if (!Number.isFinite(minutesUntil)) {
+            return null;
+        }
+        return minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due';
+    }
+    pickReferenceTime(departure) {
+        var _a, _b;
+        if (this.parseDateTime((_a = departure.estimated) !== null && _a !== void 0 ? _a : '')) {
+            return departure.estimated;
+        }
+        if (this.parseDateTime((_b = departure.scheduled) !== null && _b !== void 0 ? _b : '')) {
+            return departure.scheduled;
+        }
+        return undefined;
+    }
+    extractTimeLabel(datetime) {
+        if (!datetime) {
+            return '—';
+        }
+        const trimmed = datetime.trim();
+        if (!trimmed) {
+            return '—';
+        }
+        const parts = trimmed.split(' ');
+        if (parts.length === 2 && /^\d{2}:\d{2}$/.test(parts[1])) {
+            return parts[1];
+        }
+        if (/^\d{2}:\d{2}$/.test(trimmed)) {
+            return trimmed;
+        }
+        return parts.length === 2 ? parts[1] || parts[0] : trimmed;
+    }
     parseDateTime(datetime) {
         if (!datetime) {
             return null;
         }
         const [datePart, timePart] = datetime.split(' ');
-        if (!datePart || !timePart) {
-            return null;
+        if (datePart && timePart) {
+            const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
+            const parsed = new Date(isoDate);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
         }
-        const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
-        const parsed = new Date(isoDate);
-        return Number.isNaN(parsed.getTime()) ? null : parsed;
+        if (/^\d{2}:\d{2}$/.test(datetime)) {
+            const today = new Date();
+            const iso = `${today.toISOString().split('T')[0]}T${datetime}`;
+            const parsedTime = new Date(iso);
+            return Number.isNaN(parsedTime.getTime()) ? null : parsedTime;
+        }
+        return null;
     }
     calculateDelayMinutes(scheduled, estimated) {
-        // Parse datetime strings in format "13-11-2025 22:51"
-        const scheduledParts = scheduled.split(' ');
-        const estimatedParts = estimated.split(' ');
-        const scheduledDate = new Date(`${scheduledParts[0].split('-').reverse().join('-')}T${scheduledParts[1]}`);
-        const estimatedDate = new Date(`${estimatedParts[0].split('-').reverse().join('-')}T${estimatedParts[1]}`);
+        const scheduledDate = this.parseDateTime(scheduled);
+        const estimatedDate = this.parseDateTime(estimated);
+        if (!scheduledDate || !estimatedDate) {
+            return Number.NaN;
+        }
         const delayMs = estimatedDate.getTime() - scheduledDate.getTime();
-        return Math.round(delayMs / (1000 * 60)); // Convert milliseconds to minutes
+        return Math.round(delayMs / (1000 * 60));
     }
     calculateMinutesUntil(datetime) {
-        // Parse datetime strings in format "13-11-2025 22:51"
-        const parts = datetime.split(' ');
-        const date = new Date(`${parts[0].split('-').reverse().join('-')}T${parts[1]}`);
+        const target = this.parseDateTime(datetime);
+        if (!target) {
+            return Number.NaN;
+        }
         const now = new Date();
-        const diffMs = date.getTime() - now.getTime();
-        return Math.max(0, Math.round(diffMs / (1000 * 60))); // minutes until departure; don't return negative
+        const diffMs = target.getTime() - now.getTime();
+        return Math.max(0, Math.round(diffMs / (1000 * 60)));
     }
 };
 TrainDepartureBoard.styles = i$2 `
@@ -271,6 +325,9 @@ TrainDepartureBoard.styles = i$2 `
             display: flex;
             flex-direction: column;
             gap: 6px;
+        }
+        .train.no-calling-data {
+            padding-bottom: 16px;
         }
         .top-heading {
             display: flex;
@@ -330,6 +387,9 @@ TrainDepartureBoard.styles = i$2 `
             font-size: 0.9em;
             font-style: italic;
             color: var(--secondary-text-color, #666);
+        }
+        .calling-at.empty {
+            color: var(--disabled-text-color, #9e9e9e);
         }
         .no-departures {
             padding: 32px 0;
