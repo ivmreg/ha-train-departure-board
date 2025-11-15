@@ -139,4 +139,4 @@ const nt=(t,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e
             color: var(--secondary-text-color, #999);
         }
     `,t([ot({type:Object})],at.prototype,"hass",void 0),t([ot({type:Object})],at.prototype,"config",void 0),t([ot({type:Array})],at.prototype,"departures",void 0),at=t([(t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e):((t,e)=>{const{kind:i,elements:s}=e;return{kind:i,elements:s,finisher(e){customElements.define(t,e)}}})(t,e))("train-departure-card")],at),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-card",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{at as TrainDepartureCard};
-//# sourceMappingURL=train-departure-card.js.map
+//# sourceMappingURL=ha-train-departure-board.js.map
