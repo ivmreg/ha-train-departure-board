@@ -112,4 +112,4 @@ var lt;null===(lt=window.HTMLSlotElement)||void 0===lt||lt.prototype.assignedEle
                 </div>
             </div>
         `}renderVia(t){const e=t.stops_of_interest||[];if(!e.length)return D``;const i=e.slice(0,2).map(t=>{const e=t.estimate_stop||t.scheduled_stop,i=e?e.split(" ")[1]:"";return`${t.stop||(t.name?t.name.split(" ")[0]:"")}${i?" "+i:""}`});return e.length>2&&i.push("+"+(e.length-2)),D`<div class="via">via ${i.join(" • ")}</div>`}calculateMinutesUntil(t){const e=t.split(" "),i=new Date(`${e[0].split("-").reverse().join("-")}T${e[1]}`),s=new Date;return Math.max(0,Math.round((i.getTime()-s.getTime())/6e4))}};t([function(t){return(e,i)=>void 0!==i?((t,e,i)=>{e.constructor.createProperty(i,t)})(t,e,i):ot(t,e)}({type:Array})],ht.prototype,"departures",void 0),ht=t([(t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e):((t,e)=>{const{kind:i,elements:s}=e;return{kind:i,elements:s,finisher(e){customElements.define(t,e)}}})(t,e))("train-departure-board")],ht);
-//# sourceMappingURL=ha-train-departure-board.js.map
+//# sourceMappingURL=train-departure-board.js.map
