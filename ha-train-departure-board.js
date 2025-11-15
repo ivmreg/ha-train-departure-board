@@ -71,115 +71,216 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         super(...arguments);
         this.departures = [];
     }
-    static get styles() {
-        return i$2 `
-            .board {
-                display: flex;
-                flex-direction: column;
-                padding: 16px;
-                background-color: #f9f9f9;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
-            .header {
-                font-size: 1.5em;
-                font-weight: bold;
-                margin-bottom: 12px;
-            }
-            .departure-row {
-                display: flex;
-                justify-content: space-between;
-                padding: 8px 0;
-                border-bottom: 1px solid #eee;
-            }
-            .departure-row:last-child {
-                border-bottom: none;
-            }
-            .via {
-                font-size: 0.78em;
-                color: var(--secondary-text-color, #777);
-                margin-top: 4px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .minutes {
-                text-align: right;
-                font-size: 0.9em;
-                color: var(--secondary-text-color, #666);
-            }
-            .right {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                min-width: 80px;
-            }
-        `;
+    static getConfigElement() {
+        return document.createElement('train-departure-board-editor');
     }
-    updated(changedProperties) {
-        super.updated(changedProperties);
-        if (changedProperties.has('departures')) {
-            this.requestUpdate();
+    static getStubConfig() {
+        return {
+            type: 'custom:train-departure-board',
+            title: 'Train Departures',
+            entity: ''
+        };
+    }
+    setConfig(config) {
+        if (!config) {
+            throw new Error('Invalid configuration');
         }
+        this.config = Object.assign({ title: 'Train Departures' }, config);
+    }
+    static get properties() {
+        return {
+            hass: {},
+            config: {},
+            departures: { type: Array }
+        };
     }
     render() {
+        var _a, _b, _c;
+        if (!this.config) {
+            return x `<div class="card">No configuration provided</div>`;
+        }
+        if (!this.config.entity) {
+            return x `<div class="card">Please configure an entity</div>`;
+        }
+        const entity = (_b = (_a = this.hass) === null || _a === void 0 ? void 0 : _a.states) === null || _b === void 0 ? void 0 : _b[this.config.entity];
+        if (!entity) {
+            return x `<div class="card">Entity not found: ${this.config.entity}</div>`;
+        }
+        const departures = ((_c = entity.attributes) === null || _c === void 0 ? void 0 : _c.departures) || [];
         return x `
-            <div class="board">
-                <div class="header">Train Departures</div>
-                ${this.departures.map(departure => this.renderDepartureRow(departure))}
-            </div>
+            <ha-card>
+                <div class="card">
+                    ${this.config.title ? x `<h1 class="card-header">${this.config.title}</h1>` : ''}
+                    ${departures.length > 0
+            ? departures.map((departure) => this.renderDepartureRow(departure))
+            : x `<div class="no-departures">No departures available</div>`}
+                </div>
+            </ha-card>
         `;
     }
     renderDepartureRow(departure) {
         var _a;
+        // Extract time from datetime string (format: "13-11-2025 22:51")
         const scheduledTime = departure.scheduled.split(' ')[1];
         const estimatedTime = departure.estimated.split(' ')[1];
+        // Determine status by comparing scheduled and estimated times
         let status = 'On Time';
+        let statusClass = 'on-time';
         if (estimatedTime !== scheduledTime) {
-            status = 'Delayed';
+            // Calculate delay in minutes
+            const delayMinutes = this.calculateDelayMinutes(departure.scheduled, departure.estimated);
+            status = `Delayed +${delayMinutes} min`;
+            statusClass = 'delayed';
         }
+        // Prefer `minutes` attribute from the sensor if present, otherwise calculate from estimated/scheduled
         const minutesUntil = (_a = departure.minutes) !== null && _a !== void 0 ? _a : this.calculateMinutesUntil(departure.estimated || departure.scheduled);
         return x `
             <div class="departure-row">
-                <div>${scheduledTime}</div>
-                <div>
-                    <div>${departure.destination_name}</div>
+                <div class="time">${scheduledTime}</div>
+                <div class="destination">
+                    ${departure.destination_name}
                     ${this.renderVia(departure)}
                 </div>
-                <div class="right">
-                    <div class="minutes">${minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due'}</div>
-                    <div class="status">${status}</div>
-                </div>
+                <div class="minutes">${minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due'}</div>
+                <div class="platform">Platform ${departure.platform}</div>
+                <div class="status ${statusClass}">${status}</div>
             </div>
         `;
     }
     renderVia(departure) {
         const stops = departure.stops_of_interest || [];
-        if (!stops.length)
+        if (!stops || stops.length === 0)
             return x ``;
+        // Build a compact string with up to 2 stops — use the stop code (short) and time to keep it compact
         const max = 2;
         const items = stops.slice(0, max).map(s => {
-            const tm = s.estimate_stop || s.scheduled_stop;
-            const time = tm ? tm.split(' ')[1] : '';
+            const t = s.estimate_stop || s.scheduled_stop;
+            const time = t ? t.split(' ')[1] : '';
+            // Prefer stop code for compactness, fallback to name if not present
             const label = s.stop || (s.name ? s.name.split(' ')[0] : '');
             return `${label}${time ? ' ' + time : ''}`;
         });
         if (stops.length > max)
             items.push(`+${stops.length - max}`);
+        // Use a compact bullet separator
         return x `<div class="via">via ${items.join(' • ')}</div>`;
     }
+    calculateDelayMinutes(scheduled, estimated) {
+        // Parse datetime strings in format "13-11-2025 22:51"
+        const scheduledParts = scheduled.split(' ');
+        const estimatedParts = estimated.split(' ');
+        const scheduledDate = new Date(`${scheduledParts[0].split('-').reverse().join('-')}T${scheduledParts[1]}`);
+        const estimatedDate = new Date(`${estimatedParts[0].split('-').reverse().join('-')}T${estimatedParts[1]}`);
+        const delayMs = estimatedDate.getTime() - scheduledDate.getTime();
+        return Math.round(delayMs / (1000 * 60)); // Convert milliseconds to minutes
+    }
     calculateMinutesUntil(datetime) {
+        // Parse datetime strings in format "13-11-2025 22:51"
         const parts = datetime.split(' ');
         const date = new Date(`${parts[0].split('-').reverse().join('-')}T${parts[1]}`);
         const now = new Date();
-        return Math.max(0, Math.round((date.getTime() - now.getTime()) / (1000 * 60)));
+        const diffMs = date.getTime() - now.getTime();
+        return Math.max(0, Math.round(diffMs / (1000 * 60))); // minutes until departure; don't return negative
     }
 };
+TrainDepartureBoard.styles = i$2 `
+        ha-card {
+            height: 100%;
+        }
+        .card {
+            padding: 0;
+        }
+        .card-header {
+            margin: 0 0 16px 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 12px 16px 0 16px;
+        }
+        .departure-row {
+            display: grid;
+            grid-template-columns: 70px 1fr 70px 100px 100px;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+            font-size: 14px;
+        }
+        .departure-row:last-child {
+            border-bottom: none;
+        }
+        .time {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .minutes {
+            text-align: center;
+            color: var(--secondary-text-color, #666);
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        .destination {
+            font-weight: 500;
+        }
+        .via {
+            font-size: 0.78em;
+            color: var(--secondary-text-color, #777);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.2px;
+            opacity: 0.95;
+        }
+        .platform {
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--secondary-text-color, #666);
+        }
+        .status {
+            text-align: right;
+            font-weight: 500;
+        }
+        .status.on-time {
+            color: #4caf50;
+        }
+        .status.delayed {
+            color: #ff9800;
+        }
+        .status.cancelled {
+            color: #f44336;
+        }
+        .no-departures {
+            padding: 20px 16px;
+            text-align: center;
+            color: var(--secondary-text-color, #999);
+        }
+    `;
+__decorate([
+    n$1({ type: Object })
+], TrainDepartureBoard.prototype, "hass", void 0);
+__decorate([
+    n$1({ type: Object })
+], TrainDepartureBoard.prototype, "config", void 0);
 __decorate([
     n$1({ type: Array })
 ], TrainDepartureBoard.prototype, "departures", void 0);
 TrainDepartureBoard = __decorate([
     e$1('train-departure-board')
 ], TrainDepartureBoard);
+// Register with Home Assistant's card registry
+window.customCards = window.customCards || [];
+window.customCards.push({
+    // Register with the `custom:` prefix so Home Assistant's card picker
+    // recognizes the YAML type `custom:train-departure-board`.
+    type: 'custom:train-departure-board',
+    name: 'Train Departure Board',
+    description: 'Display train departure information in a TFL-style board',
+    // Enable preview so the card is discoverable in the card picker
+    // and shows a preview in the UI.
+    preview: true,
+    support_url: 'https://github.com/ivmreg/ha-train-departure-board/issues'
+});
+
+export { TrainDepartureBoard };
 //# sourceMappingURL=ha-train-departure-board.js.map

@@ -101,6 +101,8 @@ To contribute or make modifications:
    npm run watch
    ```
 
+The Lovelace card is implemented entirely in `src/train-departure-card.ts`. That file is the single place where the `custom:train-departure-board` element is registered, and the bundle `ha-train-departure-board.js` is produced directly from it via Rollup. Keeping a single entry point avoids the confusion we previously had when multiple files declared components with the same tag name.
+
 ## License
 
 This project is licensed under the MIT License.
