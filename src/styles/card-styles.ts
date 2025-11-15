@@ -1,7 +1,7 @@
 import { css } from 'lit';
 
 export const cardStyles = css`
-  .train-departure-card {
+  .train-departure-board {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;

@@ -17,7 +17,7 @@ The card will automatically appear in the card picker after installation. Simply
 ### Example Configuration
 
 ```yaml
-type: custom:train-departure-card
+type: custom:train-departure-board
 title: Train Departures
 entity: sensor.your_train_sensor
 ```

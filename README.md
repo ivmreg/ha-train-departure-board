@@ -27,12 +27,12 @@ A custom Lovelace card for Home Assistant that displays train departure informat
 
 ### Manual Installation
 
-1. Download `train-departure-card.js` from the latest release
-2. Copy it to `<config>/www/train-departure-card.js` (create the `www` folder if it doesn't exist)
+1. Download `train-departure-board.js` from the latest release
+2. Copy it to `<config>/www/train-departure-board.js` (create the `www` folder if it doesn't exist)
 3. Add the resource to your Lovelace configuration:
    - Go to Settings → Dashboards → Resources
    - Click "Add Resource"
-   - URL: `/local/train-departure-card.js`
+   - URL: `/local/train-departure-board.js`
    - Resource type: JavaScript Module
 4. Restart Home Assistant
 
@@ -48,7 +48,7 @@ After installation, the card will automatically appear in your card picker. No n
 ### Configuration Options
 
 ```yaml
-type: custom:train-departure-card
+type: custom:train-departure-board
 title: Train Departures
 entity: sensor.your_train_sensor
 ```

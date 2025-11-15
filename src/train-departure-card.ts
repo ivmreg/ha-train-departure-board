@@ -2,25 +2,19 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { TrainDeparture } from './types';
 
-declare global {
-    interface HTMLElementTagNameMap {
-        'train-departure-card': TrainDepartureCard;
-    }
-}
-
-@customElement('train-departure-card')
-export class TrainDepartureCard extends LitElement {
+@customElement('train-departure-board')
+export class TrainDepartureBoard extends LitElement {
     @property({ type: Object }) hass: any;
     @property({ type: Object }) config: any;
     @property({ type: Array }) departures: TrainDeparture[] = [];
 
     static getConfigElement() {
-        return document.createElement('train-departure-card-editor');
+        return document.createElement('train-departure-board-editor');
     }
 
     static getStubConfig() {
         return {
-            type: 'custom:train-departure-card',
+            type: 'custom:train-departure-board',
             title: 'Train Departures',
             entity: ''
         };
@@ -221,8 +215,8 @@ export class TrainDepartureCard extends LitElement {
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
     // Register with the `custom:` prefix so Home Assistant's card picker
-    // recognizes the YAML type `custom:train-departure-card`.
-    type: 'custom:train-departure-card',
+    // recognizes the YAML type `custom:train-departure-board`.
+    type: 'custom:train-departure-board',
     name: 'Train Departure Board',
     description: 'Display train departure information in a TFL-style board',
     // Enable preview so the card is discoverable in the card picker

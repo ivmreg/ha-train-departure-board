@@ -13,18 +13,18 @@ else
 fi
 
 # Check if the card file exists
-if [ -f "www/train-departure-card.js" ]; then
-    echo "✓ train-departure-card.js exists"
-    size=$(wc -c < "www/train-departure-card.js")
+if [ -f "www/train-departure-board.js" ]; then
+    echo "✓ train-departure-board.js exists"
+    size=$(wc -c < "www/train-departure-board.js")
     echo "  File size: $size bytes"
 else
-    echo "✗ train-departure-card.js NOT found"
+    echo "✗ train-departure-board.js NOT found"
     exit 1
 fi
 
 # Check if source map exists
-if [ -f "www/train-departure-card.js.map" ]; then
-    echo "✓ train-departure-card.js.map exists (source map)"
+if [ -f "www/train-departure-board.js.map" ]; then
+    echo "✓ train-departure-board.js.map exists (source map)"
 else
     echo "! Source map not found (optional)"
 fi
@@ -57,7 +57,7 @@ else
 fi
 
 # Check if card registration code is in the file
-if grep -q "window.customCards" "www/train-departure-card.js"; then
+if grep -q "window.customCards" "www/train-departure-board.js"; then
     echo "✓ Card registration code found"
 else
     echo "✗ Card registration code NOT found"
@@ -65,8 +65,8 @@ else
 fi
 
 # Check if the custom element is defined
-if grep -q "train-departure-card" "www/train-departure-card.js"; then
-    echo "✓ Custom element 'train-departure-card' defined"
+if grep -q "train-departure-board" "www/train-departure-board.js"; then
+    echo "✓ Custom element 'train-departure-board' defined"
 else
     echo "✗ Custom element NOT defined"
     exit 1

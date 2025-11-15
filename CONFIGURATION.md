@@ -5,7 +5,7 @@
 Add this to your Lovelace dashboard YAML or use the visual editor:
 
 ```yaml
-type: custom:train-departure-card
+type: custom:train-departure-board
 title: Train Departures
 entity: sensor.train_departures
 ```
@@ -14,7 +14,7 @@ entity: sensor.train_departures
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `type` | string | required | Must be `custom:train-departure-card` |
+| `type` | string | required | Must be `custom:train-departure-board` |
 | `title` | string | "Train Departures" | Title displayed at the top of the card |
 | `entity` | string | required | Entity ID that contains the departure data |
 

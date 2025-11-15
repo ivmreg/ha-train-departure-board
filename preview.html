@@ -333,8 +333,8 @@
         };
 
         // Create a card and append it to the preview
-        const card = document.createElement('train-departure-card');
-        card.config = { type: 'custom:train-departure-card', title: 'Train Departures', entity: 'sensor.train_deps' };
+        const card = document.createElement('train-departure-board');
+        card.config = { type: 'custom:train-departure-board', title: 'Train Departures', entity: 'sensor.train_deps' };
         // Provide Home Assistant-like object
         card.hass = sampleHass;
 

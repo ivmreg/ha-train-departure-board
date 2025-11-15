@@ -16,7 +16,7 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 ### 3. Check Browser Console for Errors
 - Open browser Developer Tools (F12)
 - Go to Console tab
-- Look for red errors containing "train-departure-card"
+- Look for red errors containing "train-departure-board"
 - Check for any JavaScript errors
 
 ## Step-by-Step Debugging
@@ -26,7 +26,7 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 2. Go to Network tab
 3. Filter for "train-departure"
 4. Refresh page
-5. Check if `train-departure-card.js` appears with status 200
+5. Check if `train-departure-board.js` appears with status 200
    - **Status 200**: File loaded successfully ✓
    - **Status 404**: File not found ✗
    - **Other**: Network/server error
@@ -37,11 +37,11 @@ If the Train Departure Board card doesn't appear in the card picker after instal
    window.customCards
    ```
 2. Press Enter
-3. Look for an array with `train-departure-card` entry:
+3. Look for an array with `train-departure-board` entry:
    ```javascript
    [
      {
-       type: "train-departure-card",
+       type: "train-departure-board",
        name: "Train Departure Board",
        description: "...",
        ...
@@ -55,7 +55,7 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 ### Step 3: Check Module Loading
 1. In browser Console, type:
    ```javascript
-   window.customElements.get('train-departure-card')
+   window.customElements.get('train-departure-board')
    ```
 2. Check if it returns a class constructor
    - **Shows constructor**: Element defined ✓
@@ -67,7 +67,7 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 3. Click the 3-dot menu → "Edit as YAML"
 4. Paste this config:
    ```yaml
-   type: custom:train-departure-card
+   type: custom:train-departure-board
    title: Test Card
    entity: sensor.my_train_sensor
    ```
@@ -76,12 +76,12 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 
 ## Common Issues and Solutions
 
-### Issue: 404 Error for train-departure-card.js
+### Issue: 404 Error for train-departure-board.js
 
 **Cause**: File not found in www folder
 
 **Solution**:
-1. Check that `www/train-departure-card.js` exists
+1. Check that `www/train-departure-board.js` exists
 2. Verify file name is correct (case-sensitive on Linux/Mac)
 3. Check file permissions: `ls -la www/`
 4. File should be readable by Home Assistant user
@@ -92,10 +92,10 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 
 **Solution**:
 1. Go to Settings → Dashboards → Resources
-2. Check if `/local/train-departure-card.js` is listed
+2. Check if `/local/train-departure-board.js` is listed
 3. If not, add it:
    - Click "Add Resource"
-   - URL: `/local/train-departure-card.js`
+   - URL: `/local/train-departure-board.js`
    - Resource type: JavaScript Module
    - Click "Add"
 
@@ -123,10 +123,10 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 ```javascript
 // Check if card is registered
 // Check if the card is registered
-window.customCards.filter(c => c.type === 'custom:train-departure-card')
+window.customCards.filter(c => c.type === 'custom:train-departure-board')
 
 // Check if element is defined
-customElements.get('train-departure-card')
+customElements.get('train-departure-board')
 
 // Check if Lit is loaded
 window.LitElement

@@ -4,11 +4,11 @@ import { TrainDepartureBoardConfig } from './types';
 
 declare global {
     interface HTMLElementTagNameMap {
-        'train-departure-card-editor': TrainDepartureEditor;
+        'train-departure-board-editor': TrainDepartureEditor;
     }
 }
 
-@customElement('train-departure-card-editor')
+@customElement('train-departure-board-editor')
 export class TrainDepartureEditor extends LitElement {
     @property({ type: Object }) public config!: TrainDepartureBoardConfig;
     @property({ type: Object }) public hass: any;
@@ -34,7 +34,7 @@ export class TrainDepartureEditor extends LitElement {
                         @change="${this._onEntityChange}"
                     >
                         <option value="">-- Select Entity --</option>
-                        ${this._getAvailableEntities().map(entity => html`
+                        ${this._getAvailableEntities().map((entity: any) => html`
                             <option value="${entity.entity_id}">${entity.friendly_name || entity.entity_id}</option>
                         `)}
                     </select>
@@ -43,11 +43,11 @@ export class TrainDepartureEditor extends LitElement {
         `;
     }
 
-    private _getAvailableEntities() {
+    private _getAvailableEntities(): Array<{ entity_id: string; friendly_name?: string }> {
         if (!this.hass?.states) return [];
         return Object.values(this.hass.states as any)
-            .filter((entity: any) => entity.entity_id.startsWith('sensor.'))
-            .slice(0, 20);
+            .filter((entity: any) => entity && typeof entity === 'object' && typeof entity.entity_id === 'string' && entity.entity_id.startsWith('sensor.'))
+            .slice(0, 20) as Array<{ entity_id: string; friendly_name?: string }>;
     }
 
     private _onTitleChange(event: Event) {

@@ -28,16 +28,16 @@
 ## Manual Installation
 
 1. **Download the card:**
-   - Get `train-departure-card.js` from the latest release
+   - Get `train-departure-board.js` from the latest release
 
 2. **Copy to Home Assistant:**
-   - Place the file in `<config>/www/train-departure-card.js`
+   - Place the file in `<config>/www/train-departure-board.js`
    - Create the `www` folder if it doesn't exist
 
 3. **Add resource:**
    - Go to Settings → Dashboards → Resources
    - Click "Add Resource"
-   - URL: `/local/train-departure-card.js`
+   - URL: `/local/train-departure-board.js`
    - Resource type: JavaScript Module
    - Click "Add"
 
@@ -59,10 +59,10 @@
 2. **Check browser console:**
    - Open browser Developer Tools (F12)
    - Go to Console tab
-   - Look for any errors related to `train-departure-card`
+   - Look for any errors related to `train-departure-board`
 
 3. **Verify file is loaded:**
-   - In browser DevTools Network tab, filter for `train-departure-card.js`
+   - In browser DevTools Network tab, filter for `train-departure-board.js`
    - Confirm it loads successfully (200 status)
 
 4. **Restart Home Assistant:**
@@ -100,7 +100,7 @@ If the card still doesn't appear, check the browser console:
 console.log(window.customCards);
 
 // Should show:
-// [{type: "train-departure-card", name: "Train Departure Board", ...}]
+// [{type: "train-departure-board", name: "Train Departure Board", ...}]
 ```
 
 ## Support
