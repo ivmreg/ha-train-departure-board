@@ -28,16 +28,16 @@
 ## Manual Installation
 
 1. **Download the card:**
-   - Get `train-departure-board.js` from the latest release
+   - Get `ha-train-departure-board.js` from the latest release
 
 2. **Copy to Home Assistant:**
-   - Place the file in `<config>/www/train-departure-board.js`
-   - Create the `www` folder if it doesn't exist
+   - Place the file in `<config>/www/community/ivmreg_ha-train-departure-board/ha-train-departure-board.js`
+   - Create the `www/community/ivmreg_ha-train-departure-board/` folder if it doesn't exist
 
 3. **Add resource:**
    - Go to Settings → Dashboards → Resources
    - Click "Add Resource"
-   - URL: `/local/train-departure-board.js`
+   - URL: `/local/community/ivmreg_ha-train-departure-board/ha-train-departure-board.js`
    - Resource type: JavaScript Module
    - Click "Add"
 
@@ -62,7 +62,7 @@
    - Look for any errors related to `train-departure-board`
 
 3. **Verify file is loaded:**
-   - In browser DevTools Network tab, filter for `train-departure-board.js`
+   - In browser DevTools Network tab, filter for `ha-train-departure-board.js`
    - Confirm it loads successfully (200 status)
 
 4. **Restart Home Assistant:**

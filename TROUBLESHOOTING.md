@@ -24,9 +24,9 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 ### Step 1: Verify File is Loaded
 1. Open browser Developer Tools (F12)
 2. Go to Network tab
-3. Filter for "train-departure"
+3. Filter for "ha-train"
 4. Refresh page
-5. Check if `train-departure-board.js` appears with status 200
+5. Check if `ha-train-departure-board.js` appears with status 200
    - **Status 200**: File loaded successfully ✓
    - **Status 404**: File not found ✗
    - **Other**: Network/server error
@@ -76,14 +76,14 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 
 ## Common Issues and Solutions
 
-### Issue: 404 Error for train-departure-board.js
+### Issue: 404 Error for ha-train-departure-board.js
 
-**Cause**: File not found in www folder
+**Cause**: File not found in the community folder
 
 **Solution**:
-1. Check that `www/train-departure-board.js` exists
+1. Check that `<config>/www/community/ivmreg_ha-train-departure-board/ha-train-departure-board.js` exists
 2. Verify file name is correct (case-sensitive on Linux/Mac)
-3. Check file permissions: `ls -la www/`
+3. Check file permissions: `ls -la www/community/ivmreg_ha-train-departure-board/`
 4. File should be readable by Home Assistant user
 
 ### Issue: Resource Not Found Error
@@ -92,10 +92,10 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 
 **Solution**:
 1. Go to Settings → Dashboards → Resources
-2. Check if `/local/train-departure-board.js` is listed
+2. Check if `/local/community/ivmreg_ha-train-departure-board/ha-train-departure-board.js` is listed
 3. If not, add it:
    - Click "Add Resource"
-   - URL: `/local/train-departure-board.js`
+   - URL: `/local/community/ivmreg_ha-train-departure-board/ha-train-departure-board.js`
    - Resource type: JavaScript Module
    - Click "Add"
 

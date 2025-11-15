@@ -4,27 +4,19 @@
 echo "===== Train Departure Board Verification ====="
 echo ""
 
-# Check if www directory exists
-if [ -d "www" ]; then
-    echo "✓ www directory exists"
-else
-    echo "✗ www directory NOT found"
-    exit 1
-fi
-
-# Check if the card file exists
-if [ -f "www/train-departure-board.js" ]; then
-    echo "✓ train-departure-board.js exists"
-    size=$(wc -c < "www/train-departure-board.js")
+# Check if the bundle exists at the repository root
+if [ -f "ha-train-departure-board.js" ]; then
+    echo "✓ ha-train-departure-board.js exists"
+    size=$(wc -c < "ha-train-departure-board.js")
     echo "  File size: $size bytes"
 else
-    echo "✗ train-departure-board.js NOT found"
+    echo "✗ ha-train-departure-board.js NOT found"
     exit 1
 fi
 
 # Check if source map exists
-if [ -f "www/train-departure-board.js.map" ]; then
-    echo "✓ train-departure-board.js.map exists (source map)"
+if [ -f "ha-train-departure-board.js.map" ]; then
+    echo "✓ ha-train-departure-board.js.map exists (source map)"
 else
     echo "! Source map not found (optional)"
 fi
@@ -57,7 +49,7 @@ else
 fi
 
 # Check if card registration code is in the file
-if grep -q "window.customCards" "www/train-departure-board.js"; then
+if grep -q "window.customCards" "ha-train-departure-board.js"; then
     echo "✓ Card registration code found"
 else
     echo "✗ Card registration code NOT found"
@@ -65,7 +57,7 @@ else
 fi
 
 # Check if the custom element is defined
-if grep -q "train-departure-board" "www/train-departure-board.js"; then
+if grep -q "train-departure-board" "ha-train-departure-board.js"; then
     echo "✓ Custom element 'train-departure-board' defined"
 else
     echo "✗ Custom element NOT defined"

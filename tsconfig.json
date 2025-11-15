@@ -7,7 +7,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./www",
+    "outDir": "./",
     "rootDir": "./src",
     "moduleResolution": "node",
     "baseUrl": "./src",
@@ -17,5 +17,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "www"]
+  "exclude": ["node_modules", "ha-train-departure-board.js", "ha-train-departure-board.js.map"]
 }

@@ -2,7 +2,7 @@
   "name": "Train Departure Board",
   "codeowners": ["@ivmreg"],
   "content_in_root": false,
-  "filename": "www/train-departure-board.js",
+  "filename": "ha-train-departure-board.js",
   "homeassistant": "2023.1.0",
   "render_readme": true,
   "requirements": [],
