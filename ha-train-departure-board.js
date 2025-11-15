@@ -144,7 +144,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const statusLine = countdown ? `${statusLabel} • ${countdown}` : statusLabel;
         const callingAt = this.getCallingAtSummary(departure);
         return x `
-            <div class="train ${callingAt ? '' : 'no-calling-data'}">
+            <div class="train">
                 <div class="top-heading">
                     <div class="scheduled-container">
                         <span class="scheduled">${scheduledTime}</span>
@@ -156,9 +156,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                     </div>
                 </div>
                 <h3 class="terminus">${departure.destination_name}</h3>
-                ${callingAt
-            ? x `<p class="calling-at">Calling at ${callingAt}</p>`
-            : x `<p class="calling-at empty">Calling pattern unavailable</p>`}
+                ${callingAt ? x `<p class="calling-at">Calling at ${callingAt}</p>` : ''}
             </div>
         `;
     }
@@ -169,7 +167,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const dedupedStops = new Map();
         stops.forEach((stop, index) => {
             var _a;
-            const label = (stop.stop || (stop.name ? stop.name.split(' ')[0] : '') || '').trim();
+            const label = (stop.name || stop.stop || '').trim();
             if (!label) {
                 return;
             }
@@ -304,12 +302,12 @@ TrainDepartureBoard.styles = i$2 `
             height: 100%;
         }
         .card {
-            padding: 0 16px 16px;
+            padding: 0 12px 12px;
         }
         .card-header {
             margin: 0;
-            padding: 16px 0 8px;
-            font-size: 1.4em;
+            padding: 12px 0 4px;
+            font-size: 1.25em;
             font-weight: 600;
         }
         .departure-list {
@@ -319,21 +317,18 @@ TrainDepartureBoard.styles = i$2 `
         }
         .train {
             border: 1px solid var(--divider-color, #e0e0e0);
-            border-radius: 8px;
-            padding: 12px 14px;
+            border-radius: 6px;
+            padding: 10px 12px;
             background: var(--ha-card-background, var(--card-background-color, #fff));
             display: flex;
             flex-direction: column;
-            gap: 6px;
-        }
-        .train.no-calling-data {
-            padding-bottom: 16px;
+            gap: 4px;
         }
         .top-heading {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            gap: 12px;
+            gap: 8px;
         }
         .scheduled-container {
             display: flex;
@@ -341,13 +336,13 @@ TrainDepartureBoard.styles = i$2 `
             gap: 2px;
         }
         .scheduled {
-            font-size: 1.8em;
+            font-size: 1.45em;
             font-weight: 600;
             line-height: 1;
         }
         .scheduled-status {
-            font-size: 0.85em;
-            letter-spacing: 0.05em;
+            font-size: 0.78em;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
             color: var(--secondary-text-color, #666);
         }
@@ -364,8 +359,8 @@ TrainDepartureBoard.styles = i$2 `
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 2px;
-            font-size: 0.85em;
+            gap: 1px;
+            font-size: 0.8em;
             color: var(--secondary-text-color, #666);
         }
         .platform-label {
@@ -373,23 +368,20 @@ TrainDepartureBoard.styles = i$2 `
             letter-spacing: 0.08em;
         }
         .platform {
-            font-size: 1.4em;
+            font-size: 1.2em;
             font-weight: 600;
             color: var(--primary-text-color, #111);
         }
         .terminus {
             margin: 0;
-            font-size: 1.25em;
+            font-size: 1.1em;
             font-weight: 600;
         }
         .calling-at {
             margin: 0;
-            font-size: 0.9em;
+            font-size: 0.85em;
             font-style: italic;
             color: var(--secondary-text-color, #666);
-        }
-        .calling-at.empty {
-            color: var(--disabled-text-color, #9e9e9e);
         }
         .no-departures {
             padding: 32px 0;
