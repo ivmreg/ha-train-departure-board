@@ -53,43 +53,62 @@ export class TrainDepartureBoard extends LitElement {
             height: 100%;
         }
         .card {
-            padding: 12px;
+            padding: 8px;
         }
         .departure-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
         }
         .train {
             border: 1px solid var(--divider-color, #e0e0e0);
             border-radius: 6px;
-            padding: 10px 12px;
+            padding: 8px 10px;
             background: var(--ha-card-background, var(--card-background-color, #fff));
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
         }
-        .top-heading {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 8px;
-        }
-        .scheduled-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+        .time-box {
+            flex-shrink: 0;
         }
         .scheduled {
-            font-size: 1.45em;
-            font-weight: 600;
+            font-size: 1.3em;
+            font-weight: 700;
             line-height: 1;
+            color: var(--primary-text-color, #111);
+        }
+        .info-box {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0; /* Enable truncation */
+            gap: 2px;
+        }
+        .terminus {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--primary-text-color, #111);
+        }
+        .meta-row {
+            display: flex;
+            align-items: center;
+            font-size: 0.85em;
+            color: var(--secondary-text-color, #666);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .scheduled-status {
-            font-size: 0.78em;
-            letter-spacing: 0.03em;
             text-transform: uppercase;
-            color: var(--secondary-text-color, #666);
+            letter-spacing: 0.03em;
+            flex-shrink: 0;
         }
         .scheduled-status.on-time {
             color: #52aa52;
@@ -99,6 +118,13 @@ export class TrainDepartureBoard extends LitElement {
         }
         .scheduled-status.cancelled {
             color: var(--error-color, #f06260);
+        }
+        .calling-at {
+            font-style: italic;
+            margin-left: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .platform-container {
             display: flex;
@@ -111,33 +137,23 @@ export class TrainDepartureBoard extends LitElement {
             background: var(--secondary-background-color, #f5f5f5);
             padding: 4px 8px;
             border-radius: 4px;
-            min-width: 40px;
+            min-width: 36px;
+            flex-shrink: 0;
         }
         .platform-label {
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            font-size: 0.7em;
+            font-size: 0.65em;
             line-height: 1;
         }
         .platform {
-            font-size: 1.4em;
+            font-size: 1.2em;
             font-weight: 700;
             color: var(--primary-text-color, #111);
             line-height: 1;
         }
-        .terminus {
-            margin: 0;
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-        .calling-at {
-            margin: 0;
-            font-size: 0.85em;
-            font-style: italic;
-            color: var(--secondary-text-color, #666);
-        }
         .no-departures {
-            padding: 32px 0;
+            padding: 24px 0;
             text-align: center;
             color: var(--secondary-text-color, #999);
         }
@@ -195,19 +211,21 @@ export class TrainDepartureBoard extends LitElement {
 
         return html`
             <div class="train">
-                <div class="top-heading">
-                    <div class="scheduled-container">
-                        <span class="scheduled">${scheduledTime}</span>
-                        <span class="scheduled-status ${statusClass}">${statusLine}</span>
-                    </div>
-                    ${platform ? html`
-                    <div class="platform-container">
-                        <span class="platform-label">Plat</span>
-                        <span class="platform">${platform}</span>
-                    </div>` : ''}
+                <div class="time-box">
+                    <span class="scheduled">${scheduledTime}</span>
                 </div>
-                <h3 class="terminus">${departure.destination_name}</h3>
-                ${callingAt ? html`<p class="calling-at">Calling at ${callingAt}</p>` : ''}
+                <div class="info-box">
+                    <h3 class="terminus">${departure.destination_name}</h3>
+                    <div class="meta-row">
+                        <span class="scheduled-status ${statusClass}">${statusLine}</span>
+                        ${callingAt ? html`<span class="calling-at"> • ${callingAt}</span>` : ''}
+                    </div>
+                </div>
+                ${platform ? html`
+                <div class="platform-container">
+                    <span class="platform-label">Plat</span>
+                    <span class="platform">${platform}</span>
+                </div>` : ''}
             </div>
         `;
     }
