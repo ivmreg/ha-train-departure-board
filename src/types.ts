@@ -9,6 +9,8 @@ export interface TrainDeparture {
     operator_name: string;
     status?: string;
     etd?: string;
+    planned_cancel?: boolean;
+    cancel_reason?: string;
     stops_of_interest: StopOfInterest[];
     stops: number;
 }

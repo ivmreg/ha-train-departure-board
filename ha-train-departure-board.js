@@ -144,6 +144,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const { statusClass, statusLabel, countdown } = this.getStatusMeta(departure);
         const statusLine = countdown ? `${statusLabel} • ${countdown}` : statusLabel;
         const callingAt = this.getCallingAtSummary(departure);
+        const platform = departure.platform ? departure.platform : null;
         return x `
             <div class="train">
                 <div class="top-heading">
@@ -151,10 +152,11 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                         <span class="scheduled">${scheduledTime}</span>
                         <span class="scheduled-status ${statusClass}">${statusLine}</span>
                     </div>
+                    ${platform ? x `
                     <div class="platform-container">
-                        <span class="platform-label">Platform</span>
-                        <span class="platform">${departure.platform || '-'}</span>
-                    </div>
+                        <span class="platform-label">Plat</span>
+                        <span class="platform">${platform}</span>
+                    </div>` : ''}
                 </div>
                 <h3 class="terminus">${departure.destination_name}</h3>
                 ${callingAt ? x `<p class="calling-at">Calling at ${callingAt}</p>` : ''}
@@ -195,7 +197,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         if (sortedStops.length === 0) {
             return null;
         }
-        const max = 3;
+        const max = 5;
         const items = sortedStops.slice(0, max).map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`);
         if (sortedStops.length > max) {
             items.push(`+${sortedStops.length - max} more`);
@@ -203,11 +205,24 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         return items.join(', ');
     }
     getStatusMeta(departure) {
+        var _a, _b;
         const scheduledRaw = departure.scheduled || '';
         const estimatedRaw = departure.estimated || '';
         const scheduledTime = this.extractTimeLabel(scheduledRaw);
         const estimatedTime = this.extractTimeLabel(estimatedRaw);
         const countdown = this.formatCountdown(departure);
+        if ((_a = departure.status) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes('cancel')) {
+            return { statusLabel: departure.status || 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
+        if ((_b = departure.etd) === null || _b === void 0 ? void 0 : _b.toLowerCase().includes('cancel')) {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
+        if (departure.planned_cancel) {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
+        if (departure.cancel_reason) {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
         if (!estimatedRaw) {
             return { statusLabel: 'Awaiting update', statusClass: 'delayed', countdown };
         }
@@ -354,24 +369,32 @@ TrainDepartureBoard.styles = i$2 `
             color: #ffb347;
         }
         .scheduled-status.cancelled {
-            color: #f06260;
+            color: var(--error-color, #f06260);
         }
         .platform-container {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 1px;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
             font-size: 0.8em;
             color: var(--secondary-text-color, #666);
+            background: var(--secondary-background-color, #f5f5f5);
+            padding: 4px 8px;
+            border-radius: 4px;
+            min-width: 40px;
         }
         .platform-label {
             text-transform: uppercase;
             letter-spacing: 0.08em;
+            font-size: 0.7em;
+            line-height: 1;
         }
         .platform {
-            font-size: 1.2em;
-            font-weight: 600;
+            font-size: 1.4em;
+            font-weight: 700;
             color: var(--primary-text-color, #111);
+            line-height: 1;
         }
         .terminus {
             margin: 0;
