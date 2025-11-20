@@ -257,6 +257,14 @@ export class TrainDepartureBoard extends LitElement {
         const estimatedTime = this.extractTimeLabel(estimatedRaw);
         const countdown = this.formatCountdown(departure);
 
+        if (departure.status?.toLowerCase() === 'cancelled') {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
+
+        if (departure.etd?.toLowerCase().includes('cancel')) {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        }
+
         if (!estimatedRaw) {
             return { statusLabel: 'Awaiting update', statusClass: 'delayed', countdown };
         }

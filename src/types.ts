@@ -7,6 +7,8 @@ export interface TrainDeparture {
     minutes: number;
     platform: string;
     operator_name: string;
+    status?: string;
+    etd?: string;
     stops_of_interest: StopOfInterest[];
     stops: number;
 }
