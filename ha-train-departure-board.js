@@ -151,11 +151,14 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                     <span class="scheduled">${scheduledTime}</span>
                 </div>
                 <div class="info-box">
-                    <h3 class="terminus">${departure.destination_name}</h3>
-                    <div class="meta-row">
-                        <span class="scheduled-status ${statusClass}">${statusLine}</span>
-                        ${callingAt ? x `<span class="calling-at"> • ${callingAt}</span>` : ''}
+                    <div class="destination-row">
+                        <h3 class="terminus">${departure.destination_name}</h3>
+                        <span class="status-pill ${statusClass}">${statusLine}</span>
                     </div>
+                    ${callingAt ? x `
+                    <div class="marquee-container">
+                        <div class="marquee-content">Calling at: ${callingAt}</div>
+                    </div>` : ''}
                 </div>
                 ${platform ? x `
                 <div class="platform-container">
@@ -199,12 +202,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         if (sortedStops.length === 0) {
             return null;
         }
-        const max = 5;
-        const items = sortedStops.slice(0, max).map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`);
-        if (sortedStops.length > max) {
-            items.push(`+${sortedStops.length - max} more`);
-        }
-        return items.join(', ');
+        return sortedStops.map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`).join(', ');
     }
     getStatusMeta(departure) {
         var _a, _b;
@@ -324,6 +322,8 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
 TrainDepartureBoard.styles = i$2 `
         ha-card {
             height: 100%;
+            background: var(--ha-card-background, var(--card-background-color, #fff));
+            color: var(--primary-text-color, #111);
         }
         .card {
             padding: 8px;
@@ -335,19 +335,24 @@ TrainDepartureBoard.styles = i$2 `
         }
         .train {
             border: 1px solid var(--divider-color, #e0e0e0);
-            border-radius: 6px;
-            padding: 8px 10px;
-            background: var(--ha-card-background, var(--card-background-color, #fff));
+            border-radius: 8px;
+            padding: 8px 12px;
+            background: var(--secondary-background-color, #f9f9f9);
             display: flex;
             flex-direction: row;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
         .time-box {
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
         }
         .scheduled {
-            font-size: 1.3em;
+            font-size: 1.5em;
             font-weight: 700;
             line-height: 1;
             color: var(--primary-text-color, #111);
@@ -356,12 +361,18 @@ TrainDepartureBoard.styles = i$2 `
             display: flex;
             flex-direction: column;
             flex: 1;
-            min-width: 0; /* Enable truncation */
-            gap: 2px;
+            min-width: 0;
+            gap: 4px;
+        }
+        .destination-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
         .terminus {
             margin: 0;
-            font-size: 1.1em;
+            font-size: 1.2em;
             font-weight: 600;
             line-height: 1.2;
             white-space: nowrap;
@@ -369,60 +380,69 @@ TrainDepartureBoard.styles = i$2 `
             text-overflow: ellipsis;
             color: var(--primary-text-color, #111);
         }
-        .meta-row {
-            display: flex;
+        .status-pill {
+            display: inline-flex;
             align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 0.85em;
-            color: var(--secondary-text-color, #666);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .scheduled-status {
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
             flex-shrink: 0;
         }
-        .scheduled-status.on-time {
-            color: #52aa52;
+        .status-pill.on-time {
+            background-color: var(--success-color, #4caf50);
+            color: #fff;
         }
-        .scheduled-status.delayed {
-            color: #ffb347;
+        .status-pill.delayed {
+            background-color: var(--warning-color, #ff9800);
+            color: #fff;
         }
-        .scheduled-status.cancelled {
-            color: var(--error-color, #f06260);
+        .status-pill.cancelled {
+            background-color: var(--error-color, #f44336);
+            color: #fff;
         }
-        .calling-at {
-            font-style: italic;
-            margin-left: 4px;
-            white-space: nowrap;
+        .marquee-container {
             overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+        .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+            font-size: 0.9em;
+            color: var(--secondary-text-color, #666);
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
         }
         .platform-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 0;
-            font-size: 0.8em;
-            color: var(--secondary-text-color, #666);
-            background: var(--secondary-background-color, #f5f5f5);
+            background: var(--primary-color, #03a9f4);
+            color: #fff;
             padding: 4px 8px;
-            border-radius: 4px;
-            min-width: 36px;
+            border-radius: 6px;
+            min-width: 40px;
             flex-shrink: 0;
         }
         .platform-label {
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 0.65em;
+            font-size: 0.6em;
             line-height: 1;
+            opacity: 0.9;
         }
         .platform {
             font-size: 1.2em;
             font-weight: 700;
-            color: var(--primary-text-color, #111);
             line-height: 1;
         }
         .no-departures {
