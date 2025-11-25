@@ -170,8 +170,6 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
     }
     getCallingAtSummary(departure) {
         const stops = departure.stops_of_interest || [];
-        if (!stops || stops.length === 0)
-            return null;
         const dedupedStops = new Map();
         stops.forEach((stop, index) => {
             var _a;
@@ -199,6 +197,18 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
             }
             return a.time - b.time;
         });
+        const destinationName = (departure.destination_name || '').trim();
+        if (destinationName) {
+            const lastStop = sortedStops[sortedStops.length - 1];
+            if (!lastStop || lastStop.label.toLowerCase() !== destinationName.toLowerCase()) {
+                sortedStops.push({
+                    label: destinationName,
+                    time: Number.POSITIVE_INFINITY,
+                    timeText: '',
+                    order: sortedStops.length
+                });
+            }
+        }
         if (sortedStops.length === 0) {
             return null;
         }
