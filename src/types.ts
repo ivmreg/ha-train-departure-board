@@ -25,12 +25,8 @@ export interface StopOfInterest {
 }
 
 export interface TrainDepartureBoardConfig {
-    routes: string[];
-    displayOptions: DisplayOptions;
-}
-
-export interface DisplayOptions {
-    showPlatform: boolean;
-    showStatus: boolean;
-    showJourneyTime: boolean;
+    type: string;
+    title?: string;
+    entity?: string;
+    attribute?: string;
 }

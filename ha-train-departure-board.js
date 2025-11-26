@@ -1,4 +1,4 @@
-/*! *****************************************************************************
+/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -19,6 +19,11 @@ function __decorate(decorators, target, key, desc) {
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 }
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
 
 /**
  * @license
@@ -119,6 +124,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const attributeName = this.config.attribute || 'departures';
         const attributeValue = (_c = entity.attributes) === null || _c === void 0 ? void 0 : _c[attributeName];
         const departures = Array.isArray(attributeValue) ? attributeValue : [];
+        const lastUpdated = entity.last_updated ? new Date(entity.last_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         if (attributeValue === undefined) {
             // eslint-disable-next-line no-console
             console.warn(`train-departure-board: attribute "${attributeName}" was not found on entity ${this.config.entity}`);
@@ -132,39 +138,36 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                 <div class="card">
                     ${departures.length > 0
             ? x `<div class="departure-list">
-                            ${departures.map((departure) => this.renderDepartureRow(departure))}
+                            ${departures.map((departure, index) => this.renderDepartureRow(departure, index))}
                         </div>`
             : x `<div class="no-departures">No departures available</div>`}
+                    ${lastUpdated ? x `<div class="footer">Last updated: ${lastUpdated}</div>` : ''}
                 </div>
             </ha-card>
         `;
     }
-    renderDepartureRow(departure) {
+    renderDepartureRow(departure, index) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
-        const { statusClass, statusLabel, countdown } = this.getStatusMeta(departure);
-        const statusLine = countdown ? `${statusLabel} • ${countdown}` : statusLabel;
+        const { statusClass, statusLabel } = this.getStatusMeta(departure);
         const callingAt = this.getCallingAtSummary(departure);
         const platform = departure.platform ? departure.platform : null;
+        const isNextTrain = index === 0;
         return x `
-            <div class="train">
-                <div class="time-box">
+            <div class="train ${isNextTrain ? 'next-train' : ''}">
+                <div class="time-wrapper">
                     <span class="scheduled">${scheduledTime}</span>
+                    ${platform ? x `<span class="platform-badge">Plat ${platform}</span>` : ''}
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
-                        <span class="status-pill ${statusClass}">${statusLine}</span>
+                        <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? x `
                     <div class="marquee-container">
                         <div class="marquee-content">Calling at: ${callingAt}</div>
                     </div>` : ''}
                 </div>
-                ${platform ? x `
-                <div class="platform-container">
-                    <span class="platform-label">Plat</span>
-                    <span class="platform">${platform}</span>
-                </div>` : ''}
             </div>
         `;
     }
@@ -220,54 +223,27 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const estimatedRaw = departure.estimated || '';
         const scheduledTime = this.extractTimeLabel(scheduledRaw);
         const estimatedTime = this.extractTimeLabel(estimatedRaw);
-        const countdown = this.formatCountdown(departure);
-        if ((_a = departure.status) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes('cancel')) {
-            return { statusLabel: departure.status || 'Cancelled', statusClass: 'cancelled', countdown: null };
-        }
-        if ((_b = departure.etd) === null || _b === void 0 ? void 0 : _b.toLowerCase().includes('cancel')) {
-            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
-        }
-        if (departure.planned_cancel) {
-            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
-        }
-        if (departure.cancel_reason) {
-            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        if (((_a = departure.status) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes('cancel')) ||
+            ((_b = departure.etd) === null || _b === void 0 ? void 0 : _b.toLowerCase().includes('cancel')) ||
+            departure.planned_cancel ||
+            departure.cancel_reason ||
+            estimatedRaw.toLowerCase().includes('cancel')) {
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled' };
         }
         if (!estimatedRaw) {
-            return { statusLabel: 'Awaiting update', statusClass: 'delayed', countdown };
+            return { statusLabel: 'Awaiting', statusClass: 'delayed' };
         }
         const normalizedEstimate = estimatedRaw.toLowerCase();
-        if (normalizedEstimate.includes('cancel')) {
-            return { statusLabel: 'Cancelled', statusClass: 'cancelled', countdown: null };
+        if (normalizedEstimate === 'on time') {
+            return { statusLabel: 'On Time', statusClass: 'on-time' };
         }
         if (estimatedTime && scheduledTime && estimatedTime !== scheduledTime) {
-            const delayMinutes = this.calculateDelayMinutes(scheduledRaw, estimatedRaw);
-            const label = Number.isFinite(delayMinutes) ? `Delayed +${delayMinutes} min` : 'Delayed';
-            return { statusLabel: label, statusClass: 'delayed', countdown };
+            if (/\d{2}:\d{2}/.test(estimatedTime)) {
+                return { statusLabel: `Exp ${estimatedTime}`, statusClass: 'delayed' };
+            }
+            return { statusLabel: estimatedTime, statusClass: 'delayed' };
         }
-        if (!/\d{2}:\d{2}/.test(estimatedTime) && estimatedRaw) {
-            return { statusLabel: estimatedRaw, statusClass: 'delayed', countdown };
-        }
-        return { statusLabel: 'On time', statusClass: 'on-time', countdown };
-    }
-    formatCountdown(departure) {
-        var _a;
-        const referenceTime = this.pickReferenceTime(departure);
-        const minutesUntil = (_a = departure.minutes) !== null && _a !== void 0 ? _a : (referenceTime ? this.calculateMinutesUntil(referenceTime) : Number.NaN);
-        if (!Number.isFinite(minutesUntil)) {
-            return null;
-        }
-        return minutesUntil > 0 ? `in ${minutesUntil} min` : 'Due';
-    }
-    pickReferenceTime(departure) {
-        var _a, _b;
-        if (this.parseDateTime((_a = departure.estimated) !== null && _a !== void 0 ? _a : '')) {
-            return departure.estimated;
-        }
-        if (this.parseDateTime((_b = departure.scheduled) !== null && _b !== void 0 ? _b : '')) {
-            return departure.scheduled;
-        }
-        return undefined;
+        return { statusLabel: 'On Time', statusClass: 'on-time' };
     }
     extractTimeLabel(datetime) {
         if (!datetime) {
@@ -310,109 +286,122 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         this.dateCache.set(datetime, parsed);
         return parsed;
     }
-    calculateDelayMinutes(scheduled, estimated) {
-        const scheduledDate = this.parseDateTime(scheduled);
-        const estimatedDate = this.parseDateTime(estimated);
-        if (!scheduledDate || !estimatedDate) {
-            return Number.NaN;
-        }
-        const delayMs = estimatedDate.getTime() - scheduledDate.getTime();
-        return Math.round(delayMs / (1000 * 60));
-    }
-    calculateMinutesUntil(datetime) {
-        const target = this.parseDateTime(datetime);
-        if (!target) {
-            return Number.NaN;
-        }
-        const now = new Date();
-        const diffMs = target.getTime() - now.getTime();
-        return Math.max(0, Math.round(diffMs / (1000 * 60)));
-    }
 };
 TrainDepartureBoard.styles = i$2 `
         ha-card {
             height: 100%;
             background: var(--ha-card-background, var(--card-background-color, #fff));
             color: var(--primary-text-color, #111);
+            display: flex;
+            flex-direction: column;
         }
         .card {
-            padding: 8px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
         .departure-list {
             display: flex;
             flex-direction: column;
+            padding: 8px;
             gap: 8px;
+            flex: 1;
         }
         .train {
-            border: 1px solid var(--divider-color, #e0e0e0);
-            border-radius: 8px;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
             padding: 8px 12px;
-            background: var(--secondary-background-color, #f9f9f9);
+            background: var(--card-background-color, #fff);
             display: flex;
             flex-direction: row;
             align-items: center;
             gap: 16px;
+            position: relative;
         }
-        .time-box {
-            flex-shrink: 0;
+        .train:last-child {
+            border-bottom: none;
+        }
+        .train.next-train {
+            background: var(--secondary-background-color, rgba(255, 193, 7, 0.1));
+            border-left: 4px solid var(--warning-color, #ff9800);
+            padding-left: 8px; /* Compensate for border */
+        }
+        .time-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-width: 50px;
+            gap: 4px;
+            min-width: 55px;
+            flex-shrink: 0;
         }
         .scheduled {
-            font-size: 1.5em;
+            font-size: 1.4em;
             font-weight: 700;
             line-height: 1;
             color: var(--primary-text-color, #111);
+            font-family: var(--primary-font-family, sans-serif);
+            font-variant-numeric: tabular-nums;
+        }
+        .platform-badge {
+            background: var(--primary-color, #03a9f4);
+            color: #fff;
+            font-size: 0.75em;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            line-height: 1;
         }
         .info-box {
             display: flex;
             flex-direction: column;
             flex: 1;
             min-width: 0;
-            gap: 4px;
+            gap: 2px;
         }
         .destination-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            width: 100%;
         }
         .terminus {
             margin: 0;
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 600;
             line-height: 1.2;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: var(--primary-text-color, #111);
+            flex: 1;
         }
         .status-pill {
             display: inline-flex;
             align-items: center;
-            padding: 2px 8px;
-            border-radius: 12px;
+            justify-content: center;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 0.85em;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             white-space: nowrap;
             flex-shrink: 0;
+            min-width: 80px;
+            text-align: center;
         }
         .status-pill.on-time {
-            background-color: var(--success-color, #4caf50);
-            color: #fff;
+            color: var(--success-color, #4caf50);
+            background: rgba(76, 175, 80, 0.1);
         }
         .status-pill.delayed {
-            background-color: var(--warning-color, #ff9800);
-            color: #fff;
+            color: var(--warning-color, #ff9800);
+            background: rgba(255, 152, 0, 0.1);
         }
         .status-pill.cancelled {
-            background-color: var(--error-color, #f44336);
-            color: #fff;
+            color: var(--error-color, #f44336);
+            background: rgba(244, 67, 54, 0.1);
         }
         .marquee-container {
             overflow: hidden;
@@ -420,40 +409,30 @@ TrainDepartureBoard.styles = i$2 `
             position: relative;
             mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            width: 100%;
         }
         .marquee-content {
             display: inline-block;
             padding-left: 100%;
             animation: marquee 20s linear infinite;
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: var(--secondary-text-color, #666);
+        }
+        .marquee-container:hover .marquee-content {
+            animation-play-state: paused;
         }
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
         }
-        .platform-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary-color, #03a9f4);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 6px;
-            min-width: 40px;
-            flex-shrink: 0;
-        }
-        .platform-label {
-            text-transform: uppercase;
-            font-size: 0.6em;
-            line-height: 1;
-            opacity: 0.9;
-        }
-        .platform {
-            font-size: 1.2em;
-            font-weight: 700;
-            line-height: 1;
+        .footer {
+            padding: 8px 12px;
+            border-top: 1px solid var(--divider-color, #e0e0e0);
+            font-size: 0.75em;
+            color: var(--secondary-text-color, #666);
+            text-align: right;
+            background: var(--card-background-color, #fff);
+            border-radius: 0 0 8px 8px;
         }
         .no-departures {
             padding: 24px 0;

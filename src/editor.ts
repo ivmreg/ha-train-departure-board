@@ -21,16 +21,16 @@ export class TrainDepartureEditor extends LitElement {
                     <input 
                         id="title"
                         type="text"
-                        .value="${this.config.routes?.[0] || 'Train Departures'}"
+                        .value="${this.config.title || ''}"
                         @change="${this._onTitleChange}"
-                        placeholder="Enter card title"
+                        placeholder="Train Departures"
                     />
                 </div>
                 <div class="config-section">
                     <label for="entity">Select Entity:</label>
                     <select 
                         id="entity"
-                        .value="${this.config.routes?.[0] || ''}"
+                        .value="${this.config.entity || ''}"
                         @change="${this._onEntityChange}"
                     >
                         <option value="">-- Select Entity --</option>
@@ -38,6 +38,16 @@ export class TrainDepartureEditor extends LitElement {
                             <option value="${entity.entity_id}">${entity.friendly_name || entity.entity_id}</option>
                         `)}
                     </select>
+                </div>
+                <div class="config-section">
+                    <label for="attribute">Attribute (optional):</label>
+                    <input 
+                        id="attribute"
+                        type="text"
+                        .value="${this.config.attribute || 'departures'}"
+                        @change="${this._onAttributeChange}"
+                        placeholder="departures"
+                    />
                 </div>
             </div>
         `;
@@ -58,6 +68,11 @@ export class TrainDepartureEditor extends LitElement {
     private _onEntityChange(event: Event) {
         const select = event.target as HTMLSelectElement;
         this._fireConfigChanged({ entity: select.value });
+    }
+
+    private _onAttributeChange(event: Event) {
+        const input = event.target as HTMLInputElement;
+        this._fireConfigChanged({ attribute: input.value });
     }
 
     private _fireConfigChanged(updates: any) {
