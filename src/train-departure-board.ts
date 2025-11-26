@@ -175,10 +175,13 @@ export class TrainDepartureBoard extends LitElement {
         }
         .marquee-content {
             display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
+            padding-left: 0;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
+        }
+        .marquee-container.should-scroll .marquee-content {
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
         }
         .marquee-container:hover .marquee-content {
             animation-play-state: paused;
@@ -248,10 +251,31 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
-    private cleanStationName(name: string): string {
-        if (name.startsWith('London ')) {
-            return name.substring(7);
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('departures') || changedProperties.has('config')) {
+            this.checkMarqueeOverflow();
         }
+    }
+
+    private checkMarqueeOverflow() {
+        const marquees = this.shadowRoot?.querySelectorAll('.marquee-container');
+        marquees?.forEach((container: Element) => {
+            const content = container.querySelector('.marquee-content');
+            if (container && content) {
+                container.classList.remove('should-scroll');
+                
+                const containerWidth = container.clientWidth;
+                const contentWidth = content.scrollWidth;
+                
+                if (contentWidth > containerWidth) {
+                    container.classList.add('should-scroll');
+                }
+            }
+        });
+    }
+
+    private cleanStationName(name: string): string {
         return name;
     }
 

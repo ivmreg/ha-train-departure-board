@@ -284,10 +284,28 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
             </ha-card>
         `;
     }
-    cleanStationName(name) {
-        if (name.startsWith('London ')) {
-            return name.substring(7);
+    updated(changedProperties) {
+        super.updated(changedProperties);
+        if (changedProperties.has('departures') || changedProperties.has('config')) {
+            this.checkMarqueeOverflow();
         }
+    }
+    checkMarqueeOverflow() {
+        var _a;
+        const marquees = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelectorAll('.marquee-container');
+        marquees === null || marquees === void 0 ? void 0 : marquees.forEach((container) => {
+            const content = container.querySelector('.marquee-content');
+            if (container && content) {
+                container.classList.remove('should-scroll');
+                const containerWidth = container.clientWidth;
+                const contentWidth = content.scrollWidth;
+                if (contentWidth > containerWidth) {
+                    container.classList.add('should-scroll');
+                }
+            }
+        });
+    }
+    cleanStationName(name) {
         return name;
     }
     renderDepartureRow(departure, index) {
@@ -569,10 +587,13 @@ TrainDepartureBoard.styles = i$2 `
         }
         .marquee-content {
             display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
+            padding-left: 0;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
+        }
+        .marquee-container.should-scroll .marquee-content {
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
         }
         .marquee-container:hover .marquee-content {
             animation-play-state: paused;
