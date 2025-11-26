@@ -173,15 +173,44 @@ export class TrainDepartureBoard extends LitElement {
             width: 100%;
         }
         .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
         }
-        .marquee-container:hover .marquee-content {
+
+        /* Marquee Mode (Default) */
+        .marquee-container.marquee .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+        }
+        .marquee-container.marquee:hover .marquee-content {
             animation-play-state: paused;
         }
+
+        /* Scroll on Hover Mode */
+        .marquee-container.scroll_on_hover .marquee-content {
+            display: block;
+            padding-left: 0;
+            animation: none;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .marquee-container.scroll_on_hover:hover .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+            text-overflow: clip;
+        }
+
+        /* Static Mode */
+        .marquee-container.static .marquee-content {
+            display: block;
+            padding-left: 0;
+            animation: none;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
@@ -247,12 +276,23 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
+    private cleanStationName(name: string): string {
+        if (this.config.use_short_names === false) {
+            return name;
+        }
+        if (name.startsWith('London ')) {
+            return name.substring(7);
+        }
+        return name;
+    }
+
     private renderDepartureRow(departure: TrainDeparture, index: number) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
         const { statusClass, statusLabel } = this.getStatusMeta(departure);
         const callingAt = this.getCallingAtSummary(departure);
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
+        const scrollingMode = this.config.scrolling_mode || 'marquee';
 
         return html`
             <div class="train ${isNextTrain ? 'next-train' : ''}">
@@ -262,11 +302,11 @@ export class TrainDepartureBoard extends LitElement {
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
-                        <h3 class="terminus">${departure.destination_name}</h3>
+                        <h3 class="terminus">${this.cleanStationName(departure.destination_name)}</h3>
                         <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? html`
-                    <div class="marquee-container">
+                    <div class="marquee-container ${scrollingMode}">
                         <div class="marquee-content">Calling at: ${callingAt}</div>
                     </div>` : ''}
                 </div>
@@ -280,10 +320,11 @@ export class TrainDepartureBoard extends LitElement {
         const dedupedStops = new Map<string, { label: string; time: number; timeText: string; order: number }>();
 
         stops.forEach((stop, index) => {
-            const label = (stop.name || stop.stop || '').trim();
+            let label = (stop.name || stop.stop || '').trim();
             if (!label) {
                 return;
             }
+            label = this.cleanStationName(label);
 
             const datetime = stop.estimate_stop || stop.scheduled_stop;
             const parsedDate = this.parseDateTime(datetime);
@@ -308,8 +349,9 @@ export class TrainDepartureBoard extends LitElement {
             return a.time - b.time;
         });
 
-        const destinationName = (departure.destination_name || '').trim();
+        let destinationName = (departure.destination_name || '').trim();
         if (destinationName) {
+            destinationName = this.cleanStationName(destinationName);
             const lastStop = sortedStops[sortedStops.length - 1];
             if (!lastStop || lastStop.label.toLowerCase() !== destinationName.toLowerCase()) {
                 sortedStops.push({

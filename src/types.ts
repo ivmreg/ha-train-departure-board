@@ -29,4 +29,6 @@ export interface TrainDepartureBoardConfig {
     title?: string;
     entity?: string;
     attribute?: string;
+    scrolling_mode?: 'marquee' | 'scroll_on_hover' | 'static';
+    use_short_names?: boolean;
 }

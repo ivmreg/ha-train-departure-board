@@ -146,12 +146,22 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
             </ha-card>
         `;
     }
+    cleanStationName(name) {
+        if (this.config.use_short_names === false) {
+            return name;
+        }
+        if (name.startsWith('London ')) {
+            return name.substring(7);
+        }
+        return name;
+    }
     renderDepartureRow(departure, index) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
         const { statusClass, statusLabel } = this.getStatusMeta(departure);
         const callingAt = this.getCallingAtSummary(departure);
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
+        const scrollingMode = this.config.scrolling_mode || 'marquee';
         return x `
             <div class="train ${isNextTrain ? 'next-train' : ''}">
                 <div class="time-wrapper">
@@ -160,11 +170,11 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
-                        <h3 class="terminus">${departure.destination_name}</h3>
+                        <h3 class="terminus">${this.cleanStationName(departure.destination_name)}</h3>
                         <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? x `
-                    <div class="marquee-container">
+                    <div class="marquee-container ${scrollingMode}">
                         <div class="marquee-content">Calling at: ${callingAt}</div>
                     </div>` : ''}
                 </div>
@@ -176,10 +186,11 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const dedupedStops = new Map();
         stops.forEach((stop, index) => {
             var _a;
-            const label = (stop.name || stop.stop || '').trim();
+            let label = (stop.name || stop.stop || '').trim();
             if (!label) {
                 return;
             }
+            label = this.cleanStationName(label);
             const datetime = stop.estimate_stop || stop.scheduled_stop;
             const parsedDate = this.parseDateTime(datetime);
             const timestamp = (_a = parsedDate === null || parsedDate === void 0 ? void 0 : parsedDate.getTime()) !== null && _a !== void 0 ? _a : Number.POSITIVE_INFINITY;
@@ -200,8 +211,9 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
             }
             return a.time - b.time;
         });
-        const destinationName = (departure.destination_name || '').trim();
+        let destinationName = (departure.destination_name || '').trim();
         if (destinationName) {
+            destinationName = this.cleanStationName(destinationName);
             const lastStop = sortedStops[sortedStops.length - 1];
             if (!lastStop || lastStop.label.toLowerCase() !== destinationName.toLowerCase()) {
                 sortedStops.push({
@@ -412,15 +424,44 @@ TrainDepartureBoard.styles = i$2 `
             width: 100%;
         }
         .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
         }
-        .marquee-container:hover .marquee-content {
+
+        /* Marquee Mode (Default) */
+        .marquee-container.marquee .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+        }
+        .marquee-container.marquee:hover .marquee-content {
             animation-play-state: paused;
         }
+
+        /* Scroll on Hover Mode */
+        .marquee-container.scroll_on_hover .marquee-content {
+            display: block;
+            padding-left: 0;
+            animation: none;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .marquee-container.scroll_on_hover:hover .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+            text-overflow: clip;
+        }
+
+        /* Static Mode */
+        .marquee-container.static .marquee-content {
+            display: block;
+            padding-left: 0;
+            animation: none;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }

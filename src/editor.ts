@@ -13,6 +13,10 @@ export class TrainDepartureEditor extends LitElement {
     @property({ type: Object }) public config!: TrainDepartureBoardConfig;
     @property({ type: Object }) public hass: any;
 
+    setConfig(config: TrainDepartureBoardConfig) {
+        this.config = config;
+    }
+
     protected render() {
         return html`
             <div class="editor">
@@ -49,6 +53,27 @@ export class TrainDepartureEditor extends LitElement {
                         placeholder="departures"
                     />
                 </div>
+                <div class="config-section">
+                    <label for="scrolling_mode">Scrolling Mode:</label>
+                    <select 
+                        id="scrolling_mode"
+                        .value="${this.config.scrolling_mode || 'marquee'}"
+                        @change="${this._onScrollingModeChange}"
+                    >
+                        <option value="marquee">Marquee (Default)</option>
+                        <option value="scroll_on_hover">Scroll on Hover</option>
+                        <option value="static">Static (Ellipsis)</option>
+                    </select>
+                </div>
+                <div class="config-section checkbox-section">
+                    <input 
+                        id="use_short_names"
+                        type="checkbox"
+                        .checked="${this.config.use_short_names !== false}"
+                        @change="${this._onUseShortNamesChange}"
+                    />
+                    <label for="use_short_names">Use Short Station Names</label>
+                </div>
             </div>
         `;
     }
@@ -75,6 +100,16 @@ export class TrainDepartureEditor extends LitElement {
         this._fireConfigChanged({ attribute: input.value });
     }
 
+    private _onScrollingModeChange(event: Event) {
+        const select = event.target as HTMLSelectElement;
+        this._fireConfigChanged({ scrolling_mode: select.value });
+    }
+
+    private _onUseShortNamesChange(event: Event) {
+        const input = event.target as HTMLInputElement;
+        this._fireConfigChanged({ use_short_names: input.checked });
+    }
+
     private _fireConfigChanged(updates: any) {
         const newConfig = { ...this.config, ...updates };
         this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: newConfig } }));
@@ -90,6 +125,17 @@ export class TrainDepartureEditor extends LitElement {
             display: flex;
             flex-direction: column;
             margin-bottom: 16px;
+        }
+        .checkbox-section {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-section input {
+            width: auto;
+        }
+        .checkbox-section label {
+            margin-bottom: 0;
         }
         label {
             display: block;
