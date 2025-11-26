@@ -18,6 +18,7 @@ export interface TrainDeparture {
 export interface StopOfInterest {
     stop: string;
     name: string;
+    crs?: string;
     scheduled_stop: string;
     estimate_stop: string;
     journey_time_mins: number;
@@ -29,6 +30,5 @@ export interface TrainDepartureBoardConfig {
     title?: string;
     entity?: string;
     attribute?: string;
-    scrolling_mode?: 'marquee' | 'scroll_on_hover' | 'static';
-    use_short_names?: boolean;
+    stops_identifier?: 'tiploc' | 'crs' | 'description';
 }

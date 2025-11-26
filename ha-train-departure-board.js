@@ -71,6 +71,144 @@ const i=(i,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e,
  * SPDX-License-Identifier: BSD-3-Clause
  */var n;null!=(null===(n=window.HTMLSlotElement)||void 0===n?void 0:n.prototype.assignedElements)?(o,n)=>o.assignedElements(n):(o,n)=>o.assignedNodes(n).filter((o=>o.nodeType===Node.ELEMENT_NODE));
 
+let TrainDepartureEditor = class TrainDepartureEditor extends s {
+    setConfig(config) {
+        this.config = config;
+    }
+    render() {
+        return x `
+            <div class="editor">
+                <div class="config-section">
+                    <label for="title">Card Title:</label>
+                    <input 
+                        id="title"
+                        type="text"
+                        .value="${this.config.title || ''}"
+                        @change="${this._onTitleChange}"
+                        placeholder="Train Departures"
+                    />
+                </div>
+                <div class="config-section">
+                    <label for="entity">Select Entity:</label>
+                    <select 
+                        id="entity"
+                        .value="${this.config.entity || ''}"
+                        @change="${this._onEntityChange}"
+                    >
+                        <option value="">-- Select Entity --</option>
+                        ${this._getAvailableEntities().map((entity) => x `
+                            <option value="${entity.entity_id}">${entity.friendly_name || entity.entity_id}</option>
+                        `)}
+                    </select>
+                </div>
+                <div class="config-section">
+                    <label for="attribute">Attribute (optional):</label>
+                    <input 
+                        id="attribute"
+                        type="text"
+                        .value="${this.config.attribute || 'departures'}"
+                        @change="${this._onAttributeChange}"
+                        placeholder="departures"
+                    />
+                </div>
+                <div class="config-section">
+                    <label for="stops_identifier">Stops Identifier:</label>
+                    <select 
+                        id="stops_identifier"
+                        .value="${this.config.stops_identifier || 'description'}"
+                        @change="${this._onStopsIdentifierChange}"
+                    >
+                        <option value="description">Description (Default)</option>
+                        <option value="tiploc">TIPLOC</option>
+                        <option value="crs">CRS</option>
+                    </select>
+                </div>
+            </div>
+        `;
+    }
+    _getAvailableEntities() {
+        var _a;
+        if (!((_a = this.hass) === null || _a === void 0 ? void 0 : _a.states))
+            return [];
+        return Object.values(this.hass.states)
+            .filter((entity) => entity && typeof entity === 'object' && typeof entity.entity_id === 'string' && entity.entity_id.startsWith('sensor.'))
+            .slice(0, 20);
+    }
+    _onTitleChange(event) {
+        const input = event.target;
+        this._fireConfigChanged({ title: input.value });
+    }
+    _onEntityChange(event) {
+        const select = event.target;
+        this._fireConfigChanged({ entity: select.value });
+    }
+    _onAttributeChange(event) {
+        const input = event.target;
+        this._fireConfigChanged({ attribute: input.value });
+    }
+    _onStopsIdentifierChange(event) {
+        const select = event.target;
+        this._fireConfigChanged({ stops_identifier: select.value });
+    }
+    _fireConfigChanged(updates) {
+        const newConfig = Object.assign(Object.assign({}, this.config), updates);
+        this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: newConfig } }));
+    }
+};
+TrainDepartureEditor.styles = i$2 `
+        .editor {
+            padding: 16px;
+            background-color: var(--card-background-color);
+            border-radius: 8px;
+        }
+        .config-section {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+        .checkbox-section {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-section input {
+            width: auto;
+        }
+        .checkbox-section label {
+            margin-bottom: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-text-color);
+        }
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--divider-color);
+            border-radius: 4px;
+            background-color: var(--card-background-color);
+            color: var(--primary-text-color);
+            font-family: inherit;
+        }
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+    `;
+__decorate([
+    n$1({ type: Object })
+], TrainDepartureEditor.prototype, "config", void 0);
+__decorate([
+    n$1({ type: Object })
+], TrainDepartureEditor.prototype, "hass", void 0);
+TrainDepartureEditor = __decorate([
+    e$1('train-departure-board-editor')
+], TrainDepartureEditor);
+
 let TrainDepartureBoard = class TrainDepartureBoard extends s {
     constructor() {
         super(...arguments);
@@ -147,9 +285,6 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         `;
     }
     cleanStationName(name) {
-        if (this.config.use_short_names === false) {
-            return name;
-        }
         if (name.startsWith('London ')) {
             return name.substring(7);
         }
@@ -161,7 +296,6 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const callingAt = this.getCallingAtSummary(departure);
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
-        const scrollingMode = this.config.scrolling_mode || 'marquee';
         return x `
             <div class="train ${isNextTrain ? 'next-train' : ''}">
                 <div class="time-wrapper">
@@ -174,7 +308,7 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
                         <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? x `
-                    <div class="marquee-container ${scrollingMode}">
+                    <div class="marquee-container">
                         <div class="marquee-content">Calling at: ${callingAt}</div>
                     </div>` : ''}
                 </div>
@@ -186,7 +320,17 @@ let TrainDepartureBoard = class TrainDepartureBoard extends s {
         const dedupedStops = new Map();
         stops.forEach((stop, index) => {
             var _a;
-            let label = (stop.name || stop.stop || '').trim();
+            let label = '';
+            const identifier = this.config.stops_identifier || 'description';
+            if (identifier === 'tiploc') {
+                label = (stop.stop || '').trim();
+            }
+            else if (identifier === 'crs') {
+                label = (stop.crs || stop.name || '').trim();
+            }
+            else {
+                label = (stop.name || stop.stop || '').trim();
+            }
             if (!label) {
                 return;
             }
@@ -424,44 +568,15 @@ TrainDepartureBoard.styles = i$2 `
             width: 100%;
         }
         .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
         }
-
-        /* Marquee Mode (Default) */
-        .marquee-container.marquee .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
-        }
-        .marquee-container.marquee:hover .marquee-content {
+        .marquee-container:hover .marquee-content {
             animation-play-state: paused;
         }
-
-        /* Scroll on Hover Mode */
-        .marquee-container.scroll_on_hover .marquee-content {
-            display: block;
-            padding-left: 0;
-            animation: none;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-        .marquee-container.scroll_on_hover:hover .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
-            text-overflow: clip;
-        }
-
-        /* Static Mode */
-        .marquee-container.static .marquee-content {
-            display: block;
-            padding-left: 0;
-            animation: none;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }

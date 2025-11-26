@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { TrainDeparture } from './types';
+import './editor'; // Import the editor to ensure it's registered
 
 @customElement('train-departure-board')
 export class TrainDepartureBoard extends LitElement {
@@ -173,44 +174,15 @@ export class TrainDepartureBoard extends LitElement {
             width: 100%;
         }
         .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
         }
-
-        /* Marquee Mode (Default) */
-        .marquee-container.marquee .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
-        }
-        .marquee-container.marquee:hover .marquee-content {
+        .marquee-container:hover .marquee-content {
             animation-play-state: paused;
         }
-
-        /* Scroll on Hover Mode */
-        .marquee-container.scroll_on_hover .marquee-content {
-            display: block;
-            padding-left: 0;
-            animation: none;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-        .marquee-container.scroll_on_hover:hover .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
-            text-overflow: clip;
-        }
-
-        /* Static Mode */
-        .marquee-container.static .marquee-content {
-            display: block;
-            padding-left: 0;
-            animation: none;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
@@ -277,9 +249,6 @@ export class TrainDepartureBoard extends LitElement {
     }
 
     private cleanStationName(name: string): string {
-        if (this.config.use_short_names === false) {
-            return name;
-        }
         if (name.startsWith('London ')) {
             return name.substring(7);
         }
@@ -292,7 +261,6 @@ export class TrainDepartureBoard extends LitElement {
         const callingAt = this.getCallingAtSummary(departure);
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
-        const scrollingMode = this.config.scrolling_mode || 'marquee';
 
         return html`
             <div class="train ${isNextTrain ? 'next-train' : ''}">
@@ -306,7 +274,7 @@ export class TrainDepartureBoard extends LitElement {
                         <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? html`
-                    <div class="marquee-container ${scrollingMode}">
+                    <div class="marquee-container">
                         <div class="marquee-content">Calling at: ${callingAt}</div>
                     </div>` : ''}
                 </div>
@@ -320,7 +288,17 @@ export class TrainDepartureBoard extends LitElement {
         const dedupedStops = new Map<string, { label: string; time: number; timeText: string; order: number }>();
 
         stops.forEach((stop, index) => {
-            let label = (stop.name || stop.stop || '').trim();
+            let label = '';
+            const identifier = this.config.stops_identifier || 'description';
+            
+            if (identifier === 'tiploc') {
+                label = (stop.stop || '').trim();
+            } else if (identifier === 'crs') {
+                label = (stop.crs || stop.name || '').trim();
+            } else {
+                label = (stop.name || stop.stop || '').trim();
+            }
+
             if (!label) {
                 return;
             }

@@ -54,25 +54,16 @@ export class TrainDepartureEditor extends LitElement {
                     />
                 </div>
                 <div class="config-section">
-                    <label for="scrolling_mode">Scrolling Mode:</label>
+                    <label for="stops_identifier">Stops Identifier:</label>
                     <select 
-                        id="scrolling_mode"
-                        .value="${this.config.scrolling_mode || 'marquee'}"
-                        @change="${this._onScrollingModeChange}"
+                        id="stops_identifier"
+                        .value="${this.config.stops_identifier || 'description'}"
+                        @change="${this._onStopsIdentifierChange}"
                     >
-                        <option value="marquee">Marquee (Default)</option>
-                        <option value="scroll_on_hover">Scroll on Hover</option>
-                        <option value="static">Static (Ellipsis)</option>
+                        <option value="description">Description (Default)</option>
+                        <option value="tiploc">TIPLOC</option>
+                        <option value="crs">CRS</option>
                     </select>
-                </div>
-                <div class="config-section checkbox-section">
-                    <input 
-                        id="use_short_names"
-                        type="checkbox"
-                        .checked="${this.config.use_short_names !== false}"
-                        @change="${this._onUseShortNamesChange}"
-                    />
-                    <label for="use_short_names">Use Short Station Names</label>
                 </div>
             </div>
         `;
@@ -100,14 +91,9 @@ export class TrainDepartureEditor extends LitElement {
         this._fireConfigChanged({ attribute: input.value });
     }
 
-    private _onScrollingModeChange(event: Event) {
+    private _onStopsIdentifierChange(event: Event) {
         const select = event.target as HTMLSelectElement;
-        this._fireConfigChanged({ scrolling_mode: select.value });
-    }
-
-    private _onUseShortNamesChange(event: Event) {
-        const input = event.target as HTMLInputElement;
-        this._fireConfigChanged({ use_short_names: input.checked });
+        this._fireConfigChanged({ stops_identifier: select.value });
     }
 
     private _fireConfigChanged(updates: any) {
