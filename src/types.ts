@@ -1,3 +1,32 @@
+// Home Assistant types
+export interface HomeAssistantEntity {
+    entity_id: string;
+    state: string;
+    attributes: Record<string, unknown>;
+    last_changed: string;
+    last_updated: string;
+    context: {
+        id: string;
+        parent_id: string | null;
+        user_id: string | null;
+    };
+}
+
+export interface HomeAssistant {
+    states: Record<string, HomeAssistantEntity>;
+    services: Record<string, Record<string, unknown>>;
+    user?: {
+        id: string;
+        name: string;
+        is_admin: boolean;
+    };
+    language: string;
+    themes: {
+        theme: string;
+        themes: Record<string, unknown>;
+    };
+}
+
 export interface TrainDeparture {
     origin_name: string;
     destination_name: string;

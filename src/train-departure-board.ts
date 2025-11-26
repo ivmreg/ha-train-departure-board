@@ -1,14 +1,15 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { TrainDeparture } from './types';
+import { TrainDeparture, TrainDepartureBoardConfig, HomeAssistant } from './types';
 import './editor'; // Import the editor to ensure it's registered
 
 @customElement('train-departure-board')
 export class TrainDepartureBoard extends LitElement {
-    @property({ type: Object }) hass: any;
-    @property({ type: Object }) config: any;
+    @property({ type: Object }) hass!: HomeAssistant;
+    @property({ type: Object }) config!: TrainDepartureBoardConfig;
     @property({ type: Array }) departures: TrainDeparture[] = [];
     private dateCache = new Map<string, Date | null>();
+    private lastEntityId: string | null = null;
 
     static getConfigElement() {
         return document.createElement('train-departure-board-editor');
@@ -23,7 +24,7 @@ export class TrainDepartureBoard extends LitElement {
         };
     }
 
-    setConfig(config: any) {
+    setConfig(config: TrainDepartureBoardConfig) {
         if (!config) {
             throw new Error('Invalid configuration');
         }
@@ -39,14 +40,6 @@ export class TrainDepartureBoard extends LitElement {
         }
 
         this.config = mergedConfig;
-    }
-
-    static get properties() {
-        return {
-            hass: {},
-            config: {},
-            departures: { type: Array }
-        };
     }
 
     static styles = css`
@@ -175,13 +168,10 @@ export class TrainDepartureBoard extends LitElement {
         }
         .marquee-content {
             display: inline-block;
-            padding-left: 0;
-            font-size: 0.85em;
-            color: var(--secondary-text-color, #666);
-        }
-        .marquee-container.should-scroll .marquee-content {
             padding-left: 100%;
             animation: marquee 20s linear infinite;
+            font-size: 0.85em;
+            color: var(--secondary-text-color, #666);
         }
         .marquee-container:hover .marquee-content {
             animation-play-state: paused;
@@ -220,7 +210,11 @@ export class TrainDepartureBoard extends LitElement {
             return html`<div class="card">Entity not found: ${this.config.entity}</div>`;
         }
 
-        this.dateCache.clear();
+        // Clear date cache only when entity changes
+        if (this.lastEntityId !== this.config.entity) {
+            this.dateCache.clear();
+            this.lastEntityId = this.config.entity;
+        }
 
         const attributeName = this.config.attribute || 'departures';
         const attributeValue = entity.attributes?.[attributeName];
@@ -251,34 +245,6 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
-    updated(changedProperties: Map<string | number | symbol, unknown>) {
-        super.updated(changedProperties);
-        if (changedProperties.has('departures') || changedProperties.has('config')) {
-            this.checkMarqueeOverflow();
-        }
-    }
-
-    private checkMarqueeOverflow() {
-        const marquees = this.shadowRoot?.querySelectorAll('.marquee-container');
-        marquees?.forEach((container: Element) => {
-            const content = container.querySelector('.marquee-content');
-            if (container && content) {
-                container.classList.remove('should-scroll');
-                
-                const containerWidth = container.clientWidth;
-                const contentWidth = content.scrollWidth;
-                
-                if (contentWidth > containerWidth) {
-                    container.classList.add('should-scroll');
-                }
-            }
-        });
-    }
-
-    private cleanStationName(name: string): string {
-        return name;
-    }
-
     private renderDepartureRow(departure: TrainDeparture, index: number) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
         const { statusClass, statusLabel } = this.getStatusMeta(departure);
@@ -294,7 +260,7 @@ export class TrainDepartureBoard extends LitElement {
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
-                        <h3 class="terminus">${this.cleanStationName(departure.destination_name)}</h3>
+                        <h3 class="terminus">${departure.destination_name}</h3>
                         <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? html`
@@ -326,7 +292,6 @@ export class TrainDepartureBoard extends LitElement {
             if (!label) {
                 return;
             }
-            label = this.cleanStationName(label);
 
             const datetime = stop.estimate_stop || stop.scheduled_stop;
             const parsedDate = this.parseDateTime(datetime);
@@ -351,9 +316,8 @@ export class TrainDepartureBoard extends LitElement {
             return a.time - b.time;
         });
 
-        let destinationName = (departure.destination_name || '').trim();
+        const destinationName = (departure.destination_name || '').trim();
         if (destinationName) {
-            destinationName = this.cleanStationName(destinationName);
             const lastStop = sortedStops[sortedStops.length - 1];
             if (!lastStop || lastStop.label.toLowerCase() !== destinationName.toLowerCase()) {
                 sortedStops.push({

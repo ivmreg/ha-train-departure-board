@@ -1,6 +1,6 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { TrainDepartureBoardConfig } from './types';
+import { TrainDepartureBoardConfig, HomeAssistant } from './types';
 
 declare global {
     interface HTMLElementTagNameMap {
@@ -11,7 +11,7 @@ declare global {
 @customElement('train-departure-board-editor')
 export class TrainDepartureEditor extends LitElement {
     @property({ type: Object }) public config!: TrainDepartureBoardConfig;
-    @property({ type: Object }) public hass: any;
+    @property({ type: Object }) public hass!: HomeAssistant;
 
     setConfig(config: TrainDepartureBoardConfig) {
         this.config = config;
@@ -73,7 +73,8 @@ export class TrainDepartureEditor extends LitElement {
         if (!this.hass?.states) return [];
         return Object.values(this.hass.states as any)
             .filter((entity: any) => entity && typeof entity === 'object' && typeof entity.entity_id === 'string' && entity.entity_id.startsWith('sensor.'))
-            .slice(0, 20) as Array<{ entity_id: string; friendly_name?: string }>;
+            .map((entity: any) => ({ entity_id: entity.entity_id, friendly_name: entity.attributes?.friendly_name }))
+            .sort((a, b) => (a.friendly_name || a.entity_id).localeCompare(b.friendly_name || b.entity_id));
     }
 
     private _onTitleChange(event: Event) {
@@ -93,10 +94,10 @@ export class TrainDepartureEditor extends LitElement {
 
     private _onStopsIdentifierChange(event: Event) {
         const select = event.target as HTMLSelectElement;
-        this._fireConfigChanged({ stops_identifier: select.value });
+        this._fireConfigChanged({ stops_identifier: select.value as 'tiploc' | 'crs' | 'description' });
     }
 
-    private _fireConfigChanged(updates: any) {
+    private _fireConfigChanged(updates: Partial<TrainDepartureBoardConfig>) {
         const newConfig = { ...this.config, ...updates };
         this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: newConfig } }));
     }
@@ -111,17 +112,6 @@ export class TrainDepartureEditor extends LitElement {
             display: flex;
             flex-direction: column;
             margin-bottom: 16px;
-        }
-        .checkbox-section {
-            flex-direction: row;
-            align-items: center;
-            gap: 8px;
-        }
-        .checkbox-section input {
-            width: auto;
-        }
-        .checkbox-section label {
-            margin-bottom: 0;
         }
         label {
             display: block;
