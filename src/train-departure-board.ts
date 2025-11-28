@@ -316,7 +316,7 @@ export class TrainDepartureBoard extends LitElement {
                     </div>
                     ${callingAt ? html`
                     <div class="marquee-container" aria-label="Calling at: ${callingAt}">
-                        <div class="marquee-content">Calling at: ${callingAt}</div>
+                        <div class="marquee-content">${callingAt}</div>
                     </div>` : ''}
                 </div>
             </div>
@@ -360,18 +360,26 @@ export class TrainDepartureBoard extends LitElement {
             }
         });
 
-        const sortedStops = Array.from(dedupedStops.values()).sort((a, b) => {
-            if (a.time === b.time) {
-                return a.order - b.order;
-            }
-            return a.time - b.time;
-        });
+        const sortedStops = Array.from(dedupedStops.values()).sort((a, b) => 
+            a.time === b.time ? a.order - b.order : a.time - b.time
+        );
 
         if (sortedStops.length === 0) {
             return null;
         }
 
-        return sortedStops.map(info => `${info.label}${info.timeText ? ' ' + info.timeText : ''}`).join(', ');
+        // Format times: full time for first stop, ".:MM" if same hour as previous
+        return sortedStops.reduce<{ result: string[]; prevHour: string | null }>((acc, { label, timeText }) => {
+            if (!timeText) {
+                acc.result.push(label);
+                return acc;
+            }
+            const [hour, minute] = timeText.split(':');
+            const time = acc.prevHour === hour ? `.:${minute}` : timeText;
+            acc.result.push(`${label} ${time}`);
+            acc.prevHour = hour;
+            return acc;
+        }, { result: [], prevHour: null }).result.join(', ');
     }
 
     private getStatusMeta(departure: TrainDeparture): { statusLabel: string; statusClass: string } {
