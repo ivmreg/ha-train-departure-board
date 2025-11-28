@@ -34,12 +34,11 @@ export class TrainDepartureEditor extends LitElement {
                     <label for="entity">Select Entity:</label>
                     <select 
                         id="entity"
-                        .value="${this.config.entity || ''}"
                         @change="${this._onEntityChange}"
                     >
-                        <option value="">-- Select Entity --</option>
+                        <option value="" ?selected="${!this.config.entity}">-- Select Entity --</option>
                         ${this._getAvailableEntities().map((entity: any) => html`
-                            <option value="${entity.entity_id}">${entity.friendly_name || entity.entity_id}</option>
+                            <option value="${entity.entity_id}" ?selected="${this.config.entity === entity.entity_id}">${entity.friendly_name || entity.entity_id}</option>
                         `)}
                     </select>
                 </div>
@@ -57,12 +56,11 @@ export class TrainDepartureEditor extends LitElement {
                     <label for="stops_identifier">Stops Identifier:</label>
                     <select 
                         id="stops_identifier"
-                        .value="${this.config.stops_identifier || 'description'}"
                         @change="${this._onStopsIdentifierChange}"
                     >
-                        <option value="description">Description (Default)</option>
-                        <option value="tiploc">TIPLOC</option>
-                        <option value="crs">CRS</option>
+                        <option value="description" ?selected="${(this.config.stops_identifier || 'description') === 'description'}">Description (Default)</option>
+                        <option value="tiploc" ?selected="${this.config.stops_identifier === 'tiploc'}">TIPLOC</option>
+                        <option value="crs" ?selected="${this.config.stops_identifier === 'crs'}">CRS</option>
                     </select>
                 </div>
             </div>
@@ -99,7 +97,11 @@ export class TrainDepartureEditor extends LitElement {
 
     private _fireConfigChanged(updates: Partial<TrainDepartureBoardConfig>) {
         const newConfig = { ...this.config, ...updates };
-        this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: newConfig } }));
+        this.dispatchEvent(new CustomEvent('config-changed', {
+            detail: { config: newConfig },
+            bubbles: true,
+            composed: true
+        }));
     }
 
     static styles = css`

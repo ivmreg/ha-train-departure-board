@@ -50,6 +50,13 @@ export class TrainDepartureBoard extends LitElement {
             display: flex;
             flex-direction: column;
         }
+        .card-header {
+            padding: 12px 16px;
+            font-size: 1.2em;
+            font-weight: 500;
+            color: var(--primary-text-color);
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+        }
         .card {
             padding: 0;
             display: flex;
@@ -97,14 +104,34 @@ export class TrainDepartureBoard extends LitElement {
             font-family: var(--primary-font-family, sans-serif);
             font-variant-numeric: tabular-nums;
         }
-        .platform-badge {
-            background: var(--primary-color, #03a9f4);
-            color: #fff;
-            font-size: 0.75em;
+        .status-badge {
+            font-size: 0.7em;
             font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 10px;
-            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+        .status-badge.on-time {
+            color: var(--success-color, #4caf50);
+        }
+        .status-badge.delayed {
+            color: var(--warning-color, #ff9800);
+        }
+        .status-badge.cancelled {
+            color: var(--error-color, #f44336);
+        }
+        .platform-badge {
+            background: var(--disabled-color, #9e9e9e);
+            color: #fff;
+            font-size: 0.9em;
+            font-weight: 700;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .info-box {
             display: flex;
@@ -131,47 +158,24 @@ export class TrainDepartureBoard extends LitElement {
             color: var(--primary-text-color, #111);
             flex: 1;
         }
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
-            flex-shrink: 0;
-            min-width: 80px;
-            text-align: center;
-        }
-        .status-pill.on-time {
-            color: var(--success-color, #4caf50);
-            background: rgba(76, 175, 80, 0.1);
-        }
-        .status-pill.delayed {
-            color: var(--warning-color, #ff9800);
-            background: rgba(255, 152, 0, 0.1);
-        }
-        .status-pill.cancelled {
-            color: var(--error-color, #f44336);
-            background: rgba(244, 67, 54, 0.1);
-        }
         .marquee-container {
             overflow: hidden;
             white-space: nowrap;
             position: relative;
+            width: 100%;
+        }
+        .marquee-container.should-scroll {
             mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            width: 100%;
         }
         .marquee-content {
             display: inline-block;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
             font-size: 0.85em;
             color: var(--secondary-text-color, #666);
+        }
+        .marquee-container.should-scroll .marquee-content {
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
         }
         .marquee-container:hover .marquee-content {
             animation-play-state: paused;
@@ -179,6 +183,12 @@ export class TrainDepartureBoard extends LitElement {
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .marquee-container.should-scroll .marquee-content {
+                animation: none;
+                padding-left: 0;
+            }
         }
         .footer {
             padding: 8px 12px;
@@ -232,9 +242,10 @@ export class TrainDepartureBoard extends LitElement {
 
         return html`
             <ha-card>
+                ${this.config.title ? html`<div class="card-header">${this.config.title}</div>` : ''}
                 <div class="card">
                     ${departures.length > 0
-                        ? html`<div class="departure-list">
+                        ? html`<div class="departure-list" role="list" aria-label="Train departures">
                             ${departures.map((departure: TrainDeparture, index: number) => this.renderDepartureRow(departure, index))}
                         </div>`
                         : html`<div class="no-departures">No departures available</div>`
@@ -245,6 +256,26 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        this.checkMarqueeOverflow();
+    }
+
+    private checkMarqueeOverflow() {
+        const marquees = this.shadowRoot?.querySelectorAll('.marquee-container');
+        marquees?.forEach((container: Element) => {
+            const content = container.querySelector('.marquee-content');
+            if (container && content) {
+                container.classList.remove('should-scroll');
+                const containerWidth = container.clientWidth;
+                const contentWidth = content.scrollWidth;
+                if (contentWidth > containerWidth) {
+                    container.classList.add('should-scroll');
+                }
+            }
+        });
+    }
+
     private renderDepartureRow(departure: TrainDeparture, index: number) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
         const { statusClass, statusLabel } = this.getStatusMeta(departure);
@@ -253,18 +284,18 @@ export class TrainDepartureBoard extends LitElement {
         const isNextTrain = index === 0;
 
         return html`
-            <div class="train ${isNextTrain ? 'next-train' : ''}">
+            <div class="train ${isNextTrain ? 'next-train' : ''}" role="listitem" aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform ? `, Platform ${platform}` : ''}">
+                ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                 <div class="time-wrapper">
-                    <span class="scheduled">${scheduledTime}</span>
-                    ${platform ? html`<span class="platform-badge">Plat ${platform}</span>` : ''}
+                    <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
+                    <span class="status-badge ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
-                        <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     ${callingAt ? html`
-                    <div class="marquee-container">
+                    <div class="marquee-container" aria-label="Calling at: ${callingAt}">
                         <div class="marquee-content">Calling at: ${callingAt}</div>
                     </div>` : ''}
                 </div>
