@@ -367,19 +367,6 @@ export class TrainDepartureBoard extends LitElement {
             return a.time - b.time;
         });
 
-        const destinationName = (departure.destination_name || '').trim();
-        if (destinationName) {
-            const lastStop = sortedStops[sortedStops.length - 1];
-            if (!lastStop || lastStop.label.toLowerCase() !== destinationName.toLowerCase()) {
-                sortedStops.push({
-                    label: destinationName,
-                    time: Number.POSITIVE_INFINITY,
-                    timeText: '',
-                    order: sortedStops.length
-                });
-            }
-        }
-
         if (sortedStops.length === 0) {
             return null;
         }
