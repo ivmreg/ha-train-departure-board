@@ -1,6 +1,6 @@
 {
   "name": "ha-train-departure-board",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A custom Lovelace card for Home Assistant that displays train departure information similar to TFL boards.",
   "main": "ha-train-departure-board.js",
   "repository": {

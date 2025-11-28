@@ -10,6 +10,7 @@ export class TrainDepartureBoard extends LitElement {
     @property({ type: Array }) departures: TrainDeparture[] = [];
     private dateCache = new Map<string, Date | null>();
     private lastEntityId: string | null = null;
+    private lastDeparturesJson: string = '';
 
     static getConfigElement() {
         return document.createElement('train-departure-board-editor');
@@ -256,9 +257,25 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
+    firstUpdated() {
+        // Check marquee overflow after first render
+        this.checkMarqueeOverflow();
+    }
+
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
-        this.checkMarqueeOverflow();
+        // Only check marquee overflow when hass changes (which contains departures data)
+        if (changedProperties.has('hass') && this.config?.entity) {
+            const entity = this.hass?.states?.[this.config.entity];
+            const attributeName = this.config.attribute || 'departures';
+            const departures = entity?.attributes?.[attributeName];
+            const newJson = JSON.stringify(departures || []);
+            if (newJson !== this.lastDeparturesJson) {
+                this.lastDeparturesJson = newJson;
+                // Use requestAnimationFrame to check after DOM updates
+                requestAnimationFrame(() => this.checkMarqueeOverflow());
+            }
+        }
     }
 
     private checkMarqueeOverflow() {
@@ -266,11 +283,14 @@ export class TrainDepartureBoard extends LitElement {
         marquees?.forEach((container: Element) => {
             const content = container.querySelector('.marquee-content');
             if (container && content) {
-                container.classList.remove('should-scroll');
+                // Only add class if not already present to avoid animation reset
                 const containerWidth = container.clientWidth;
                 const contentWidth = content.scrollWidth;
-                if (contentWidth > containerWidth) {
+                const shouldScroll = contentWidth > containerWidth;
+                if (shouldScroll && !container.classList.contains('should-scroll')) {
                     container.classList.add('should-scroll');
+                } else if (!shouldScroll && container.classList.contains('should-scroll')) {
+                    container.classList.remove('should-scroll');
                 }
             }
         });
@@ -285,7 +305,6 @@ export class TrainDepartureBoard extends LitElement {
 
         return html`
             <div class="train ${isNextTrain ? 'next-train' : ''}" role="listitem" aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform ? `, Platform ${platform}` : ''}">
-                ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                 <div class="time-wrapper">
                     <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
                     <span class="status-badge ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
@@ -293,6 +312,7 @@ export class TrainDepartureBoard extends LitElement {
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
+                        ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                     </div>
                     ${callingAt ? html`
                     <div class="marquee-container" aria-label="Calling at: ${callingAt}">
