@@ -49,6 +49,30 @@ const SCHEMA: HaFormSchema[] = [
                 }
             }
         ]
+    },
+    {
+        type: 'expandable',
+        name: '',
+        schema: [
+            {
+                type: 'grid',
+                name: '',
+                schema: [
+                    {
+                        name: 'font_size_time',
+                        selector: { text: {} }
+                    },
+                    {
+                        name: 'font_size_destination',
+                        selector: { text: {} }
+                    },
+                    {
+                        name: 'font_size_status',
+                        selector: { text: {} }
+                    }
+                ]
+            }
+        ]
     }
 ];
 
@@ -57,14 +81,21 @@ const LABELS: Record<string, string> = {
     entity: 'Entity',
     title: 'Card Title',
     attribute: 'Data Attribute',
-    stops_identifier: 'Station Identifier'
+    stops_identifier: 'Station Identifier',
+    '': 'Font Sizes',
+    font_size_time: 'Time',
+    font_size_destination: 'Destination',
+    font_size_status: 'Status Pill'
 };
 
 // Helper text for fields
 const HELPERS: Record<string, string> = {
     entity: 'Select a realtime trains sensor',
     attribute: 'Attribute with departure data (default: departures)',
-    stops_identifier: 'How stations are identified in the data'
+    stops_identifier: 'How stations are identified in the data',
+    font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
+    font_size_destination: 'e.g. 1.2rem (default: 1rem)',
+    font_size_status: 'e.g. 0.85rem (default: 0.75rem)'
 };
 
 declare global {

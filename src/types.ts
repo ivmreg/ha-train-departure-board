@@ -60,4 +60,8 @@ export interface TrainDepartureBoardConfig {
     entity?: string;
     attribute?: string;
     stops_identifier?: 'tiploc' | 'crs' | 'description';
+    // Font size configuration (CSS values like '1rem', '16px', etc.)
+    font_size_time?: string;
+    font_size_destination?: string;
+    font_size_status?: string;
 }

@@ -113,7 +113,7 @@ export class TrainDepartureBoard extends LitElement {
             flex-shrink: 0;
         }
         .scheduled {
-            font-size: 1.4em;
+            font-size: var(--train-board-time-size, 1.25rem);
             font-weight: 700;
             line-height: 1;
             color: var(--primary-text-color, #111);
@@ -125,12 +125,12 @@ export class TrainDepartureBoard extends LitElement {
             text-decoration: line-through;
         }
         .status-pill {
-            font-size: 0.7em;
+            font-size: var(--train-board-status-size, 0.75rem);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.03em;
             white-space: nowrap;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 12px;
             flex-shrink: 0;
         }
@@ -149,11 +149,11 @@ export class TrainDepartureBoard extends LitElement {
         .platform-badge {
             background: var(--disabled-color, #9e9e9e);
             color: #fff;
-            font-size: 0.9em;
+            font-size: 0.95em;
             font-weight: 700;
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -170,12 +170,12 @@ export class TrainDepartureBoard extends LitElement {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
         }
         .terminus {
             margin: 0;
-            font-size: 1.1em;
+            font-size: var(--train-board-destination-size, 1rem);
             font-weight: 600;
             line-height: 1.2;
             white-space: nowrap;
@@ -252,18 +252,18 @@ export class TrainDepartureBoard extends LitElement {
             gap: 2px;
         }
         .popup-meta-label {
-            font-size: 0.75em;
+            font-size: 0.85em;
             color: var(--secondary-text-color, #666);
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
         .popup-meta-value {
-            font-size: 0.95em;
+            font-size: 1.1em;
             font-weight: 500;
             color: var(--primary-text-color);
         }
         .popup-stops-title {
-            font-size: 0.85em;
+            font-size: 0.95em;
             font-weight: 600;
             color: var(--secondary-text-color, #666);
             margin-bottom: 12px;
@@ -286,21 +286,21 @@ export class TrainDepartureBoard extends LitElement {
             border-bottom: none;
         }
         .popup-stop-time {
-            font-size: 0.9em;
+            font-size: 1.0em;
             font-weight: 600;
             font-variant-numeric: tabular-nums;
             min-width: 50px;
             color: var(--primary-text-color);
         }
         .popup-stop-name {
-            font-size: 0.95em;
+            font-size: 1.0em;
             color: var(--primary-text-color);
             flex: 1;
         }
         .footer {
             padding: 8px 12px;
             border-top: 1px solid var(--divider-color, #e0e0e0);
-            font-size: 0.75em;
+            font-size: 0.85em;
             color: var(--secondary-text-color, #666);
             text-align: right;
             background: var(--card-background-color, #fff);
@@ -347,8 +347,15 @@ export class TrainDepartureBoard extends LitElement {
             console.warn(`train-departure-board: attribute "${attributeName}" is not an array, falling back to empty list`);
         }
 
+        // Build custom property styles from config
+        const customStyles = [
+            this.config.font_size_time ? `--train-board-time-size: ${this.config.font_size_time}` : '',
+            this.config.font_size_destination ? `--train-board-destination-size: ${this.config.font_size_destination}` : '',
+            this.config.font_size_status ? `--train-board-status-size: ${this.config.font_size_status}` : ''
+        ].filter(Boolean).join('; ');
+
         return html`
-            <ha-card>
+            <ha-card style="${customStyles}">
                 ${this.config.title ? html`<div class="card-header">${this.config.title}</div>` : ''}
                 <div class="card">
                     ${departures.length > 0
