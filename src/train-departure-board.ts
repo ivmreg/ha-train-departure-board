@@ -124,22 +124,27 @@ export class TrainDepartureBoard extends LitElement {
             color: var(--error-color, #f44336);
             text-decoration: line-through;
         }
-        .delay-indicator {
-            font-size: 0.85em;
+        .status-pill {
+            font-size: 0.7em;
             font-weight: 600;
-            color: var(--warning-color, #ff9800);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
             white-space: nowrap;
+            padding: 2px 8px;
+            border-radius: 12px;
+            flex-shrink: 0;
         }
-        .popup-time-delayed {
-            color: var(--warning-color, #ff9800);
+        .status-pill.on-time {
+            background: var(--success-color, #4caf50);
+            color: #fff;
         }
-        .popup-time-cancelled {
-            color: var(--error-color, #f44336);
-            text-decoration: line-through;
+        .status-pill.delayed {
+            background: var(--warning-color, #ff9800);
+            color: #000;
         }
-        .popup-delay {
-            font-size: 0.85em;
-            color: var(--warning-color, #ff9800);
+        .status-pill.cancelled {
+            background: var(--error-color, #f44336);
+            color: #fff;
         }
         .platform-badge {
             background: var(--disabled-color, #9e9e9e);
@@ -394,11 +399,10 @@ export class TrainDepartureBoard extends LitElement {
         if (!this._selectedDeparture) return nothing;
         
         const departure = this._selectedDeparture;
-        const { statusClass, statusLabel, delayMinutes } = this.getStatusMeta(departure);
+        const { statusClass, statusLabel } = this.getStatusMeta(departure);
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
         const stops = this._getStopsForPopup(departure);
         const isCancelled = statusClass === 'cancelled';
-        const isDelayed = statusClass === 'delayed';
 
         return html`
             <div class="popup-overlay" @click=${this._handleOverlayClick} role="dialog" aria-modal="true" aria-label="Train details">
@@ -411,9 +415,11 @@ export class TrainDepartureBoard extends LitElement {
                         <div class="popup-meta">
                             <div class="popup-meta-item">
                                 <span class="popup-meta-label">Scheduled</span>
-                                <span class="popup-meta-value ${isCancelled ? 'popup-time-cancelled' : ''} ${isDelayed ? 'popup-time-delayed' : ''}">
-                                    ${scheduledTime}${isDelayed && delayMinutes !== null ? html` <span class="popup-delay">+${delayMinutes} min</span>` : ''}
-                                </span>
+                                <span class="popup-meta-value ${isCancelled ? 'popup-time-cancelled' : ''}">${scheduledTime}</span>
+                            </div>
+                            <div class="popup-meta-item">
+                                <span class="popup-meta-label">Status</span>
+                                <span class="status-pill ${statusClass}">${statusLabel}</span>
                             </div>
                             ${departure.platform ? html`
                             <div class="popup-meta-item">
@@ -476,13 +482,12 @@ export class TrainDepartureBoard extends LitElement {
 
     private renderDepartureRow(departure: TrainDeparture, index: number) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
-        const { statusClass, statusLabel, delayMinutes } = this.getStatusMeta(departure);
+        const { statusClass, statusLabel } = this.getStatusMeta(departure);
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
         const isCancelled = statusClass === 'cancelled';
-        const isDelayed = statusClass === 'delayed';
 
-        const timeClass = isCancelled ? 'time-cancelled' : isDelayed ? 'time-delayed' : '';
+        const timeClass = isCancelled ? 'time-cancelled' : '';
 
         return html`
             <div 
@@ -493,11 +498,11 @@ export class TrainDepartureBoard extends LitElement {
             >
                 <div class="time-wrapper ${timeClass}">
                     <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
-                    ${isDelayed && delayMinutes !== null ? html`<span class="delay-indicator">+${delayMinutes} min</span>` : ''}
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
+                        <span class="status-pill ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
                         ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                     </div>
                 </div>
@@ -505,7 +510,7 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
-    private getStatusMeta(departure: TrainDeparture): { statusLabel: string; statusClass: string; delayMinutes: number | null } {
+    private getStatusMeta(departure: TrainDeparture): { statusLabel: string; statusClass: string } {
         const scheduledRaw = departure.scheduled || '';
         const estimatedRaw = departure.estimated || '';
         const scheduledTime = this.extractTimeLabel(scheduledRaw);
@@ -518,47 +523,26 @@ export class TrainDepartureBoard extends LitElement {
             departure.cancel_reason ||
             estimatedRaw.toLowerCase().includes('cancel')
         ) {
-            return { statusLabel: 'Cancelled', statusClass: 'cancelled', delayMinutes: null };
+            return { statusLabel: 'Cancelled', statusClass: 'cancelled' };
         }
 
         if (!estimatedRaw) {
-            return { statusLabel: 'Awaiting', statusClass: 'delayed', delayMinutes: null };
+            return { statusLabel: 'Awaiting', statusClass: 'delayed' };
         }
 
         const normalizedEstimate = estimatedRaw.toLowerCase();
         if (normalizedEstimate === 'on time') {
-            return { statusLabel: 'On Time', statusClass: 'on-time', delayMinutes: null };
+            return { statusLabel: 'On Time', statusClass: 'on-time' };
         }
 
         if (estimatedTime && scheduledTime && estimatedTime !== scheduledTime) {
-            // Calculate delay in minutes
-            const delayMinutes = this.calculateDelayMinutes(scheduledTime, estimatedTime);
             if (/\d{2}:\d{2}/.test(estimatedTime)) {
-                return { statusLabel: `Exp ${estimatedTime}`, statusClass: 'delayed', delayMinutes };
+                return { statusLabel: `Exp ${estimatedTime}`, statusClass: 'delayed' };
             }
-            return { statusLabel: estimatedTime, statusClass: 'delayed', delayMinutes };
+            return { statusLabel: estimatedTime, statusClass: 'delayed' };
         }
 
-        return { statusLabel: 'On Time', statusClass: 'on-time', delayMinutes: null };
-    }
-
-    private calculateDelayMinutes(scheduled: string, estimated: string): number | null {
-        const parseTime = (time: string): number | null => {
-            const match = time.match(/^(\d{2}):(\d{2})$/);
-            if (!match) return null;
-            return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
-        };
-
-        const scheduledMins = parseTime(scheduled);
-        const estimatedMins = parseTime(estimated);
-
-        if (scheduledMins === null || estimatedMins === null) return null;
-
-        let diff = estimatedMins - scheduledMins;
-        // Handle day rollover (e.g., scheduled 23:50, estimated 00:05)
-        if (diff < -720) diff += 1440; // Add 24 hours if negative by more than 12 hours
-        
-        return diff > 0 ? diff : null;
+        return { statusLabel: 'On Time', statusClass: 'on-time' };
     }
 
     private extractTimeLabel(datetime?: string): string {
