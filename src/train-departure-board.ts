@@ -1,5 +1,5 @@
-import { LitElement, html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { LitElement, html, css, nothing } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { TrainDeparture, TrainDepartureBoardConfig, HomeAssistant } from './types';
 import './editor'; // Import the editor to ensure it's registered
 
@@ -8,9 +8,9 @@ export class TrainDepartureBoard extends LitElement {
     @property({ type: Object }) hass!: HomeAssistant;
     @property({ type: Object }) config!: TrainDepartureBoardConfig;
     @property({ type: Array }) departures: TrainDeparture[] = [];
+    @state() private _selectedDeparture: TrainDeparture | null = null;
     private dateCache = new Map<string, Date | null>();
     private lastEntityId: string | null = null;
-    private lastDeparturesJson: string = '';
 
     static getConfigElement() {
         return document.createElement('train-departure-board-editor');
@@ -80,6 +80,11 @@ export class TrainDepartureBoard extends LitElement {
             align-items: center;
             gap: 16px;
             position: relative;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        .train:hover {
+            background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
         }
         .train:last-child {
             border-bottom: none;
@@ -88,6 +93,16 @@ export class TrainDepartureBoard extends LitElement {
             background: var(--secondary-background-color, rgba(255, 193, 7, 0.1));
             border-left: 4px solid var(--warning-color, #ff9800);
             padding-left: 8px; /* Compensate for border */
+        }
+        .train.next-train:hover {
+            background: rgba(255, 193, 7, 0.18);
+        }
+        .train.cancelled-row {
+            border-left: 4px solid var(--error-color, #f44336);
+            padding-left: 8px;
+        }
+        .train.cancelled-row.next-train {
+            border-left: 4px solid var(--error-color, #f44336);
         }
         .time-wrapper {
             display: flex;
@@ -105,21 +120,27 @@ export class TrainDepartureBoard extends LitElement {
             font-family: var(--primary-font-family, sans-serif);
             font-variant-numeric: tabular-nums;
         }
-        .status-badge {
+        .status-pill {
             font-size: 0.7em;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.03em;
             white-space: nowrap;
+            padding: 2px 8px;
+            border-radius: 12px;
+            flex-shrink: 0;
         }
-        .status-badge.on-time {
-            color: var(--success-color, #4caf50);
+        .status-pill.on-time {
+            background: var(--success-color, #4caf50);
+            color: #fff;
         }
-        .status-badge.delayed {
-            color: var(--warning-color, #ff9800);
+        .status-pill.delayed {
+            background: var(--warning-color, #ff9800);
+            color: #000;
         }
-        .status-badge.cancelled {
-            color: var(--error-color, #f44336);
+        .status-pill.cancelled {
+            background: var(--error-color, #f44336);
+            color: #fff;
         }
         .platform-badge {
             background: var(--disabled-color, #9e9e9e);
@@ -158,38 +179,119 @@ export class TrainDepartureBoard extends LitElement {
             text-overflow: ellipsis;
             color: var(--primary-text-color, #111);
             flex: 1;
+            min-width: 0;
         }
-        .marquee-container {
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
+        /* Popup overlay styles */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .popup-card {
+            background: var(--card-background-color, #fff);
+            border-radius: 12px;
+            max-width: 400px;
             width: 100%;
+            max-height: 80vh;
+            overflow: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .marquee-container.should-scroll {
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+            position: sticky;
+            top: 0;
+            background: var(--card-background-color, #fff);
+            border-radius: 12px 12px 0 0;
         }
-        .marquee-content {
-            display: inline-block;
-            font-size: 0.85em;
+        .popup-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--primary-text-color);
+        }
+        .popup-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
             color: var(--secondary-text-color, #666);
+            padding: 4px 8px;
+            border-radius: 4px;
+            line-height: 1;
         }
-        .marquee-container.should-scroll .marquee-content {
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
+        .popup-close:hover {
+            background: var(--secondary-background-color, rgba(0, 0, 0, 0.1));
         }
-        .marquee-container:hover .marquee-content {
-            animation-play-state: paused;
+        .popup-content {
+            padding: 16px;
         }
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
+        .popup-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
         }
-        @media (prefers-reduced-motion: reduce) {
-            .marquee-container.should-scroll .marquee-content {
-                animation: none;
-                padding-left: 0;
-            }
+        .popup-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .popup-meta-label {
+            font-size: 0.75em;
+            color: var(--secondary-text-color, #666);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .popup-meta-value {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: var(--primary-text-color);
+        }
+        .popup-stops-title {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--secondary-text-color, #666);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .popup-stops-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .popup-stop {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+        }
+        .popup-stop:last-child {
+            border-bottom: none;
+        }
+        .popup-stop-time {
+            font-size: 0.9em;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            min-width: 50px;
+            color: var(--primary-text-color);
+        }
+        .popup-stop-name {
+            font-size: 0.95em;
+            color: var(--primary-text-color);
+            flex: 1;
         }
         .footer {
             padding: 8px 12px;
@@ -254,132 +356,151 @@ export class TrainDepartureBoard extends LitElement {
                     ${lastUpdated ? html`<div class="footer">Last updated: ${lastUpdated}</div>` : ''}
                 </div>
             </ha-card>
+            ${this._renderDetailsPopup()}
         `;
     }
 
-    firstUpdated() {
-        // Check marquee overflow after first render
-        this.checkMarqueeOverflow();
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('keydown', this._handleKeyDown);
     }
 
-    updated(changedProperties: Map<string | number | symbol, unknown>) {
-        super.updated(changedProperties);
-        // Only check marquee overflow when hass changes (which contains departures data)
-        if (changedProperties.has('hass') && this.config?.entity) {
-            const entity = this.hass?.states?.[this.config.entity];
-            const attributeName = this.config.attribute || 'departures';
-            const departures = entity?.attributes?.[attributeName];
-            const newJson = JSON.stringify(departures || []);
-            if (newJson !== this.lastDeparturesJson) {
-                this.lastDeparturesJson = newJson;
-                // Use requestAnimationFrame to check after DOM updates
-                requestAnimationFrame(() => this.checkMarqueeOverflow());
-            }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('keydown', this._handleKeyDown);
+    }
+
+    private _handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && this._selectedDeparture) {
+            this._closePopup();
+        }
+    };
+
+    private _showDetails(departure: TrainDeparture) {
+        this._selectedDeparture = departure;
+    }
+
+    private _closePopup() {
+        this._selectedDeparture = null;
+    }
+
+    private _handleOverlayClick(e: MouseEvent) {
+        // Close only if clicking the overlay itself, not the card
+        if ((e.target as HTMLElement).classList.contains('popup-overlay')) {
+            this._closePopup();
         }
     }
 
-    private checkMarqueeOverflow() {
-        const marquees = this.shadowRoot?.querySelectorAll('.marquee-container');
-        marquees?.forEach((container: Element) => {
-            const content = container.querySelector('.marquee-content');
-            if (container && content) {
-                // Only add class if not already present to avoid animation reset
-                const containerWidth = container.clientWidth;
-                const contentWidth = content.scrollWidth;
-                const shouldScroll = contentWidth > containerWidth;
-                if (shouldScroll && !container.classList.contains('should-scroll')) {
-                    container.classList.add('should-scroll');
-                } else if (!shouldScroll && container.classList.contains('should-scroll')) {
-                    container.classList.remove('should-scroll');
-                }
-            }
-        });
-    }
-
-    private renderDepartureRow(departure: TrainDeparture, index: number) {
-        const scheduledTime = this.extractTimeLabel(departure.scheduled);
+    private _renderDetailsPopup() {
+        if (!this._selectedDeparture) return nothing;
+        
+        const departure = this._selectedDeparture;
         const { statusClass, statusLabel } = this.getStatusMeta(departure);
-        const callingAt = this.getCallingAtSummary(departure);
-        const platform = departure.platform ? departure.platform : null;
-        const isNextTrain = index === 0;
+        const scheduledTime = this.extractTimeLabel(departure.scheduled);
+        const stops = this._getStopsForPopup(departure);
 
         return html`
-            <div class="train ${isNextTrain ? 'next-train' : ''}" role="listitem" aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform ? `, Platform ${platform}` : ''}">
-                <div class="time-wrapper">
-                    <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
-                    <span class="status-badge ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
-                </div>
-                <div class="info-box">
-                    <div class="destination-row">
-                        <h3 class="terminus">${departure.destination_name}</h3>
-                        ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
+            <div class="popup-overlay" @click=${this._handleOverlayClick} role="dialog" aria-modal="true" aria-label="Train details">
+                <div class="popup-card">
+                    <div class="popup-header">
+                        <h2>${departure.destination_name}</h2>
+                        <button class="popup-close" @click=${this._closePopup} aria-label="Close">&times;</button>
                     </div>
-                    ${callingAt ? html`
-                    <div class="marquee-container" aria-label="Calling at: ${callingAt}">
-                        <div class="marquee-content">${callingAt}</div>
-                    </div>` : ''}
+                    <div class="popup-content">
+                        <div class="popup-meta">
+                            <div class="popup-meta-item">
+                                <span class="popup-meta-label">Scheduled</span>
+                                <span class="popup-meta-value">${scheduledTime}</span>
+                            </div>
+                            <div class="popup-meta-item">
+                                <span class="popup-meta-label">Status</span>
+                                <span class="status-pill ${statusClass}">${statusLabel}</span>
+                            </div>
+                            ${departure.platform ? html`
+                            <div class="popup-meta-item">
+                                <span class="popup-meta-label">Platform</span>
+                                <span class="popup-meta-value">${departure.platform}</span>
+                            </div>` : ''}
+                            ${departure.origin_name ? html`
+                            <div class="popup-meta-item">
+                                <span class="popup-meta-label">From</span>
+                                <span class="popup-meta-value">${departure.origin_name}</span>
+                            </div>` : ''}
+                            ${departure.operator_name ? html`
+                            <div class="popup-meta-item">
+                                <span class="popup-meta-label">Operator</span>
+                                <span class="popup-meta-value">${departure.operator_name}</span>
+                            </div>` : ''}
+                        </div>
+                        ${stops.length > 0 ? html`
+                        <div class="popup-stops-title">Calling at</div>
+                        <div class="popup-stops-list">
+                            ${stops.map(stop => html`
+                                <div class="popup-stop">
+                                    <span class="popup-stop-time">${stop.time}</span>
+                                    <span class="popup-stop-name">${stop.name}</span>
+                                </div>
+                            `)}
+                        </div>` : ''}
+                    </div>
                 </div>
             </div>
         `;
     }
 
-    private getCallingAtSummary(departure: TrainDeparture): string | null {
+    private _getStopsForPopup(departure: TrainDeparture): { name: string; time: string }[] {
         const stops = departure.stops_of_interest || [];
+        const identifier = this.config.stops_identifier || 'description';
 
-        const dedupedStops = new Map<string, { label: string; time: number; timeText: string; order: number }>();
+        return stops
+            .map(stop => {
+                let name = '';
+                if (identifier === 'tiploc') {
+                    name = (stop.stop || '').trim();
+                } else if (identifier === 'crs') {
+                    name = (stop.crs || stop.name || '').trim();
+                } else {
+                    name = (stop.name || stop.stop || '').trim();
+                }
 
-        stops.forEach((stop, index) => {
-            let label = '';
-            const identifier = this.config.stops_identifier || 'description';
-            
-            if (identifier === 'tiploc') {
-                label = (stop.stop || '').trim();
-            } else if (identifier === 'crs') {
-                label = (stop.crs || stop.name || '').trim();
-            } else {
-                label = (stop.name || stop.stop || '').trim();
-            }
+                const datetime = stop.estimate_stop || stop.scheduled_stop;
+                const time = datetime ? (datetime.split(' ')[1] || '').trim() : '';
+                const parsedDate = this.parseDateTime(datetime);
+                const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
 
-            if (!label) {
-                return;
-            }
+                return { name, time, timestamp };
+            })
+            .filter(s => s.name)
+            .sort((a, b) => a.timestamp - b.timestamp)
+            .map(({ name, time }) => ({ name, time }));
+    }
 
-            const datetime = stop.estimate_stop || stop.scheduled_stop;
-            const parsedDate = this.parseDateTime(datetime);
-            const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
-            const timeText = datetime ? (datetime.split(' ')[1] || '').trim() : '';
+    private renderDepartureRow(departure: TrainDeparture, index: number) {
+        const scheduledTime = this.extractTimeLabel(departure.scheduled);
+        const { statusClass, statusLabel } = this.getStatusMeta(departure);
+        const platform = departure.platform ? departure.platform : null;
+        const isNextTrain = index === 0;
+        const isCancelled = statusClass === 'cancelled';
 
-            const existing = dedupedStops.get(label);
-            if (!existing || timestamp < existing.time) {
-                dedupedStops.set(label, {
-                    label,
-                    time: timestamp,
-                    timeText,
-                    order: index,
-                });
-            }
-        });
-
-        const sortedStops = Array.from(dedupedStops.values()).sort((a, b) => 
-            a.time === b.time ? a.order - b.order : a.time - b.time
-        );
-
-        if (sortedStops.length === 0) {
-            return null;
-        }
-
-        // Format times: full time for first stop, ".:MM" if same hour as previous
-        return sortedStops.reduce<{ result: string[]; prevHour: string | null }>((acc, { label, timeText }) => {
-            if (!timeText) {
-                acc.result.push(label);
-                return acc;
-            }
-            const [hour, minute] = timeText.split(':');
-            const time = acc.prevHour === hour ? `.:${minute}` : timeText;
-            acc.result.push(`${label} ${time}`);
-            acc.prevHour = hour;
-            return acc;
-        }, { result: [], prevHour: null }).result.join(', ');
+        return html`
+            <div 
+                class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled ? 'cancelled-row' : ''}"
+                role="listitem" 
+                aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform ? `, Platform ${platform}` : ''}"
+                @click=${() => this._showDetails(departure)}
+            >
+                <div class="time-wrapper">
+                    <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
+                </div>
+                <div class="info-box">
+                    <div class="destination-row">
+                        <h3 class="terminus">${departure.destination_name}</h3>
+                        <span class="status-pill ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
+                        ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     private getStatusMeta(departure: TrainDeparture): { statusLabel: string; statusClass: string } {
