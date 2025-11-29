@@ -106,8 +106,8 @@ export class TrainDepartureBoard extends LitElement {
         }
         .time-wrapper {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
+            align-items: baseline;
             gap: 4px;
             min-width: 55px;
             flex-shrink: 0;
@@ -120,15 +120,12 @@ export class TrainDepartureBoard extends LitElement {
             font-family: var(--primary-font-family, sans-serif);
             font-variant-numeric: tabular-nums;
         }
-        .time-delayed .scheduled {
-            color: var(--warning-color, #ff9800);
-        }
         .time-cancelled .scheduled {
             color: var(--error-color, #f44336);
             text-decoration: line-through;
         }
         .delay-indicator {
-            font-size: 0.7em;
+            font-size: 0.85em;
             font-weight: 600;
             color: var(--warning-color, #ff9800);
             white-space: nowrap;
