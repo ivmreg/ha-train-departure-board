@@ -537,7 +537,7 @@ export class TrainDepartureBoard extends LitElement {
                     name,
                     time,
                     timestamp,
-                    stopCode: stop.stop || '',
+                    stopCode: (stop.stop || '').trim(),
                     isPassed: false,
                     isCurrent: false,
                     isBetweenPrevious: false
