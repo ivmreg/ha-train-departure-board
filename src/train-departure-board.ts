@@ -567,9 +567,8 @@ export class TrainDepartureBoard extends LitElement {
                 stopsProcessed[exactMatchIndex].isPassed = false;
             } else { // 'Departure' or 'Pass'
                 stopsProcessed[exactMatchIndex].isPassed = true;
-                // Leave isCurrent false for all stations so we can render it between stations
-                // Wait, if it's "between", we need to know. We can use a property "isBetweenPrevious"
-                // on the next station.
+                // After a departure/pass, treat the train as between this station and the next,
+                // indicated by setting isBetweenPrevious on the following station when available.
                 if (exactMatchIndex + 1 < stopsProcessed.length) {
                     stopsProcessed[exactMatchIndex + 1].isBetweenPrevious = true;
                 } else {
