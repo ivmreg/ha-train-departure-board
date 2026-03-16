@@ -27,6 +27,10 @@ export interface HomeAssistant {
     };
 }
 
+export type LastReportType = 'Arrival' | 'Departure' | 'Pass';
+
+export type DateTimeString = string;
+
 export interface TrainDeparture {
     origin_name: string;
     destination_name: string;
@@ -43,8 +47,8 @@ export interface TrainDeparture {
     stops_of_interest: StopOfInterest[];
     stops: number;
     last_report_station?: string;
-    last_report_type?: string;
-    last_report_time?: string;
+    last_report_type?: LastReportType;
+    last_report_time?: DateTimeString;
 }
 
 export interface StopOfInterest {
