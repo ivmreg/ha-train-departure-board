@@ -273,17 +273,46 @@ export class TrainDepartureBoard extends LitElement {
         .popup-stops-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        .popup-stops-list::before {
+            content: '';
+            position: absolute;
+            left: 27px;
+            top: 14px;
+            bottom: 14px;
+            width: 4px;
+            background: var(--divider-color, #e0e0e0);
+            z-index: 1;
         }
         .popup-stop {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+            gap: 16px;
+            padding: 10px 0;
+            position: relative;
+            z-index: 2;
         }
-        .popup-stop:last-child {
-            border-bottom: none;
+        .popup-stop::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--card-background-color, #fff);
+            border: 3px solid var(--divider-color, #e0e0e0);
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .popup-stop.passed::before {
+            background: var(--primary-text-color, #111);
+            border-color: var(--primary-text-color, #111);
+        }
+        .popup-stop.current::before {
+            background: var(--warning-color, #ff9800);
+            border-color: var(--warning-color, #ff9800);
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
         }
         .popup-stop-time {
             font-size: 1.0em;
@@ -296,6 +325,21 @@ export class TrainDepartureBoard extends LitElement {
             font-size: 1.0em;
             color: var(--primary-text-color);
             flex: 1;
+        }
+        .popup-train-indicator {
+            position: absolute;
+            left: -1px;
+            top: -12px;
+            background: var(--warning-color, #ff9800);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            z-index: 3;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
+        }
+        .popup-stop.between-previous .popup-train-indicator {
+            display: block;
         }
         .footer {
             padding: 8px 12px;
@@ -448,7 +492,8 @@ export class TrainDepartureBoard extends LitElement {
                         <div class="popup-stops-title">Calling at</div>
                         <div class="popup-stops-list">
                             ${stops.map(stop => html`
-                                <div class="popup-stop">
+                                <div class="popup-stop ${stop.isPassed ? 'passed' : ''} ${stop.isCurrent ? 'current' : ''} ${stop.isBetweenPrevious ? 'between-previous' : ''}">
+                                    ${stop.isBetweenPrevious ? html`<div class="popup-train-indicator"></div>` : ''}
                                     <span class="popup-stop-time">${stop.time}</span>
                                     <span class="popup-stop-name">${stop.name}</span>
                                 </div>
@@ -460,11 +505,19 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
-    private _getStopsForPopup(departure: TrainDeparture): { name: string; time: string }[] {
+    private _getStopsForPopup(departure: TrainDeparture): {
+        name: string;
+        time: string;
+        stopCode: string;
+        isPassed: boolean;
+        isCurrent: boolean;
+        isBetweenPrevious?: boolean;
+        timestamp: number;
+    }[] {
         const stops = departure.stops_of_interest || [];
         const identifier = this.config.stops_identifier || 'description';
 
-        return stops
+        let stopsProcessed = stops
             .map(stop => {
                 let name = '';
                 if (identifier === 'tiploc') {
@@ -480,11 +533,70 @@ export class TrainDepartureBoard extends LitElement {
                 const parsedDate = this.parseDateTime(datetime);
                 const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
 
-                return { name, time, timestamp };
+                return {
+                    name,
+                    time,
+                    timestamp,
+                    stopCode: stop.stop || '',
+                    isPassed: false,
+                    isCurrent: false,
+                    isBetweenPrevious: false
+                };
             })
             .filter(s => s.name)
-            .sort((a, b) => a.timestamp - b.timestamp)
-            .map(({ name, time }) => ({ name, time }));
+            .sort((a, b) => a.timestamp - b.timestamp);
+
+        if (!departure.last_report_station || !departure.last_report_type) {
+            // No real-time report logic: fall back to marking all as future
+            return stopsProcessed;
+        }
+
+        const reportStation = departure.last_report_station;
+        const reportType = departure.last_report_type; // 'Arrival', 'Departure', 'Pass'
+        const reportTimeMs = departure.last_report_time ? this.parseDateTime(departure.last_report_time)?.getTime() : undefined;
+
+        // Try to find the exact reported station
+        const exactMatchIndex = stopsProcessed.findIndex(s => s.stopCode === reportStation);
+
+        if (exactMatchIndex !== -1) {
+            for (let i = 0; i < exactMatchIndex; i++) {
+                stopsProcessed[i].isPassed = true;
+            }
+            if (reportType === 'Arrival') {
+                stopsProcessed[exactMatchIndex].isCurrent = true; // At the station
+                stopsProcessed[exactMatchIndex].isPassed = false;
+            } else { // 'Departure' or 'Pass'
+                stopsProcessed[exactMatchIndex].isPassed = true;
+                // Leave isCurrent false for all stations so we can render it between stations
+                // Wait, if it's "between", we need to know. We can use a property "isBetweenPrevious"
+                // on the next station.
+                if (exactMatchIndex + 1 < stopsProcessed.length) {
+                    stopsProcessed[exactMatchIndex + 1].isBetweenPrevious = true;
+                } else {
+                    // It left the last station
+                    stopsProcessed[exactMatchIndex].isPassed = true;
+                }
+            }
+        } else if (reportTimeMs !== undefined && !Number.isNaN(reportTimeMs)) {
+            // Interpolation fallback based on time
+            let lastPassedIndex = -1;
+            for (let i = 0; i < stopsProcessed.length; i++) {
+                if (stopsProcessed[i].timestamp <= reportTimeMs) {
+                    stopsProcessed[i].isPassed = true;
+                    lastPassedIndex = i;
+                } else {
+                    break;
+                }
+            }
+            if (lastPassedIndex !== -1 && lastPassedIndex + 1 < stopsProcessed.length) {
+                stopsProcessed[lastPassedIndex + 1].isBetweenPrevious = true;
+            } else if (lastPassedIndex === -1 && stopsProcessed.length > 0) {
+                // Not reached the first station yet
+                stopsProcessed[0].isBetweenPrevious = true;
+            }
+        }
+
+        return stopsProcessed;
     }
 
     private renderDepartureRow(departure: TrainDeparture, index: number) {

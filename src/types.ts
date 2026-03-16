@@ -42,6 +42,9 @@ export interface TrainDeparture {
     cancel_reason?: string;
     stops_of_interest: StopOfInterest[];
     stops: number;
+    last_report_station?: string;
+    last_report_type?: string;
+    last_report_time?: string;
 }
 
 export interface StopOfInterest {
