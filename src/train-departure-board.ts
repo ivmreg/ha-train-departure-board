@@ -274,17 +274,21 @@ export class TrainDepartureBoard extends LitElement {
             display: flex;
             flex-direction: column;
             position: relative;
-            padding-left: 20px;
+            padding-left: 36px;
         }
         .popup-stops-list::before {
             content: '';
             position: absolute;
-            left: 27px;
-            top: 14px;
-            bottom: 14px;
+            left: 14px;
+            top: 18px;
+            bottom: 18px;
             width: 4px;
             background: var(--divider-color, #e0e0e0);
             z-index: 1;
+        }
+        /* Extend line upwards if the very first item is between-previous (rare but possible) */
+        .popup-stops-list.first-is-between::before {
+            top: 0;
         }
         .popup-stop {
             display: flex;
@@ -294,24 +298,26 @@ export class TrainDepartureBoard extends LitElement {
             position: relative;
             z-index: 2;
         }
-        .popup-stop::before {
-            content: '';
-            width: 14px;
-            height: 14px;
+        .popup-stop-circle {
+            position: absolute;
+            left: -28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: var(--card-background-color, #fff);
-            border: 3px solid var(--divider-color, #e0e0e0);
+            border: 4px solid var(--divider-color, #e0e0e0);
             z-index: 2;
-            flex-shrink: 0;
         }
-        .popup-stop.passed::before {
+        .popup-stop.passed .popup-stop-circle {
             background: var(--primary-text-color, #111);
             border-color: var(--primary-text-color, #111);
         }
-        .popup-stop.current::before {
+        .popup-stop.current .popup-stop-circle {
             background: var(--warning-color, #ff9800);
             border-color: var(--warning-color, #ff9800);
-            transform: scale(1.2);
+            transform: translateY(-50%) scale(1.2);
             box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
         }
         .popup-stop-time {
@@ -327,15 +333,16 @@ export class TrainDepartureBoard extends LitElement {
             flex: 1;
         }
         .popup-train-indicator {
+            display: none;
             position: absolute;
-            left: -1px;
-            top: -12px;
+            left: 50%;
+            top: -18px;
+            transform: translate(-50%, -50%) scale(1.2);
             background: var(--warning-color, #ff9800);
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             z-index: 3;
-            transform: scale(1.2);
             box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
         }
         .popup-stop.between-previous .popup-train-indicator {
@@ -490,10 +497,12 @@ export class TrainDepartureBoard extends LitElement {
                         </div>
                         ${stops.length > 0 ? html`
                         <div class="popup-stops-title">Calling at</div>
-                        <div class="popup-stops-list">
+                        <div class="popup-stops-list ${stops[0].isBetweenPrevious ? 'first-is-between' : ''}">
                             ${stops.map(stop => html`
                                 <div class="popup-stop ${stop.isPassed ? 'passed' : ''} ${stop.isCurrent ? 'current' : ''} ${stop.isBetweenPrevious ? 'between-previous' : ''}">
-                                    ${stop.isBetweenPrevious ? html`<div class="popup-train-indicator"></div>` : ''}
+                                    <div class="popup-stop-circle">
+                                        <div class="popup-train-indicator"></div>
+                                    </div>
                                     <span class="popup-stop-time">${stop.time}</span>
                                     <span class="popup-stop-name">${stop.name}</span>
                                 </div>
@@ -537,7 +546,7 @@ export class TrainDepartureBoard extends LitElement {
                     name,
                     time,
                     timestamp,
-                    stopCode: (stop.stop || '').trim(),
+                    stopCode: stop.stop || '',
                     isPassed: false,
                     isCurrent: false,
                     isBetweenPrevious: false
@@ -567,8 +576,9 @@ export class TrainDepartureBoard extends LitElement {
                 stopsProcessed[exactMatchIndex].isPassed = false;
             } else { // 'Departure' or 'Pass'
                 stopsProcessed[exactMatchIndex].isPassed = true;
-                // After a departure/pass, treat the train as between this station and the next,
-                // indicated by setting isBetweenPrevious on the following station when available.
+                // Leave isCurrent false for all stations so we can render it between stations
+                // Wait, if it's "between", we need to know. We can use a property "isBetweenPrevious"
+                // on the next station.
                 if (exactMatchIndex + 1 < stopsProcessed.length) {
                     stopsProcessed[exactMatchIndex + 1].isBetweenPrevious = true;
                 } else {
@@ -593,6 +603,22 @@ export class TrainDepartureBoard extends LitElement {
                 // Not reached the first station yet
                 stopsProcessed[0].isBetweenPrevious = true;
             }
+        }
+
+        // Feature: Inject previous unlisted station to connect the timeline if train is currently between
+        if (stopsProcessed.length > 0 && stopsProcessed[0].isBetweenPrevious && exactMatchIndex === -1 && reportStation) {
+            // Train has departed an unknown/unlisted station and is headed to our first listed stop.
+            // Let's add that station to the front so we have a visual line coming from it.
+            const timeLabel = departure.last_report_time ? this.extractTimeLabel(departure.last_report_time) : '';
+            stopsProcessed.unshift({
+                name: reportStation, // We only have the CRS code, but it's better than nothing
+                time: timeLabel,
+                timestamp: reportTimeMs || 0,
+                stopCode: reportStation,
+                isPassed: true,
+                isCurrent: false,
+                isBetweenPrevious: false
+            });
         }
 
         return stopsProcessed;
