@@ -386,7 +386,7 @@ export class TrainDepartureBoard extends LitElement {
 
         const attributeName = this.config.attribute || 'departures';
         const attributeValue = entity.attributes?.[attributeName];
-        const departures = Array.isArray(attributeValue) ? attributeValue : [];
+        let departures = Array.isArray(attributeValue) ? attributeValue : [];
         const lastUpdated = entity.last_updated ? new Date(entity.last_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
         if (attributeValue === undefined) {
@@ -396,6 +396,44 @@ export class TrainDepartureBoard extends LitElement {
         if (!Array.isArray(attributeValue) && attributeValue !== undefined) {
             // eslint-disable-next-line no-console
             console.warn(`train-departure-board: attribute "${attributeName}" is not an array, falling back to empty list`);
+        }
+
+        // Apply UI Filters
+        if (this.config.time_offset_minutes !== undefined && this.config.time_offset_minutes > 0) {
+            const offset = this.config.time_offset_minutes;
+            departures = departures.filter(dep => {
+                const depTime = this.parseDateTime(dep.estimated || dep.scheduled);
+                if (!depTime) return true;
+                const now = new Date();
+                const diffMins = (depTime.getTime() - now.getTime()) / (1000 * 60);
+                return diffMins >= offset;
+            });
+        }
+
+        if (this.config.destination) {
+            const dest = this.config.destination.toUpperCase().trim();
+            if (dest) {
+                departures = departures.filter(dep => {
+                    return dep.destination_name?.toUpperCase() === dest ||
+                           dep.stops_of_interest?.some((s: any) => s.stop === dest || s.name?.toUpperCase() === dest);
+                });
+            }
+        }
+
+        if (this.config.platforms_input) {
+            const platforms = this.config.platforms_input.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+            if (platforms.length > 0) {
+                departures = departures.filter(dep => platforms.includes(dep.platform?.toLowerCase() || ''));
+            }
+        }
+
+        if (this.config.stops_input) {
+            const stops = this.config.stops_input.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+            if (stops.length > 0) {
+                departures = departures.filter(dep => {
+                    return dep.stops_of_interest?.some((s: any) => stops.includes(s.stop) || stops.includes(s.name?.toUpperCase()));
+                });
+            }
         }
 
         // Build custom property styles from config
@@ -498,7 +536,13 @@ export class TrainDepartureBoard extends LitElement {
                         ${stops.length > 0 ? html`
                         <div class="popup-stops-title">Calling at</div>
                         <div class="popup-stops-list ${stops[0].isBetweenPrevious ? 'first-is-between' : ''}">
-                            ${stops.map(stop => html`
+                            ${stops.map(stop => stop.isStationCountNode ? html`
+                                <div class="popup-stop passed">
+                                    <div class="popup-stop-circle" style="border: 2px dashed var(--divider-color, #e0e0e0); background: transparent;"></div>
+                                    <span class="popup-stop-time" style="opacity: 0.5;">⋮</span>
+                                    <span class="popup-stop-name" style="font-style: italic; color: var(--secondary-text-color, #666); font-size: 0.9em;">${stop.name}</span>
+                                </div>
+                            ` : html`
                                 <div class="popup-stop ${stop.isPassed ? 'passed' : ''} ${stop.isCurrent ? 'current' : ''} ${stop.isBetweenPrevious ? 'between-previous' : ''}">
                                     <div class="popup-stop-circle">
                                         <div class="popup-train-indicator"></div>
@@ -522,6 +566,7 @@ export class TrainDepartureBoard extends LitElement {
         isCurrent: boolean;
         isBetweenPrevious?: boolean;
         timestamp: number;
+        isStationCountNode?: boolean;
     }[] {
         const stops = departure.stops_of_interest || [];
         const identifier = this.config.stops_identifier || 'description';
@@ -549,18 +594,27 @@ export class TrainDepartureBoard extends LitElement {
                     stopCode: stop.stop || '',
                     isPassed: false,
                     isCurrent: false,
-                    isBetweenPrevious: false
+                    isBetweenPrevious: false,
+                    isStationCountNode: false
                 };
             })
             .filter(s => s.name)
             .sort((a, b) => a.timestamp - b.timestamp);
 
+        // Filter stops if UI config requests it
+        if (this.config.stops_input) {
+            const filterStops = this.config.stops_input.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+            if (filterStops.length > 0) {
+                stopsProcessed = stopsProcessed.filter(s => filterStops.includes(s.stopCode.toUpperCase()) || filterStops.includes(s.name.toUpperCase()));
+            }
+        }
+
         if (!departure.last_report_station || !departure.last_report_type) {
-            // No real-time report logic: fall back to marking all as future
             return stopsProcessed;
         }
 
         const reportStation = departure.last_report_station;
+        const reportStationName = departure.last_report_station_name || reportStation;
         const reportType = departure.last_report_type; // 'Arrival', 'Departure', 'Pass'
         const reportTimeMs = departure.last_report_time ? this.parseDateTime(departure.last_report_time)?.getTime() : undefined;
 
@@ -576,13 +630,9 @@ export class TrainDepartureBoard extends LitElement {
                 stopsProcessed[exactMatchIndex].isPassed = false;
             } else { // 'Departure' or 'Pass'
                 stopsProcessed[exactMatchIndex].isPassed = true;
-                // Leave isCurrent false for all stations so we can render it between stations
-                // Wait, if it's "between", we need to know. We can use a property "isBetweenPrevious"
-                // on the next station.
                 if (exactMatchIndex + 1 < stopsProcessed.length) {
                     stopsProcessed[exactMatchIndex + 1].isBetweenPrevious = true;
                 } else {
-                    // It left the last station
                     stopsProcessed[exactMatchIndex].isPassed = true;
                 }
             }
@@ -607,17 +657,32 @@ export class TrainDepartureBoard extends LitElement {
 
         // Feature: Inject previous unlisted station to connect the timeline if train is currently between
         if (stopsProcessed.length > 0 && stopsProcessed[0].isBetweenPrevious && exactMatchIndex === -1 && reportStation) {
-            // Train has departed an unknown/unlisted station and is headed to our first listed stop.
-            // Let's add that station to the front so we have a visual line coming from it.
             const timeLabel = departure.last_report_time ? this.extractTimeLabel(departure.last_report_time) : '';
             stopsProcessed.unshift({
-                name: reportStation, // We only have the CRS code, but it's better than nothing
+                name: reportStationName,
                 time: timeLabel,
                 timestamp: reportTimeMs || 0,
                 stopCode: reportStation,
                 isPassed: true,
                 isCurrent: false,
-                isBetweenPrevious: false
+                isBetweenPrevious: false,
+                isStationCountNode: false
+            });
+        }
+
+        // Feature: Show how many stations are between the train and origin (as a node)
+        if (departure.last_report_index && departure.last_report_index > 0) {
+            const passedCount = departure.last_report_index;
+            // Insert it at the very top (or after the injected previous station)
+            stopsProcessed.unshift({
+                name: `+ ${passedCount} stations from origin`,
+                time: '',
+                timestamp: -1,
+                stopCode: '_COUNT_',
+                isPassed: true,
+                isCurrent: false,
+                isBetweenPrevious: false,
+                isStationCountNode: true
             });
         }
 

@@ -52,6 +52,28 @@ const SCHEMA: HaFormSchema[] = [
     },
     {
         type: 'expandable',
+        name: 'filters',
+        schema: [
+            {
+                name: 'destination',
+                selector: { text: {} }
+            },
+            {
+                name: 'time_offset_minutes',
+                selector: { number: { min: 0, mode: 'box' } }
+            },
+            {
+                name: 'stops_input',
+                selector: { text: {} }
+            },
+            {
+                name: 'platforms_input',
+                selector: { text: {} }
+            }
+        ]
+    },
+    {
+        type: 'expandable',
         name: '',
         schema: [
             {
@@ -82,6 +104,11 @@ const LABELS: Record<string, string> = {
     title: 'Card Title',
     attribute: 'Data Attribute',
     stops_identifier: 'Station Identifier',
+    filters: 'Filtering Options',
+    destination: 'Destination Station (CRS Code)',
+    time_offset_minutes: 'Time Offset (minutes)',
+    stops_input: 'Stops of Interest (CSV)',
+    platforms_input: 'Platforms of Interest (CSV)',
     '': 'Font Sizes',
     font_size_time: 'Time',
     font_size_destination: 'Destination',
@@ -93,6 +120,10 @@ const HELPERS: Record<string, string> = {
     entity: 'Select a realtime trains sensor',
     attribute: 'Attribute with departure data (default: departures)',
     stops_identifier: 'How stations are identified in the data',
+    destination: 'Only show trains calling at this station',
+    time_offset_minutes: 'Hide trains departing sooner than this',
+    stops_input: 'Only show these stops in the timeline',
+    platforms_input: 'Only show trains on these platforms',
     font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
     font_size_destination: 'e.g. 1.2rem (default: 1rem)',
     font_size_status: 'e.g. 0.85rem (default: 0.75rem)'
