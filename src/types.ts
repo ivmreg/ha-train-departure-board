@@ -43,8 +43,10 @@ export interface TrainDeparture {
     stops_of_interest: StopOfInterest[];
     stops: number;
     last_report_station?: string;
+    last_report_station_name?: string;
     last_report_type?: string;
     last_report_time?: string;
+    last_report_index?: number;
 }
 
 export interface StopOfInterest {
@@ -63,6 +65,10 @@ export interface TrainDepartureBoardConfig {
     entity?: string;
     attribute?: string;
     stops_identifier?: 'tiploc' | 'crs' | 'description';
+    destination?: string;
+    time_offset_minutes?: number;
+    stops_input?: string;
+    platforms_input?: string;
     // Font size configuration (CSS values like '1rem', '16px', etc.)
     font_size_time?: string;
     font_size_destination?: string;
