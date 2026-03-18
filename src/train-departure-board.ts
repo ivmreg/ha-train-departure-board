@@ -386,7 +386,7 @@ export class TrainDepartureBoard extends LitElement {
 
         const attributeName = this.config.attribute || 'departures';
         const attributeValue = entity.attributes?.[attributeName];
-        let departures = Array.isArray(attributeValue) ? attributeValue : [];
+        let departures: TrainDeparture[] = Array.isArray(attributeValue) ? attributeValue as TrainDeparture[] : [];
         const lastUpdated = entity.last_updated ? new Date(entity.last_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
         if (attributeValue === undefined) {
@@ -414,8 +414,8 @@ export class TrainDepartureBoard extends LitElement {
             const dest = this.config.destination.toUpperCase().trim();
             if (dest) {
                 departures = departures.filter(dep => {
-                    return dep.destination_name?.toUpperCase() === dest ||
-                           dep.stops_of_interest?.some((s: any) => s.stop === dest || s.name?.toUpperCase() === dest);
+                    return dep.destination_name?.toUpperCase().trim() === dest ||
+                           dep.stops_of_interest?.some(s => s.stop?.toUpperCase().trim() === dest || s.name?.toUpperCase().trim() === dest);
                 });
             }
         }
@@ -431,7 +431,7 @@ export class TrainDepartureBoard extends LitElement {
             const stops = this.config.stops_input.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
             if (stops.length > 0) {
                 departures = departures.filter(dep => {
-                    return dep.stops_of_interest?.some((s: any) => stops.includes(s.stop) || stops.includes(s.name?.toUpperCase()));
+                    return dep.stops_of_interest?.some(s => stops.includes(s.stop?.toUpperCase().trim()) || stops.includes(s.name?.toUpperCase().trim()));
                 });
             }
         }
