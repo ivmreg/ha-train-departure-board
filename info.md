@@ -26,15 +26,21 @@ The card expects data from a sensor that provides train departure information in
 
 ```yaml
 - origin_name: Dartford
-  destination_name: London Charing Cross
-  service_uid: P19333
-  scheduled: "13-11-2025 22:51"
-  estimated: "13-11-2025 22:51"
-  minutes: 14
-  platform: "1"
+  destination_name: London Cannon Street
+  service_uid: P63128
+  headcode: 2A69
+  type: TRAIN
   operator_name: Southeastern
-  stops_of_interest: []
-  stops: 11
+  scheduled: 01-04-2026 22:13
+  estimated: 01-04-2026 22:13
+  minutes: 8
+  lateness: null
+  is_cancelled: false
+  platform: "1"
+  length: 8
+  stock: null
+  subsequent_stops: []
+  stops: 14
 ```
 
 ## Support

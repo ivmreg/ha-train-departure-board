@@ -31,30 +31,33 @@ export interface TrainDeparture {
     origin_name: string;
     destination_name: string;
     service_uid: string;
+    headcode: string;
+    type: string;
     scheduled: string;
     estimated: string;
     minutes: number;
+    lateness: number | null;
+    is_cancelled: boolean;
     platform: string;
+    length: number | null;
+    stock: string | null;
     operator_name: string;
-    status?: string;
-    etd?: string;
-    planned_cancel?: boolean;
-    cancel_reason?: string;
-    stops_of_interest: StopOfInterest[];
+    subsequent_stops: SubsequentStop[];
     stops: number;
     last_report_station?: string;
     last_report_type?: string;
     last_report_time?: string;
+    status?: string;
+    etd?: string;
+    planned_cancel?: boolean;
+    cancel_reason?: string;
 }
 
-export interface StopOfInterest {
+export interface SubsequentStop {
     stop: string;
     name: string;
-    crs?: string;
-    scheduled_stop: string;
-    estimate_stop: string;
-    journey_time_mins: number;
-    stops: number;
+    scheduled: string;
+    estimated: string;
 }
 
 export interface TrainDepartureBoardConfig {

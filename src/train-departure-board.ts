@@ -7,7 +7,7 @@ import './editor'; // Import the editor to ensure it's registered
 export class TrainDepartureBoard extends LitElement {
     @property({ type: Object }) hass!: HomeAssistant;
     @property({ type: Object }) config!: TrainDepartureBoardConfig;
-    @property({ type: Array }) departures: TrainDeparture[] = [];
+    @property({ type: Array }) nextTrains: TrainDeparture[] = [];
     @state() private _selectedDeparture: TrainDeparture | null = null;
     private dateCache = new Map<string, Date | null>();
     private lastEntityId: string | null = null;
@@ -21,7 +21,7 @@ export class TrainDepartureBoard extends LitElement {
             type: 'custom:train-departure-board',
             title: 'Train Departures',
             entity: '',
-            attribute: 'departures'
+            attribute: 'next_trains'
         };
     }
 
@@ -30,14 +30,14 @@ export class TrainDepartureBoard extends LitElement {
             throw new Error('Invalid configuration');
         }
         const mergedConfig = {
-            attribute: 'departures',
+            attribute: 'next_trains',
             ...config,
         };
 
         if (typeof mergedConfig.attribute === 'string') {
-            mergedConfig.attribute = mergedConfig.attribute.trim() || 'departures';
+            mergedConfig.attribute = mergedConfig.attribute.trim() || 'next_trains';
         } else {
-            mergedConfig.attribute = 'departures';
+            mergedConfig.attribute = 'next_trains';
         }
 
         this.config = mergedConfig;
@@ -384,7 +384,7 @@ export class TrainDepartureBoard extends LitElement {
             this.lastEntityId = this.config.entity;
         }
 
-        const attributeName = this.config.attribute || 'departures';
+        const attributeName = this.config.attribute || 'next_trains';
         const attributeValue = entity.attributes?.[attributeName];
         const departures = Array.isArray(attributeValue) ? attributeValue : [];
         const lastUpdated = entity.last_updated ? new Date(entity.last_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -523,7 +523,7 @@ export class TrainDepartureBoard extends LitElement {
         isBetweenPrevious?: boolean;
         timestamp: number;
     }[] {
-        const stops = departure.stops_of_interest || [];
+        const stops = departure.subsequent_stops || [];
         const identifier = this.config.stops_identifier || 'description';
 
         let stopsProcessed = stops
@@ -532,12 +532,12 @@ export class TrainDepartureBoard extends LitElement {
                 if (identifier === 'tiploc') {
                     name = (stop.stop || '').trim();
                 } else if (identifier === 'crs') {
-                    name = (stop.crs || stop.name || '').trim();
+                    name = (stop.name || '').trim();
                 } else {
                     name = (stop.name || stop.stop || '').trim();
                 }
 
-                const datetime = stop.estimate_stop || stop.scheduled_stop;
+                const datetime = stop.estimated || stop.scheduled;
                 const time = datetime ? (datetime.split(' ')[1] || '').trim() : '';
                 const parsedDate = this.parseDateTime(datetime);
                 const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
@@ -661,6 +661,7 @@ export class TrainDepartureBoard extends LitElement {
         const estimatedTime = this.extractTimeLabel(estimatedRaw);
 
         if (
+            departure.is_cancelled ||
             departure.status?.toLowerCase().includes('cancel') ||
             departure.etd?.toLowerCase().includes('cancel') ||
             departure.planned_cancel ||

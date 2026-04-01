@@ -91,7 +91,7 @@ const LABELS: Record<string, string> = {
 // Helper text for fields
 const HELPERS: Record<string, string> = {
     entity: 'Select a realtime trains sensor',
-    attribute: 'Attribute with departure data (default: departures)',
+    attribute: 'Attribute with departure data (default: next_trains)',
     stops_identifier: 'How stations are identified in the data',
     font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
     font_size_destination: 'e.g. 1.2rem (default: 1rem)',
@@ -146,7 +146,7 @@ export class TrainDepartureBoardEditor extends LitElement {
         const newConfig = {
             ...this._config,
             ...config,
-            attribute: config.attribute || 'departures',
+            attribute: config.attribute || 'next_trains',
             stops_identifier: config.stops_identifier || 'description'
         };
 

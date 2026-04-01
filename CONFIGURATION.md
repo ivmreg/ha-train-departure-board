@@ -17,42 +17,36 @@ entity: sensor.train_departures
 | `type` | string | required | Must be `custom:train-departure-board` |
 | `title` | string | "Train Departures" | Title displayed at the top of the card |
 | `entity` | string | required | Entity ID that contains the departure data |
-| `attribute` | string | `departures` | Name of the entity attribute that holds the departures array |
+| `attribute` | string | `next_trains` | Name of the entity attribute that holds the departures array |
 
 ## Expected Entity Data Structure
 
-The card expects a sensor entity with an array of departures. By default it reads `attributes.departures`, but you can change the attribute name through the `attribute` option if your integration uses something like `Next trains`. Each departure should have:
+The card expects a sensor entity with an array of departures. By default it reads `attributes.next_trains`, but you can change the attribute name through the `attribute` option if your integration uses something like `departures`. Each departure should have:
 
 ```yaml
 state: "updated"
 attributes:
-  departures:
+  next_trains:
     - origin_name: "Dartford"
-      destination_name: "London Charing Cross"
-      service_uid: "P19333"
-      scheduled: "13-11-2025 22:51"
-      estimated: "13-11-2025 22:51"
-      minutes: 14
+      destination_name: "London Cannon Street"
+      service_uid: "P63128"
+      headcode: "2A69"
+      type: "TRAIN"
+      operator_name: "Southeastern"
+      scheduled: "01-04-2026 22:13"
+      estimated: "01-04-2026 22:13"
+      minutes: 8
+      lateness: null
+      is_cancelled: false
       platform: "1"
-      operator_name: "Southeastern"
-      stops_of_interest:
-        - stop: "LBG"
-          name: "London Bridge"
-          scheduled_stop: "13-11-2025 23:03"
-          estimate_stop: "13-11-2025 23:03"
-          journey_time_mins: 12
-          stops: 8
-      stops: 11
-    - origin_name: "Dartford"
-      destination_name: "London Bridge"
-      service_uid: "P19334"
-      scheduled: "13-11-2025 23:00"
-      estimated: "13-11-2025 23:05"
-      minutes: 21
-      platform: "2"
-      operator_name: "Southeastern"
-      stops_of_interest: []
-      stops: 5
+      length: 8
+      stock: null
+      subsequent_stops:
+        - stop: "LEW"
+          name: "Lewisham"
+          scheduled: "01-04-2026 22:16"
+          estimated: "01-04-2026 22:16"
+      stops: 14
 ```
 
 ## Field Descriptions
@@ -63,14 +57,18 @@ attributes:
 - **scheduled**: Scheduled departure time (format: "DD-MM-YYYY HH:MM")
 - **estimated**: Estimated/actual departure time
 - **platform**: Platform number
+- **is_cancelled**: Boolean flag for cancellation
 
 ### Optional Fields
 - **service_uid**: Unique service identifier
+- **headcode**: Train headcode (e.g. 2A69)
+- **type**: Service type (e.g. TRAIN)
 - **minutes**: Minutes until departure
 - **operator_name**: Train operating company
-- **stops_of_interest**: Important stops on the route
+- **subsequent_stops**: List of upcoming stops
 - **stops**: Total number of stops
-
+- **length**: Number of coaches
+- **stock**: Train stock description (e.g. City Beam)
 ## Display Behavior
 
 The card automatically:

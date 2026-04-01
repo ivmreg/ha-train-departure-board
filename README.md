@@ -51,10 +51,10 @@ After installation, the card will automatically appear in your card picker. No n
 type: custom:train-departure-board
 title: Train Departures
 entity: sensor.your_train_sensor
-attribute: departures # optional; use e.g. "Next trains" if your sensor uses another attribute name
+attribute: next_trains # optional; use e.g. "departures" if your sensor uses another attribute name
 ```
 
-If your integration exposes the departures array under a different attribute (for example `Next trains`), set the `attribute` field to that exact name so the card can find it.
+If your integration exposes the departures array under a different attribute (for example `departures`), set the `attribute` field to that exact name so the card can find it.
 
 ### Expected Data Format
 
@@ -62,21 +62,25 @@ The card expects a sensor that provides an array of train departures with the fo
 
 ```yaml
 - origin_name: Dartford
-  destination_name: London Charing Cross
-  service_uid: P19333
-  scheduled: "13-11-2025 22:51"
-  estimated: "13-11-2025 22:51"
-  minutes: 14
-  platform: "1"
+  destination_name: London Cannon Street
+  service_uid: P63128
+  headcode: 2A69
+  type: TRAIN
   operator_name: Southeastern
-  stops_of_interest:
-    - stop: LBG
-      name: London Bridge
-      scheduled_stop: "13-11-2025 23:03"
-      estimate_stop: "13-11-2025 23:03"
-      journey_time_mins: 12
-      stops: 8
-  stops: 11
+  scheduled: 01-04-2026 22:13
+  estimated: 01-04-2026 22:13
+  minutes: 8
+  lateness: null
+  is_cancelled: false
+  platform: "1"
+  length: 8
+  stock: null
+  subsequent_stops:
+    - stop: LEW
+      name: Lewisham
+      scheduled: 01-04-2026 22:16
+      estimated: 01-04-2026 22:16
+  stops: 14
 ```
 
 ## Development
