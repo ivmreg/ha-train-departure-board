@@ -455,51 +455,56 @@ export class TrainDepartureBoard extends LitElement {
         const stops = this._getStopsForPopup(departure);
         const isCancelled = statusClass === 'cancelled';
 
+        const statusBadgeClass = statusClass === 'on-time' ? 'status-ok' : statusClass === 'cancelled' ? 'status-cancelled' : 'status-delayed';
+        
+        // Check if any stops have passed to color the line
+        const hasPassedStops = stops.some(stop => stop.isPassed);
+
         return html`
             <div class="popup-overlay" @click=${this._handleOverlayClick} role="dialog" aria-modal="true" aria-label="Train details">
                 <div class="popup-card">
-                    <div class="popup-header">
-                        <h2>${departure.destination_name}</h2>
-                        <button class="popup-close" @click=${this._closePopup} aria-label="Close">&times;</button>
-                    </div>
-                    <div class="popup-content">
-                        <div class="popup-meta">
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Scheduled</span>
-                                <span class="popup-meta-value ${isCancelled ? 'popup-time-cancelled' : ''}">${scheduledTime}</span>
+                    <div class="modern-header">
+                        <div class="modern-header-top">
+                            <div class="modern-dest-group">
+                                <div class="modern-time-group">
+                                    <span class="modern-scheduled ${isCancelled ? 'time-cancelled' : ''}">${scheduledTime}</span>
+                                    ${departure.operator_name ? html`<span class="modern-operator">${departure.operator_name}</span>` : ''}
+                                </div>
+                                <h2 class="modern-dest">${departure.destination_name}</h2>
                             </div>
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Status</span>
-                                <span class="status-pill ${statusClass}">${statusLabel}</span>
+                            <button class="popup-close" @click=${this._closePopup} aria-label="Close">&times;</button>
+                        </div>
+                        <div class="modern-badges">
+                            <div class="modern-badge ${statusBadgeClass}">
+                                <span style="font-size: 1.2em; line-height: 1;">●</span> ${statusLabel}
                             </div>
                             ${departure.platform ? html`
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Platform</span>
-                                <span class="popup-meta-value">${departure.platform}</span>
-                            </div>` : ''}
-                            ${departure.origin_name ? html`
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">From</span>
-                                <span class="popup-meta-value">${departure.origin_name}</span>
-                            </div>` : ''}
-                            ${departure.operator_name ? html`
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Operator</span>
-                                <span class="popup-meta-value">${departure.operator_name}</span>
+                            <div class="modern-badge platform">
+                                Platform ${departure.platform}
                             </div>` : ''}
                         </div>
+                    </div>
+                    
+                    <div class="modern-content">
                         ${stops.length > 0 ? html`
-                        <div class="popup-stops-title">Calling at</div>
-                        <div class="popup-stops-list ${stops[0].isBetweenPrevious ? 'first-is-between' : ''}">
-                            ${stops.map(stop => html`
-                                <div class="popup-stop ${stop.isPassed ? 'passed' : ''} ${stop.isCurrent ? 'current' : ''} ${stop.isBetweenPrevious ? 'between-previous' : ''}">
-                                    <div class="popup-stop-circle">
-                                        <div class="popup-train-indicator"></div>
+                        <div class="timeline-container">
+                            <div class="modern-stops-list ${hasPassedStops ? 'has-passed' : ''}">
+                                ${stops.map((stop, i) => html`
+                                    ${stop.isBetweenPrevious ? html`
+                                    <div style="position: relative; height: 6px;" aria-hidden="true">
+                                        <div class="modern-train-pos">🚆</div>
                                     </div>
-                                    <span class="popup-stop-time">${stop.time}</span>
-                                    <span class="popup-stop-name">${stop.name}</span>
-                                </div>
-                            `)}
+                                    ` : ''}
+                                    <div class="modern-stop ${stop.isPassed ? 'passed' : ''} ${stop.isCurrent ? 'current' : ''}">
+                                        <div class="modern-stop-circle"></div>
+                                        <span class="modern-stop-time">${stop.time}</span>
+                                        <div class="modern-stop-info">
+                                            <span class="modern-stop-name">${stop.name}</span>
+                                            ${!stop.isPassed && !isCancelled ? html`<span class="modern-stop-status on-time">On time</span>` : ''}
+                                        </div>
+                                    </div>
+                                `)}
+                            </div>
                         </div>` : ''}
                     </div>
                 </div>
