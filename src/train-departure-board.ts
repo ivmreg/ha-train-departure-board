@@ -234,7 +234,7 @@ export class TrainDepartureBoard extends LitElement {
         .modern-stops-list::before { 
             content: ''; 
             position: absolute; 
-            left: 14px; 
+            left: 17px; 
             top: 14px; 
             bottom: 14px; 
             width: 4px; 
@@ -247,7 +247,7 @@ export class TrainDepartureBoard extends LitElement {
         .modern-stops-list.has-passed::after {
             content: ''; 
             position: absolute; 
-            left: 14px; 
+            left: 17px; 
             top: 14px; 
             bottom: 14px;
             width: 4px; 
@@ -290,7 +290,7 @@ export class TrainDepartureBoard extends LitElement {
         /* Train Position Indicator */
         .modern-train-pos {
             position: absolute;
-            left: -33px;
+            left: -28px;
             top: -12px; /* Positioned between stations */
             width: 22px;
             height: 22px;
