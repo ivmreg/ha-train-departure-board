@@ -9,19 +9,19 @@ const e=window,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow)&&"
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var a;const l=window,d=l.trustedTypes,p=d?d.emptyScript:"",c=l.reactiveElementPolyfillSupport,u={toAttribute(t,e){switch(e){case Boolean:t=t?p:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t)}return t},fromAttribute(t,e){let i=t;switch(e){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t)}catch(t){i=null}}return i}},h=(t,e)=>e!==t&&(e==e||t==t),f={attribute:!0,type:String,converter:u,reflect:!1,hasChanged:h},v="finalized";class m extends HTMLElement{constructor(){super(),this._$Ei=new Map,this.isUpdatePending=!1,this.hasUpdated=!1,this._$El=null,this._$Eu()}static addInitializer(t){var e;this.finalize(),(null!==(e=this.h)&&void 0!==e?e:this.h=[]).push(t)}static get observedAttributes(){this.finalize();const t=[];return this.elementProperties.forEach((e,i)=>{const s=this._$Ep(i,e);void 0!==s&&(this._$Ev.set(s,i),t.push(s))}),t}static createProperty(t,e=f){if(e.state&&(e.attribute=!1),this.finalize(),this.elementProperties.set(t,e),!e.noAccessor&&!this.prototype.hasOwnProperty(t)){const i="symbol"==typeof t?Symbol():"__"+t,s=this.getPropertyDescriptor(t,i,e);void 0!==s&&Object.defineProperty(this.prototype,t,s)}}static getPropertyDescriptor(t,e,i){return{get(){return this[e]},set(s){const r=this[t];this[e]=s,this.requestUpdate(t,r,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)||f}static finalize(){if(this.hasOwnProperty(v))return!1;this[v]=!0;const t=Object.getPrototypeOf(this);if(t.finalize(),void 0!==t.h&&(this.h=[...t.h]),this.elementProperties=new Map(t.elementProperties),this._$Ev=new Map,this.hasOwnProperty("properties")){const t=this.properties,e=[...Object.getOwnPropertyNames(t),...Object.getOwnPropertySymbols(t)];for(const i of e)this.createProperty(i,t[i])}return this.elementStyles=this.finalizeStyles(this.styles),!0}static finalizeStyles(t){const e=[];if(Array.isArray(t)){const i=new Set(t.flat(1/0).reverse());for(const t of i)e.unshift(n(t))}else void 0!==t&&e.push(n(t));return e}static _$Ep(t,e){const i=e.attribute;return!1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}_$Eu(){var t;this._$E_=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$Eg(),this.requestUpdate(),null===(t=this.constructor.h)||void 0===t||t.forEach(t=>t(this))}addController(t){var e,i;(null!==(e=this._$ES)&&void 0!==e?e:this._$ES=[]).push(t),void 0!==this.renderRoot&&this.isConnected&&(null===(i=t.hostConnected)||void 0===i||i.call(t))}removeController(t){var e;null===(e=this._$ES)||void 0===e||e.splice(this._$ES.indexOf(t)>>>0,1)}_$Eg(){this.constructor.elementProperties.forEach((t,e)=>{this.hasOwnProperty(e)&&(this._$Ei.set(e,this[e]),delete this[e])})}createRenderRoot(){var t;const s=null!==(t=this.shadowRoot)&&void 0!==t?t:this.attachShadow(this.constructor.shadowRootOptions);return((t,s)=>{i?t.adoptedStyleSheets=s.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet):s.forEach(i=>{const s=document.createElement("style"),r=e.litNonce;void 0!==r&&s.setAttribute("nonce",r),s.textContent=i.cssText,t.appendChild(s)})})(s,this.constructor.elementStyles),s}connectedCallback(){var t;void 0===this.renderRoot&&(this.renderRoot=this.createRenderRoot()),this.enableUpdating(!0),null===(t=this._$ES)||void 0===t||t.forEach(t=>{var e;return null===(e=t.hostConnected)||void 0===e?void 0:e.call(t)})}enableUpdating(t){}disconnectedCallback(){var t;null===(t=this._$ES)||void 0===t||t.forEach(t=>{var e;return null===(e=t.hostDisconnected)||void 0===e?void 0:e.call(t)})}attributeChangedCallback(t,e,i){this._$AK(t,i)}_$EO(t,e,i=f){var s;const r=this.constructor._$Ep(t,i);if(void 0!==r&&!0===i.reflect){const o=(void 0!==(null===(s=i.converter)||void 0===s?void 0:s.toAttribute)?i.converter:u).toAttribute(e,i.type);this._$El=t,null==o?this.removeAttribute(r):this.setAttribute(r,o),this._$El=null}}_$AK(t,e){var i;const s=this.constructor,r=s._$Ev.get(t);if(void 0!==r&&this._$El!==r){const t=s.getPropertyOptions(r),o="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==(null===(i=t.converter)||void 0===i?void 0:i.fromAttribute)?t.converter:u;this._$El=r,this[r]=o.fromAttribute(e,t.type),this._$El=null}}requestUpdate(t,e,i){let s=!0;void 0!==t&&(((i=i||this.constructor.getPropertyOptions(t)).hasChanged||h)(this[t],e)?(this._$AL.has(t)||this._$AL.set(t,e),!0===i.reflect&&this._$El!==t&&(void 0===this._$EC&&(this._$EC=new Map),this._$EC.set(t,i))):s=!1),!this.isUpdatePending&&s&&(this._$E_=this._$Ej())}async _$Ej(){this.isUpdatePending=!0;try{await this._$E_}catch(t){Promise.reject(t)}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){var t;if(!this.isUpdatePending)return;this.hasUpdated,this._$Ei&&(this._$Ei.forEach((t,e)=>this[e]=t),this._$Ei=void 0);let e=!1;const i=this._$AL;try{e=this.shouldUpdate(i),e?(this.willUpdate(i),null===(t=this._$ES)||void 0===t||t.forEach(t=>{var e;return null===(e=t.hostUpdate)||void 0===e?void 0:e.call(t)}),this.update(i)):this._$Ek()}catch(t){throw e=!1,this._$Ek(),t}e&&this._$AE(i)}willUpdate(t){}_$AE(t){var e;null===(e=this._$ES)||void 0===e||e.forEach(t=>{var e;return null===(e=t.hostUpdated)||void 0===e?void 0:e.call(t)}),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t)}_$Ek(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$E_}shouldUpdate(t){return!0}update(t){void 0!==this._$EC&&(this._$EC.forEach((t,e)=>this._$EO(e,this[e],t)),this._$EC=void 0),this._$Ek()}updated(t){}firstUpdated(t){}}
+ */var a;const l=window,d=l.trustedTypes,c=d?d.emptyScript:"",p=l.reactiveElementPolyfillSupport,h={toAttribute(t,e){switch(e){case Boolean:t=t?c:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t)}return t},fromAttribute(t,e){let i=t;switch(e){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t)}catch(t){i=null}}return i}},u=(t,e)=>e!==t&&(e==e||t==t),f={attribute:!0,type:String,converter:h,reflect:!1,hasChanged:u},m="finalized";class v extends HTMLElement{constructor(){super(),this._$Ei=new Map,this.isUpdatePending=!1,this.hasUpdated=!1,this._$El=null,this._$Eu()}static addInitializer(t){var e;this.finalize(),(null!==(e=this.h)&&void 0!==e?e:this.h=[]).push(t)}static get observedAttributes(){this.finalize();const t=[];return this.elementProperties.forEach((e,i)=>{const s=this._$Ep(i,e);void 0!==s&&(this._$Ev.set(s,i),t.push(s))}),t}static createProperty(t,e=f){if(e.state&&(e.attribute=!1),this.finalize(),this.elementProperties.set(t,e),!e.noAccessor&&!this.prototype.hasOwnProperty(t)){const i="symbol"==typeof t?Symbol():"__"+t,s=this.getPropertyDescriptor(t,i,e);void 0!==s&&Object.defineProperty(this.prototype,t,s)}}static getPropertyDescriptor(t,e,i){return{get(){return this[e]},set(s){const r=this[t];this[e]=s,this.requestUpdate(t,r,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)||f}static finalize(){if(this.hasOwnProperty(m))return!1;this[m]=!0;const t=Object.getPrototypeOf(this);if(t.finalize(),void 0!==t.h&&(this.h=[...t.h]),this.elementProperties=new Map(t.elementProperties),this._$Ev=new Map,this.hasOwnProperty("properties")){const t=this.properties,e=[...Object.getOwnPropertyNames(t),...Object.getOwnPropertySymbols(t)];for(const i of e)this.createProperty(i,t[i])}return this.elementStyles=this.finalizeStyles(this.styles),!0}static finalizeStyles(t){const e=[];if(Array.isArray(t)){const i=new Set(t.flat(1/0).reverse());for(const t of i)e.unshift(n(t))}else void 0!==t&&e.push(n(t));return e}static _$Ep(t,e){const i=e.attribute;return!1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}_$Eu(){var t;this._$E_=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$Eg(),this.requestUpdate(),null===(t=this.constructor.h)||void 0===t||t.forEach(t=>t(this))}addController(t){var e,i;(null!==(e=this._$ES)&&void 0!==e?e:this._$ES=[]).push(t),void 0!==this.renderRoot&&this.isConnected&&(null===(i=t.hostConnected)||void 0===i||i.call(t))}removeController(t){var e;null===(e=this._$ES)||void 0===e||e.splice(this._$ES.indexOf(t)>>>0,1)}_$Eg(){this.constructor.elementProperties.forEach((t,e)=>{this.hasOwnProperty(e)&&(this._$Ei.set(e,this[e]),delete this[e])})}createRenderRoot(){var t;const s=null!==(t=this.shadowRoot)&&void 0!==t?t:this.attachShadow(this.constructor.shadowRootOptions);return((t,s)=>{i?t.adoptedStyleSheets=s.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet):s.forEach(i=>{const s=document.createElement("style"),r=e.litNonce;void 0!==r&&s.setAttribute("nonce",r),s.textContent=i.cssText,t.appendChild(s)})})(s,this.constructor.elementStyles),s}connectedCallback(){var t;void 0===this.renderRoot&&(this.renderRoot=this.createRenderRoot()),this.enableUpdating(!0),null===(t=this._$ES)||void 0===t||t.forEach(t=>{var e;return null===(e=t.hostConnected)||void 0===e?void 0:e.call(t)})}enableUpdating(t){}disconnectedCallback(){var t;null===(t=this._$ES)||void 0===t||t.forEach(t=>{var e;return null===(e=t.hostDisconnected)||void 0===e?void 0:e.call(t)})}attributeChangedCallback(t,e,i){this._$AK(t,i)}_$EO(t,e,i=f){var s;const r=this.constructor._$Ep(t,i);if(void 0!==r&&!0===i.reflect){const o=(void 0!==(null===(s=i.converter)||void 0===s?void 0:s.toAttribute)?i.converter:h).toAttribute(e,i.type);this._$El=t,null==o?this.removeAttribute(r):this.setAttribute(r,o),this._$El=null}}_$AK(t,e){var i;const s=this.constructor,r=s._$Ev.get(t);if(void 0!==r&&this._$El!==r){const t=s.getPropertyOptions(r),o="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==(null===(i=t.converter)||void 0===i?void 0:i.fromAttribute)?t.converter:h;this._$El=r,this[r]=o.fromAttribute(e,t.type),this._$El=null}}requestUpdate(t,e,i){let s=!0;void 0!==t&&(((i=i||this.constructor.getPropertyOptions(t)).hasChanged||u)(this[t],e)?(this._$AL.has(t)||this._$AL.set(t,e),!0===i.reflect&&this._$El!==t&&(void 0===this._$EC&&(this._$EC=new Map),this._$EC.set(t,i))):s=!1),!this.isUpdatePending&&s&&(this._$E_=this._$Ej())}async _$Ej(){this.isUpdatePending=!0;try{await this._$E_}catch(t){Promise.reject(t)}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){var t;if(!this.isUpdatePending)return;this.hasUpdated,this._$Ei&&(this._$Ei.forEach((t,e)=>this[e]=t),this._$Ei=void 0);let e=!1;const i=this._$AL;try{e=this.shouldUpdate(i),e?(this.willUpdate(i),null===(t=this._$ES)||void 0===t||t.forEach(t=>{var e;return null===(e=t.hostUpdate)||void 0===e?void 0:e.call(t)}),this.update(i)):this._$Ek()}catch(t){throw e=!1,this._$Ek(),t}e&&this._$AE(i)}willUpdate(t){}_$AE(t){var e;null===(e=this._$ES)||void 0===e||e.forEach(t=>{var e;return null===(e=t.hostUpdated)||void 0===e?void 0:e.call(t)}),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t)}_$Ek(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$E_}shouldUpdate(t){return!0}update(t){void 0!==this._$EC&&(this._$EC.forEach((t,e)=>this._$EO(e,this[e],t)),this._$EC=void 0),this._$Ek()}updated(t){}firstUpdated(t){}}
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var g;m[v]=!0,m.elementProperties=new Map,m.elementStyles=[],m.shadowRootOptions={mode:"open"},null==c||c({ReactiveElement:m}),(null!==(a=l.reactiveElementVersions)&&void 0!==a?a:l.reactiveElementVersions=[]).push("1.6.3");const _=window,b=_.trustedTypes,$=b?b.createPolicy("lit-html",{createHTML:t=>t}):void 0,y="$lit$",x=`lit$${(Math.random()+"").slice(9)}$`,w="?"+x,A=`<${w}>`,E=document,C=()=>E.createComment(""),S=t=>null===t||"object"!=typeof t&&"function"!=typeof t,k=Array.isArray,P="[ \t\n\f\r]",T=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,z=/-->/g,O=/>/g,N=RegExp(`>|${P}(?:([^\\s"'>=/]+)(${P}*=${P}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),L=/'/g,D=/"/g,H=/^(?:script|style|textarea|title)$/i,U=(t=>(e,...i)=>({_$litType$:t,strings:e,values:i}))(1),R=Symbol.for("lit-noChange"),M=Symbol.for("lit-nothing"),j=new WeakMap,I=E.createTreeWalker(E,129,null,!1);function B(t,e){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==$?$.createHTML(e):e}const V=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":"",n=T;for(let e=0;e<i;e++){const i=t[e];let a,l,d=-1,p=0;for(;p<i.length&&(n.lastIndex=p,l=n.exec(i),null!==l);)p=n.lastIndex,n===T?"!--"===l[1]?n=z:void 0!==l[1]?n=O:void 0!==l[2]?(H.test(l[2])&&(r=RegExp("</"+l[2],"g")),n=N):void 0!==l[3]&&(n=N):n===N?">"===l[0]?(n=null!=r?r:T,d=-1):void 0===l[1]?d=-2:(d=n.lastIndex-l[2].length,a=l[1],n=void 0===l[3]?N:'"'===l[3]?D:L):n===D||n===L?n=N:n===z||n===O?n=T:(n=N,r=void 0);const c=n===N&&t[e+1].startsWith("/>")?" ":"";o+=n===T?i+A:d>=0?(s.push(a),i.slice(0,d)+y+i.slice(d)+x+c):i+x+(-2===d?(s.push(void 0),e):c)}return[B(t,o+(t[i]||"<?>")+(2===e?"</svg>":"")),s]};class F{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[l,d]=V(t,e);if(this.el=F.createElement(l,i),I.currentNode=this.el.content,2===e){const t=this.el.content,e=t.firstChild;e.remove(),t.append(...e.childNodes)}for(;null!==(s=I.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes()){const t=[];for(const e of s.getAttributeNames())if(e.endsWith(y)||e.startsWith(x)){const i=d[o++];if(t.push(e),void 0!==i){const t=s.getAttribute(i.toLowerCase()+y).split(x),e=/([.?@])?(.*)/.exec(i);a.push({type:1,index:r,name:e[2],strings:t,ctor:"."===e[1]?J:"?"===e[1]?G:"@"===e[1]?Q:Y})}else a.push({type:6,index:r})}for(const e of t)s.removeAttribute(e)}if(H.test(s.tagName)){const t=s.textContent.split(x),e=t.length-1;if(e>0){s.textContent=b?b.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],C()),I.nextNode(),a.push({type:2,index:++r});s.append(t[e],C())}}}else if(8===s.nodeType)if(s.data===w)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(x,t+1));)a.push({type:7,index:r}),t+=x.length-1}r++}}static createElement(t,e){const i=E.createElement("template");return i.innerHTML=t,i}}function K(t,e,i=t,s){var r,o,n,a;if(e===R)return e;let l=void 0!==s?null===(r=i._$Co)||void 0===r?void 0:r[s]:i._$Cl;const d=S(e)?void 0:e._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(t),l._$AT(t,i,s)),void 0!==s?(null!==(n=(a=i)._$Co)&&void 0!==n?n:a._$Co=[])[s]=l:i._$Cl=l),void 0!==l&&(e=K(t,l._$AS(t,e.values),l,s)),e}class W{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){var e;const{el:{content:i},parts:s}=this._$AD,r=(null!==(e=null==t?void 0:t.creationScope)&&void 0!==e?e:E).importNode(i,!0);I.currentNode=r;let o=I.nextNode(),n=0,a=0,l=s[0];for(;void 0!==l;){if(n===l.index){let e;2===l.type?e=new q(o,o.nextSibling,this,t):1===l.type?e=new l.ctor(o,l.name,l.strings,this,t):6===l.type&&(e=new X(o,this,t)),this._$AV.push(e),l=s[++a]}n!==(null==l?void 0:l.index)&&(o=I.nextNode(),n++)}return I.currentNode=E,r}v(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class q{constructor(t,e,i,s){var r;this.type=2,this._$AH=M,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cp=null===(r=null==s?void 0:s.isConnected)||void 0===r||r}get _$AU(){var t,e;return null!==(e=null===(t=this._$AM)||void 0===t?void 0:t._$AU)&&void 0!==e?e:this._$Cp}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===(null==t?void 0:t.nodeType)&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=K(this,t,e),S(t)?t===M||null==t||""===t?(this._$AH!==M&&this._$AR(),this._$AH=M):t!==this._$AH&&t!==R&&this._(t):void 0!==t._$litType$?this.g(t):void 0!==t.nodeType?this.$(t):(t=>k(t)||"function"==typeof(null==t?void 0:t[Symbol.iterator]))(t)?this.T(t):this._(t)}k(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}$(t){this._$AH!==t&&(this._$AR(),this._$AH=this.k(t))}_(t){this._$AH!==M&&S(this._$AH)?this._$AA.nextSibling.data=t:this.$(E.createTextNode(t)),this._$AH=t}g(t){var e;const{values:i,_$litType$:s}=t,r="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=F.createElement(B(s.h,s.h[0]),this.options)),s);if((null===(e=this._$AH)||void 0===e?void 0:e._$AD)===r)this._$AH.v(i);else{const t=new W(r,this),e=t.u(this.options);t.v(i),this.$(e),this._$AH=t}}_$AC(t){let e=j.get(t.strings);return void 0===e&&j.set(t.strings,e=new F(t)),e}T(t){k(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new q(this.k(C()),this.k(C()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){var i;for(null===(i=this._$AP)||void 0===i||i.call(this,!1,!0,e);t&&t!==this._$AB;){const e=t.nextSibling;t.remove(),t=e}}setConnected(t){var e;void 0===this._$AM&&(this._$Cp=t,null===(e=this._$AP)||void 0===e||e.call(this,t))}}class Y{constructor(t,e,i,s,r){this.type=1,this._$AH=M,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=M}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=K(this,t,e,0),o=!S(t)||t!==this._$AH&&t!==R,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=K(this,s[i+n],e,n),a===R&&(a=this._$AH[n]),o||(o=!S(a)||a!==this._$AH[n]),a===M?t=M:t!==M&&(t+=(null!=a?a:"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===M?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=t?t:"")}}class J extends Y{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===M?void 0:t}}const Z=b?b.emptyScript:"";class G extends Y{constructor(){super(...arguments),this.type=4}j(t){t&&t!==M?this.element.setAttribute(this.name,Z):this.element.removeAttribute(this.name)}}class Q extends Y{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){var i;if((t=null!==(i=K(this,t,e,0))&&void 0!==i?i:M)===R)return;const s=this._$AH,r=t===M&&s!==M||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,o=t!==M&&(s===M||r);r&&this.element.removeEventListener(this.name,this,s),o&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){var e,i;"function"==typeof this._$AH?this._$AH.call(null!==(i=null===(e=this.options)||void 0===e?void 0:e.host)&&void 0!==i?i:this.element,t):this._$AH.handleEvent(t)}}class X{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){K(this,t)}}const tt=_.litHtmlPolyfillSupport;null==tt||tt(F,q),(null!==(g=_.litHtmlVersions)&&void 0!==g?g:_.litHtmlVersions=[]).push("2.8.0");
+var g;v[m]=!0,v.elementProperties=new Map,v.elementStyles=[],v.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:v}),(null!==(a=l.reactiveElementVersions)&&void 0!==a?a:l.reactiveElementVersions=[]).push("1.6.3");const b=window,_=b.trustedTypes,$=_?_.createPolicy("lit-html",{createHTML:t=>t}):void 0,y="$lit$",x=`lit$${(Math.random()+"").slice(9)}$`,w="?"+x,A=`<${w}>`,E=document,C=()=>E.createComment(""),S=t=>null===t||"object"!=typeof t&&"function"!=typeof t,k=Array.isArray,P="[ \t\n\f\r]",T=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,z=/-->/g,O=/>/g,L=RegExp(`>|${P}(?:([^\\s"'>=/]+)(${P}*=${P}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),N=/'/g,D=/"/g,U=/^(?:script|style|textarea|title)$/i,H=(t=>(e,...i)=>({_$litType$:t,strings:e,values:i}))(1),R=Symbol.for("lit-noChange"),j=Symbol.for("lit-nothing"),M=new WeakMap,I=E.createTreeWalker(E,129,null,!1);function B(t,e){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==$?$.createHTML(e):e}const V=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":"",n=T;for(let e=0;e<i;e++){const i=t[e];let a,l,d=-1,c=0;for(;c<i.length&&(n.lastIndex=c,l=n.exec(i),null!==l);)c=n.lastIndex,n===T?"!--"===l[1]?n=z:void 0!==l[1]?n=O:void 0!==l[2]?(U.test(l[2])&&(r=RegExp("</"+l[2],"g")),n=L):void 0!==l[3]&&(n=L):n===L?">"===l[0]?(n=null!=r?r:T,d=-1):void 0===l[1]?d=-2:(d=n.lastIndex-l[2].length,a=l[1],n=void 0===l[3]?L:'"'===l[3]?D:N):n===D||n===N?n=L:n===z||n===O?n=T:(n=L,r=void 0);const p=n===L&&t[e+1].startsWith("/>")?" ":"";o+=n===T?i+A:d>=0?(s.push(a),i.slice(0,d)+y+i.slice(d)+x+p):i+x+(-2===d?(s.push(void 0),e):p)}return[B(t,o+(t[i]||"<?>")+(2===e?"</svg>":"")),s]};class q{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[l,d]=V(t,e);if(this.el=q.createElement(l,i),I.currentNode=this.el.content,2===e){const t=this.el.content,e=t.firstChild;e.remove(),t.append(...e.childNodes)}for(;null!==(s=I.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes()){const t=[];for(const e of s.getAttributeNames())if(e.endsWith(y)||e.startsWith(x)){const i=d[o++];if(t.push(e),void 0!==i){const t=s.getAttribute(i.toLowerCase()+y).split(x),e=/([.?@])?(.*)/.exec(i);a.push({type:1,index:r,name:e[2],strings:t,ctor:"."===e[1]?Y:"?"===e[1]?G:"@"===e[1]?Q:J})}else a.push({type:6,index:r})}for(const e of t)s.removeAttribute(e)}if(U.test(s.tagName)){const t=s.textContent.split(x),e=t.length-1;if(e>0){s.textContent=_?_.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],C()),I.nextNode(),a.push({type:2,index:++r});s.append(t[e],C())}}}else if(8===s.nodeType)if(s.data===w)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(x,t+1));)a.push({type:7,index:r}),t+=x.length-1}r++}}static createElement(t,e){const i=E.createElement("template");return i.innerHTML=t,i}}function F(t,e,i=t,s){var r,o,n,a;if(e===R)return e;let l=void 0!==s?null===(r=i._$Co)||void 0===r?void 0:r[s]:i._$Cl;const d=S(e)?void 0:e._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(t),l._$AT(t,i,s)),void 0!==s?(null!==(n=(a=i)._$Co)&&void 0!==n?n:a._$Co=[])[s]=l:i._$Cl=l),void 0!==l&&(e=F(t,l._$AS(t,e.values),l,s)),e}class K{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){var e;const{el:{content:i},parts:s}=this._$AD,r=(null!==(e=null==t?void 0:t.creationScope)&&void 0!==e?e:E).importNode(i,!0);I.currentNode=r;let o=I.nextNode(),n=0,a=0,l=s[0];for(;void 0!==l;){if(n===l.index){let e;2===l.type?e=new W(o,o.nextSibling,this,t):1===l.type?e=new l.ctor(o,l.name,l.strings,this,t):6===l.type&&(e=new X(o,this,t)),this._$AV.push(e),l=s[++a]}n!==(null==l?void 0:l.index)&&(o=I.nextNode(),n++)}return I.currentNode=E,r}v(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class W{constructor(t,e,i,s){var r;this.type=2,this._$AH=j,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cp=null===(r=null==s?void 0:s.isConnected)||void 0===r||r}get _$AU(){var t,e;return null!==(e=null===(t=this._$AM)||void 0===t?void 0:t._$AU)&&void 0!==e?e:this._$Cp}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===(null==t?void 0:t.nodeType)&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=F(this,t,e),S(t)?t===j||null==t||""===t?(this._$AH!==j&&this._$AR(),this._$AH=j):t!==this._$AH&&t!==R&&this._(t):void 0!==t._$litType$?this.g(t):void 0!==t.nodeType?this.$(t):(t=>k(t)||"function"==typeof(null==t?void 0:t[Symbol.iterator]))(t)?this.T(t):this._(t)}k(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}$(t){this._$AH!==t&&(this._$AR(),this._$AH=this.k(t))}_(t){this._$AH!==j&&S(this._$AH)?this._$AA.nextSibling.data=t:this.$(E.createTextNode(t)),this._$AH=t}g(t){var e;const{values:i,_$litType$:s}=t,r="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=q.createElement(B(s.h,s.h[0]),this.options)),s);if((null===(e=this._$AH)||void 0===e?void 0:e._$AD)===r)this._$AH.v(i);else{const t=new K(r,this),e=t.u(this.options);t.v(i),this.$(e),this._$AH=t}}_$AC(t){let e=M.get(t.strings);return void 0===e&&M.set(t.strings,e=new q(t)),e}T(t){k(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new W(this.k(C()),this.k(C()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){var i;for(null===(i=this._$AP)||void 0===i||i.call(this,!1,!0,e);t&&t!==this._$AB;){const e=t.nextSibling;t.remove(),t=e}}setConnected(t){var e;void 0===this._$AM&&(this._$Cp=t,null===(e=this._$AP)||void 0===e||e.call(this,t))}}class J{constructor(t,e,i,s,r){this.type=1,this._$AH=j,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=j}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=F(this,t,e,0),o=!S(t)||t!==this._$AH&&t!==R,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=F(this,s[i+n],e,n),a===R&&(a=this._$AH[n]),o||(o=!S(a)||a!==this._$AH[n]),a===j?t=j:t!==j&&(t+=(null!=a?a:"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===j?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=t?t:"")}}class Y extends J{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===j?void 0:t}}const Z=_?_.emptyScript:"";class G extends J{constructor(){super(...arguments),this.type=4}j(t){t&&t!==j?this.element.setAttribute(this.name,Z):this.element.removeAttribute(this.name)}}class Q extends J{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){var i;if((t=null!==(i=F(this,t,e,0))&&void 0!==i?i:j)===R)return;const s=this._$AH,r=t===j&&s!==j||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,o=t!==j&&(s===j||r);r&&this.element.removeEventListener(this.name,this,s),o&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){var e,i;"function"==typeof this._$AH?this._$AH.call(null!==(i=null===(e=this.options)||void 0===e?void 0:e.host)&&void 0!==i?i:this.element,t):this._$AH.handleEvent(t)}}class X{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){F(this,t)}}const tt=b.litHtmlPolyfillSupport;null==tt||tt(q,W),(null!==(g=b.litHtmlVersions)&&void 0!==g?g:b.litHtmlVersions=[]).push("2.8.0");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var et,it;class st extends m{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var t,e;const i=super.createRenderRoot();return null!==(t=(e=this.renderOptions).renderBefore)&&void 0!==t||(e.renderBefore=i.firstChild),i}update(t){const e=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=((t,e,i)=>{var s,r;const o=null!==(s=null==i?void 0:i.renderBefore)&&void 0!==s?s:e;let n=o._$litPart$;if(void 0===n){const t=null!==(r=null==i?void 0:i.renderBefore)&&void 0!==r?r:null;o._$litPart$=n=new q(e.insertBefore(C(),t),t,void 0,null!=i?i:{})}return n._$AI(t),n})(e,this.renderRoot,this.renderOptions)}connectedCallback(){var t;super.connectedCallback(),null===(t=this._$Do)||void 0===t||t.setConnected(!0)}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Do)||void 0===t||t.setConnected(!1)}render(){return R}}st.finalized=!0,st._$litElement$=!0,null===(et=globalThis.litElementHydrateSupport)||void 0===et||et.call(globalThis,{LitElement:st});const rt=globalThis.litElementPolyfillSupport;null==rt||rt({LitElement:st}),(null!==(it=globalThis.litElementVersions)&&void 0!==it?it:globalThis.litElementVersions=[]).push("3.3.3");
+var et,it;class st extends v{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var t,e;const i=super.createRenderRoot();return null!==(t=(e=this.renderOptions).renderBefore)&&void 0!==t||(e.renderBefore=i.firstChild),i}update(t){const e=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=((t,e,i)=>{var s,r;const o=null!==(s=null==i?void 0:i.renderBefore)&&void 0!==s?s:e;let n=o._$litPart$;if(void 0===n){const t=null!==(r=null==i?void 0:i.renderBefore)&&void 0!==r?r:null;o._$litPart$=n=new W(e.insertBefore(C(),t),t,void 0,null!=i?i:{})}return n._$AI(t),n})(e,this.renderRoot,this.renderOptions)}connectedCallback(){var t;super.connectedCallback(),null===(t=this._$Do)||void 0===t||t.setConnected(!0)}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Do)||void 0===t||t.setConnected(!1)}render(){return R}}st.finalized=!0,st._$litElement$=!0,null===(et=globalThis.litElementHydrateSupport)||void 0===et||et.call(globalThis,{LitElement:st});const rt=globalThis.litElementPolyfillSupport;null==rt||rt({LitElement:st}),(null!==(it=globalThis.litElementVersions)&&void 0!==it?it:globalThis.litElementVersions=[]).push("3.3.3");
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -42,76 +42,76 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var dt;null===(dt=window.HTMLSlotElement)||void 0===dt||dt.prototype.assignedElements;const pt=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"expandable",name:"",schema:[{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}]}],ct={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier","":"Font Sizes",font_size_time:"Time",font_size_destination:"Destination",font_size_status:"Status Pill"},ut={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)"};let ht=class extends st{constructor(){super(...arguments),this._computeLabel=t=>ct[t.name]||t.name,this._computeHelper=t=>ut[t.name]}setConfig(t){this._config=t}render(){return this.hass&&this._config?U`
+ */var dt;null===(dt=window.HTMLSlotElement)||void 0===dt||dt.prototype.assignedElements;const ct=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"expandable",name:"",schema:[{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}]}],pt={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier","":"Font Sizes",font_size_time:"Time",font_size_destination:"Destination",font_size_status:"Status Pill"},ht={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)"};let ut=class extends st{constructor(){super(...arguments),this._computeLabel=t=>pt[t.name]||t.name,this._computeHelper=t=>ht[t.name]}setConfig(t){this._config=t}render(){return this.hass&&this._config?H`
             <ha-form
                 .hass=${this.hass}
                 .data=${this._config}
-                .schema=${pt}
+                .schema=${ct}
                 .computeLabel=${this._computeLabel}
                 .computeHelper=${this._computeHelper}
                 @value-changed=${this._valueChanged}
             ></ha-form>
-        `:M}_valueChanged(t){t.stopPropagation();const e=t.detail.value,i=Object.assign(Object.assign(Object.assign({},this._config),e),{attribute:e.attribute||"next_trains",stops_identifier:e.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:i},bubbles:!0,composed:!0}))}};t([at({attribute:!1})],ht.prototype,"hass",void 0),t([lt()],ht.prototype,"_config",void 0),ht=t([ot("train-departure-board-editor")],ht);let ft=class extends st{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this.dateCache=new Map,this.lastEntityId=null,this._handleKeyDown=t=>{"Escape"===t.key&&this._selectedDeparture&&this._closePopup()}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(t){if(!t)throw new Error("Invalid configuration");const e=Object.assign({attribute:"next_trains"},t);"string"==typeof e.attribute?e.attribute=e.attribute.trim()||"next_trains":e.attribute="next_trains",this.config=e}render(){var t,e,i;if(!this.config)return U`<div class="card">No configuration provided</div>`;if(!this.config.entity)return U`<div class="card">Please configure an entity</div>`;const s=null===(e=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===e?void 0:e[this.config.entity];if(!s)return U`<div class="card">Entity not found: ${this.config.entity}</div>`;this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity);const r=this.config.attribute||"next_trains",o=null===(i=s.attributes)||void 0===i?void 0:i[r],n=Array.isArray(o)?o:[],a=s.last_updated?new Date(s.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";void 0===o&&console.warn(`train-departure-board: attribute "${r}" was not found on entity ${this.config.entity}`),Array.isArray(o)||void 0===o||console.warn(`train-departure-board: attribute "${r}" is not an array, falling back to empty list`);const l=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; ");return U`
+        `:j}_valueChanged(t){t.stopPropagation();const e=t.detail.value,i=Object.assign(Object.assign(Object.assign({},this._config),e),{attribute:e.attribute||"next_trains",stops_identifier:e.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:i},bubbles:!0,composed:!0}))}};t([at({attribute:!1})],ut.prototype,"hass",void 0),t([lt()],ut.prototype,"_config",void 0),ut=t([ot("train-departure-board-editor")],ut);let ft=class extends st{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this.dateCache=new Map,this.lastEntityId=null,this._handleKeyDown=t=>{"Escape"===t.key&&this._selectedDeparture&&this._closePopup()}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(t){if(!t)throw new Error("Invalid configuration");const e=Object.assign({attribute:"next_trains"},t);"string"==typeof e.attribute?e.attribute=e.attribute.trim()||"next_trains":e.attribute="next_trains",this.config=e}render(){var t,e,i;if(!this.config)return H`<div class="card">No configuration provided</div>`;if(!this.config.entity)return H`<div class="card">Please configure an entity</div>`;const s=null===(e=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===e?void 0:e[this.config.entity];if(!s)return H`<div class="card">Entity not found: ${this.config.entity}</div>`;this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity);const r=this.config.attribute||"next_trains",o=null===(i=s.attributes)||void 0===i?void 0:i[r],n=Array.isArray(o)?o:[],a=s.last_updated?new Date(s.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";void 0===o&&console.warn(`train-departure-board: attribute "${r}" was not found on entity ${this.config.entity}`),Array.isArray(o)||void 0===o||console.warn(`train-departure-board: attribute "${r}" is not an array, falling back to empty list`);const l=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; ");return H`
             <ha-card style="${l}">
-                ${this.config.title?U`<div class="card-header">${this.config.title}</div>`:""}
+                ${this.config.title?H`<div class="card-header">${this.config.title}</div>`:""}
                 <div class="card">
-                    ${n.length>0?U`<div class="departure-list" role="list" aria-label="Train departures">
+                    ${n.length>0?H`<div class="departure-list" role="list" aria-label="Train departures">
                             ${n.map((t,e)=>this.renderDepartureRow(t,e))}
-                        </div>`:U`<div class="no-departures">No departures available</div>`}
-                    ${a?U`<div class="footer">Last updated: ${a}</div>`:""}
+                        </div>`:H`<div class="no-departures">No departures available</div>`}
+                    ${a?H`<div class="footer">Last updated: ${a}</div>`:""}
                 </div>
             </ha-card>
             ${this._renderDetailsPopup()}
-        `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown)}_showDetails(t){this._selectedDeparture=t}_closePopup(){this._selectedDeparture=null}_handleOverlayClick(t){t.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){if(!this._selectedDeparture)return M;const t=this._selectedDeparture,{statusClass:e,statusLabel:i}=this.getStatusMeta(t),s=this.extractTimeLabel(t.scheduled),r=this._getStopsForPopup(t),o="cancelled"===e;return U`
+        `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown)}_showDetails(t){this._selectedDeparture=t}_closePopup(){this._selectedDeparture=null}_handleOverlayClick(t){t.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){if(!this._selectedDeparture)return j;const t=this._selectedDeparture,{statusClass:e,statusLabel:i}=this.getStatusMeta(t),s=this.extractTimeLabel(t.scheduled),r=this._getStopsForPopup(t),o="cancelled"===e,n="on-time"===e?"status-ok":"cancelled"===e?"status-cancelled":"status-delayed",a=r.some(t=>t.isPassed);return H`
             <div class="popup-overlay" @click=${this._handleOverlayClick} role="dialog" aria-modal="true" aria-label="Train details">
                 <div class="popup-card">
-                    <div class="popup-header">
-                        <h2>${t.destination_name}</h2>
-                        <button class="popup-close" @click=${this._closePopup} aria-label="Close">&times;</button>
-                    </div>
-                    <div class="popup-content">
-                        <div class="popup-meta">
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Scheduled</span>
-                                <span class="popup-meta-value ${o?"popup-time-cancelled":""}">${s}</span>
+                    <div class="modern-header">
+                        <div class="modern-header-top">
+                            <div class="modern-dest-group">
+                                <div class="modern-time-group">
+                                    <span class="modern-scheduled ${o?"time-cancelled":""}">${s}</span>
+                                    ${t.operator_name?H`<span class="modern-operator">${t.operator_name}</span>`:""}
+                                </div>
+                                <h2 class="modern-dest">${t.destination_name}</h2>
                             </div>
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Status</span>
-                                <span class="status-pill ${e}">${i}</span>
+                            <button class="popup-close" @click=${this._closePopup} aria-label="Close">&times;</button>
+                        </div>
+                        <div class="modern-badges">
+                            <div class="modern-badge ${n}">
+                                <span style="font-size: 1.2em; line-height: 1;">●</span> ${i}
                             </div>
-                            ${t.platform?U`
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Platform</span>
-                                <span class="popup-meta-value">${t.platform}</span>
-                            </div>`:""}
-                            ${t.origin_name?U`
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">From</span>
-                                <span class="popup-meta-value">${t.origin_name}</span>
-                            </div>`:""}
-                            ${t.operator_name?U`
-                            <div class="popup-meta-item">
-                                <span class="popup-meta-label">Operator</span>
-                                <span class="popup-meta-value">${t.operator_name}</span>
+                            ${t.platform?H`
+                            <div class="modern-badge platform">
+                                Platform ${t.platform}
                             </div>`:""}
                         </div>
-                        ${r.length>0?U`
-                        <div class="popup-stops-title">Calling at</div>
-                        <div class="popup-stops-list ${r[0].isBetweenPrevious?"first-is-between":""}">
-                            ${r.map(t=>U`
-                                <div class="popup-stop ${t.isPassed?"passed":""} ${t.isCurrent?"current":""} ${t.isBetweenPrevious?"between-previous":""}">
-                                    <div class="popup-stop-circle">
-                                        <div class="popup-train-indicator"></div>
+                    </div>
+                    
+                    <div class="modern-content">
+                        ${r.length>0?H`
+                        <div class="timeline-container">
+                            <div class="modern-stops-list ${a?"has-passed":""}">
+                                ${r.map((t,e)=>H`
+                                    ${t.isBetweenPrevious?H`
+                                    <div style="position: relative; height: 6px;" aria-hidden="true">
+                                        <div class="modern-train-pos">🚆</div>
                                     </div>
-                                    <span class="popup-stop-time">${t.time}</span>
-                                    <span class="popup-stop-name">${t.name}</span>
-                                </div>
-                            `)}
+                                    `:""}
+                                    <div class="modern-stop ${t.isPassed?"passed":""} ${t.isCurrent?"current":""}">
+                                        <div class="modern-stop-circle"></div>
+                                        <span class="modern-stop-time">${t.time}</span>
+                                        <div class="modern-stop-info">
+                                            <span class="modern-stop-name">${t.name}</span>
+                                            ${!t.isPassed&&t.statusLabel?H`<span class="modern-stop-status ${t.statusClass}">${t.statusLabel}</span>`:""}
+                                        </div>
+                                    </div>
+                                `)}
+                            </div>
                         </div>`:""}
                     </div>
                 </div>
             </div>
-        `}_getStopsForPopup(t){var e;const i=t.subsequent_stops||[],s=this.config.stops_identifier||"description";let r=i.map(t=>{var e;let i="";i="tiploc"===s?(t.stop||"").trim():"crs"===s?(t.name||"").trim():(t.name||t.stop||"").trim();const r=t.estimated||t.scheduled,o=r?(r.split(" ")[1]||"").trim():"",n=this.parseDateTime(r);return{name:i,time:o,timestamp:null!==(e=null==n?void 0:n.getTime())&&void 0!==e?e:Number.POSITIVE_INFINITY,stopCode:t.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1}}).filter(t=>t.name).sort((t,e)=>t.timestamp-e.timestamp);if(!t.last_report_station||!t.last_report_type)return r;const o=t.last_report_station,n=t.last_report_type,a=t.last_report_time?null===(e=this.parseDateTime(t.last_report_time))||void 0===e?void 0:e.getTime():void 0,l=r.findIndex(t=>t.stopCode===o);if(-1!==l){for(let t=0;t<l;t++)r[t].isPassed=!0;"Arrival"===n?(r[l].isCurrent=!0,r[l].isPassed=!1):(r[l].isPassed=!0,l+1<r.length?r[l+1].isBetweenPrevious=!0:r[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let t=-1;for(let e=0;e<r.length&&r[e].timestamp<=a;e++)r[e].isPassed=!0,t=e;-1!==t&&t+1<r.length?r[t+1].isBetweenPrevious=!0:-1===t&&r.length>0&&(r[0].isBetweenPrevious=!0)}if(r.length>0&&r[0].isBetweenPrevious&&-1===l&&o){const e=t.last_report_time?this.extractTimeLabel(t.last_report_time):"";r.unshift({name:o,time:e,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1})}return r}renderDepartureRow(t,e){const i=this.extractTimeLabel(t.scheduled),{statusClass:s,statusLabel:r}=this.getStatusMeta(t),o=t.platform?t.platform:null,n="cancelled"===s,a=n?"time-cancelled":"";return U`
+        `}_getStopsForPopup(t){var e;const i=t.subsequent_stops||[],s=this.config.stops_identifier||"description";let r=i.map(t=>{var e;let i="";i="tiploc"===s?(t.stop||"").trim():"crs"===s?(t.name||"").trim():(t.name||t.stop||"").trim();const r=t.estimated||t.scheduled,o=this.parseDateTime(r),n=null!==(e=null==o?void 0:o.getTime())&&void 0!==e?e:Number.POSITIVE_INFINITY,a=t.estimated,l=t.scheduled;let d="On time",c="on-time";if(a&&l&&a!==l){const t=(a.split(" ")[1]||"").trim();t&&(d=`Exp ${t}`,c="delayed")}return((null==a?void 0:a.toLowerCase().includes("cancel"))||t.is_cancelled)&&(d="Cancelled",c="cancelled"),{name:i,time:r?(r.split(" ")[1]||"").trim():"",timestamp:n,stopCode:t.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:d,statusClass:c}}).filter(t=>t.name).sort((t,e)=>t.timestamp-e.timestamp);if(!t.last_report_station||!t.last_report_type)return r;const o=t.last_report_station,n=t.last_report_type,a=t.last_report_time?null===(e=this.parseDateTime(t.last_report_time))||void 0===e?void 0:e.getTime():void 0,l=r.findIndex(t=>t.stopCode===o);if(-1!==l){for(let t=0;t<l;t++)r[t].isPassed=!0;"Arrival"===n?(r[l].isCurrent=!0,r[l].isPassed=!1):(r[l].isPassed=!0,l+1<r.length?r[l+1].isBetweenPrevious=!0:r[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let t=-1;for(let e=0;e<r.length&&r[e].timestamp<=a;e++)r[e].isPassed=!0,t=e;-1!==t&&t+1<r.length?r[t+1].isBetweenPrevious=!0:-1===t&&r.length>0&&(r[0].isBetweenPrevious=!0)}if(r.length>0&&r[0].isBetweenPrevious&&-1===l&&o){const e=t.last_report_time?this.extractTimeLabel(t.last_report_time):"";r.unshift({name:o,time:e,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return r}renderDepartureRow(t,e){const i=this.extractTimeLabel(t.scheduled),{statusClass:s,statusLabel:r}=this.getStatusMeta(t),o=t.platform?t.platform:null,n="cancelled"===s,a=n?"time-cancelled":"";return H`
             <div 
                 class="train ${0===e?"next-train":""} ${n?"cancelled-row":""}"
                 role="listitem" 
@@ -125,7 +125,7 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
                     <div class="destination-row">
                         <h3 class="terminus">${t.destination_name}</h3>
                         <span class="status-pill ${s}" aria-label="Status: ${r}">${r}</span>
-                        ${o?U`<span class="platform-badge" aria-label="Platform ${o}">${o}</span>`:""}
+                        ${o?H`<span class="platform-badge" aria-label="Platform ${o}">${o}</span>`:""}
                     </div>
                 </div>
             </div>
@@ -291,148 +291,141 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
             overflow: auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .popup-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
+        /* --- MODERN POPUP (DENSE JOURNEY FOCUS) --- */
+        .modern-header {
+            padding: 12px 16px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
             border-bottom: 1px solid var(--divider-color, #e0e0e0);
-            position: sticky;
-            top: 0;
-            background: var(--card-background-color, #fff);
+            position: relative;
             border-radius: 12px 12px 0 0;
         }
-        .popup-header h2 {
-            margin: 0;
-            font-size: 1.2em;
-            font-weight: 600;
-            color: var(--primary-text-color);
+        .modern-header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .modern-dest-group { display: flex; flex-direction: column; gap: 4px; }
+        .modern-time-group { display: flex; align-items: baseline; gap: 8px; }
+        .modern-scheduled { font-size: 1.4em; color: var(--primary-text-color); font-weight: 700; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
+        .modern-operator { font-size: 0.85em; color: var(--secondary-text-color, #666); font-weight: 500; }
+        .modern-dest { margin: 0; font-size: 1.15em; font-weight: 600; line-height: 1.2; color: var(--primary-text-color); }
+        .modern-badges { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+        .modern-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; background: var(--secondary-background-color, rgba(0,0,0,0.05)); }
+        .modern-badge.status-ok { background: rgba(76, 175, 80, 0.15); color: var(--success-color, #4caf50); }
+        .modern-badge.status-delayed { background: rgba(255, 152, 0, 0.15); color: var(--warning-color, #ff9800); }
+        .modern-badge.status-cancelled { background: rgba(244, 67, 54, 0.15); color: var(--error-color, #f44336); }
+        .modern-badge.platform { background: rgba(255, 255, 255, 0.1); }
+        
+        /* Dense Timeline */
+        .timeline-container { padding: 12px 16px; background: rgba(0,0,0,0.02); }
+        .modern-stops-list { display: flex; flex-direction: column; position: relative; padding-left: 36px; }
+        
+        /* The Line */
+        .modern-stops-list::before { 
+            content: ''; 
+            position: absolute; 
+            left: 14px; 
+            top: 14px; 
+            bottom: 14px; 
+            width: 4px; 
+            background: var(--info-color, #03a9f4); 
+            border-radius: 2px;
+            z-index: 1; 
         }
-        .popup-close {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: var(--secondary-text-color, #666);
-            padding: 4px 8px;
-            border-radius: 4px;
-            line-height: 1;
+        
+        /* Passed portion of the line */
+        .modern-stops-list.has-passed::after {
+            content: ''; 
+            position: absolute; 
+            left: 14px; 
+            top: 14px; 
+            bottom: 14px;
+            width: 4px; 
+            background: var(--secondary-text-color, #666); 
+            border-radius: 2px 2px 0 0;
+            z-index: 2;
+            opacity: 0.5;
         }
-        .popup-close:hover {
-            background: var(--secondary-background-color, rgba(0, 0, 0, 0.1));
+
+        .modern-stop { display: flex; align-items: center; gap: 12px; padding: 8px 0; position: relative; z-index: 3; }
+        
+        /* Station Nodes */
+        .modern-stop-circle { 
+            position: absolute; 
+            left: -26px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            background: var(--card-background-color, #fff); 
+            border: 3px solid var(--info-color, #03a9f4); 
+            z-index: 4;
+            transition: all 0.2s ease;
         }
-        .popup-content {
-            padding: 16px;
+        
+        .modern-stop.passed .modern-stop-circle { 
+            border-color: var(--secondary-text-color, #666);
+            background: var(--secondary-text-color, #666);
+            width: 8px;
+            height: 8px;
+            left: -24px;
         }
-        .popup-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+
+        .modern-stop.current .modern-stop-circle { 
+            border-color: var(--warning-color, #ff9800);
+            background: var(--warning-color, #ff9800);
         }
-        .popup-meta-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .popup-meta-label {
-            font-size: 0.85em;
-            color: var(--secondary-text-color, #666);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .popup-meta-value {
-            font-size: 1.1em;
-            font-weight: 500;
-            color: var(--primary-text-color);
-        }
-        .popup-stops-title {
-            font-size: 0.95em;
-            font-weight: 600;
-            color: var(--secondary-text-color, #666);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .popup-stops-list {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            padding-left: 36px;
-        }
-        .popup-stops-list::before {
-            content: '';
+        
+        /* Train Position Indicator */
+        .modern-train-pos {
             position: absolute;
-            left: 14px;
-            top: 18px;
-            bottom: 18px;
-            width: 4px;
-            background: var(--divider-color, #e0e0e0);
-            z-index: 1;
-        }
-        /* Extend line upwards if the very first item is between-previous (rare but possible) */
-        .popup-stops-list.first-is-between::before {
-            top: 0;
-        }
-        .popup-stop {
+            left: -33px;
+            top: -12px; /* Positioned between stations */
+            width: 22px;
+            height: 22px;
+            background: var(--warning-color, #ff9800);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 10px 0;
-            position: relative;
-            z-index: 2;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 2px 6px rgba(0,0,0,0.5);
+            z-index: 5;
+            animation: pulse 2s infinite;
         }
-        .popup-stop-circle {
-            position: absolute;
-            left: -28px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--card-background-color, #fff);
-            border: 4px solid var(--divider-color, #e0e0e0);
-            z-index: 2;
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0.4); }
+            70% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 8px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0); }
         }
-        .popup-stop.passed .popup-stop-circle {
-            background: var(--primary-text-color, #111);
-            border-color: var(--primary-text-color, #111);
-        }
-        .popup-stop.current .popup-stop-circle {
-            background: var(--warning-color, #ff9800);
-            border-color: var(--warning-color, #ff9800);
-            transform: translateY(-50%) scale(1.2);
-            box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
-        }
-        .popup-stop-time {
-            font-size: 1.0em;
-            font-weight: 600;
+
+        .modern-stop-time { 
+            font-size: 0.95em; 
+            font-weight: 700; 
+            min-width: 45px; 
+            color: var(--primary-text-color);
             font-variant-numeric: tabular-nums;
-            min-width: 50px;
-            color: var(--primary-text-color);
         }
-        .popup-stop-name {
-            font-size: 1.0em;
-            color: var(--primary-text-color);
-            flex: 1;
+        
+        .modern-stop-info { display: flex; flex-direction: row; align-items: baseline; flex: 1; gap: 8px; justify-content: space-between; min-width: 0; }
+        .modern-stop-name { font-size: 0.95em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modern-stop-status { font-size: 0.75em; font-weight: 600; white-space: nowrap; }
+        .modern-stop-status.on-time { color: var(--success-color, #4caf50); }
+        .modern-stop-status.delayed { color: var(--warning-color, #ff9800); }
+        .modern-stop-status.cancelled { color: var(--error-color, #f44336); }
+        
+        .modern-stop.passed .modern-stop-time, 
+        .modern-stop.passed .modern-stop-name { 
+            color: var(--secondary-text-color, #666); 
+            font-weight: 400;
         }
-        .popup-train-indicator {
-            display: none;
-            position: absolute;
-            left: 50%;
-            top: -18px;
-            transform: translate(-50%, -50%) scale(1.2);
-            background: var(--warning-color, #ff9800);
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            z-index: 3;
-            box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
-        }
-        .popup-stop.between-previous .popup-train-indicator {
-            display: block;
+        .modern-stop.passed .modern-stop-status { display: none; }
+
+        /* Terminus special styling */
+        .modern-stop:last-child .modern-stop-name { font-weight: 700; }
+        .modern-stop:last-child .modern-stop-circle { 
+            border-radius: 3px; /* Square for terminus */
+            width: 14px;
+            height: 14px;
+            left: -27px;
         }
         .footer {
             padding: 8px 12px;
