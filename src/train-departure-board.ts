@@ -205,148 +205,141 @@ export class TrainDepartureBoard extends LitElement {
             overflow: auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .popup-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
+        /* --- MODERN POPUP (DENSE JOURNEY FOCUS) --- */
+        .modern-header {
+            padding: 12px 16px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
             border-bottom: 1px solid var(--divider-color, #e0e0e0);
-            position: sticky;
-            top: 0;
-            background: var(--card-background-color, #fff);
+            position: relative;
             border-radius: 12px 12px 0 0;
         }
-        .popup-header h2 {
-            margin: 0;
-            font-size: 1.2em;
-            font-weight: 600;
-            color: var(--primary-text-color);
+        .modern-header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .modern-dest-group { display: flex; flex-direction: column; gap: 4px; }
+        .modern-time-group { display: flex; align-items: baseline; gap: 8px; }
+        .modern-scheduled { font-size: 1.4em; color: var(--primary-text-color); font-weight: 700; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
+        .modern-operator { font-size: 0.85em; color: var(--secondary-text-color, #666); font-weight: 500; }
+        .modern-dest { margin: 0; font-size: 1.15em; font-weight: 600; line-height: 1.2; color: var(--primary-text-color); }
+        .modern-badges { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+        .modern-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; background: var(--secondary-background-color, rgba(0,0,0,0.05)); }
+        .modern-badge.status-ok { background: rgba(76, 175, 80, 0.15); color: var(--success-color, #4caf50); }
+        .modern-badge.status-delayed { background: rgba(255, 152, 0, 0.15); color: var(--warning-color, #ff9800); }
+        .modern-badge.status-cancelled { background: rgba(244, 67, 54, 0.15); color: var(--error-color, #f44336); }
+        .modern-badge.platform { background: rgba(255, 255, 255, 0.1); }
+        
+        /* Dense Timeline */
+        .timeline-container { padding: 12px 16px; background: rgba(0,0,0,0.02); }
+        .modern-stops-list { display: flex; flex-direction: column; position: relative; padding-left: 36px; }
+        
+        /* The Line */
+        .modern-stops-list::before { 
+            content: ''; 
+            position: absolute; 
+            left: 14px; 
+            top: 14px; 
+            bottom: 14px; 
+            width: 4px; 
+            background: var(--info-color, #03a9f4); 
+            border-radius: 2px;
+            z-index: 1; 
         }
-        .popup-close {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: var(--secondary-text-color, #666);
-            padding: 4px 8px;
-            border-radius: 4px;
-            line-height: 1;
+        
+        /* Passed portion of the line */
+        .modern-stops-list.has-passed::after {
+            content: ''; 
+            position: absolute; 
+            left: 14px; 
+            top: 14px; 
+            bottom: 14px;
+            width: 4px; 
+            background: var(--secondary-text-color, #666); 
+            border-radius: 2px 2px 0 0;
+            z-index: 2;
+            opacity: 0.5;
         }
-        .popup-close:hover {
-            background: var(--secondary-background-color, rgba(0, 0, 0, 0.1));
+
+        .modern-stop { display: flex; align-items: center; gap: 12px; padding: 8px 0; position: relative; z-index: 3; }
+        
+        /* Station Nodes */
+        .modern-stop-circle { 
+            position: absolute; 
+            left: -26px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            background: var(--card-background-color, #fff); 
+            border: 3px solid var(--info-color, #03a9f4); 
+            z-index: 4;
+            transition: all 0.2s ease;
         }
-        .popup-content {
-            padding: 16px;
+        
+        .modern-stop.passed .modern-stop-circle { 
+            border-color: var(--secondary-text-color, #666);
+            background: var(--secondary-text-color, #666);
+            width: 8px;
+            height: 8px;
+            left: -24px;
         }
-        .popup-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
+
+        .modern-stop.current .modern-stop-circle { 
+            border-color: var(--warning-color, #ff9800);
+            background: var(--warning-color, #ff9800);
         }
-        .popup-meta-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .popup-meta-label {
-            font-size: 0.85em;
-            color: var(--secondary-text-color, #666);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .popup-meta-value {
-            font-size: 1.1em;
-            font-weight: 500;
-            color: var(--primary-text-color);
-        }
-        .popup-stops-title {
-            font-size: 0.95em;
-            font-weight: 600;
-            color: var(--secondary-text-color, #666);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .popup-stops-list {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            padding-left: 36px;
-        }
-        .popup-stops-list::before {
-            content: '';
+        
+        /* Train Position Indicator */
+        .modern-train-pos {
             position: absolute;
-            left: 14px;
-            top: 18px;
-            bottom: 18px;
-            width: 4px;
-            background: var(--divider-color, #e0e0e0);
-            z-index: 1;
-        }
-        /* Extend line upwards if the very first item is between-previous (rare but possible) */
-        .popup-stops-list.first-is-between::before {
-            top: 0;
-        }
-        .popup-stop {
+            left: -33px;
+            top: -12px; /* Positioned between stations */
+            width: 22px;
+            height: 22px;
+            background: var(--warning-color, #ff9800);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 10px 0;
-            position: relative;
-            z-index: 2;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 2px 6px rgba(0,0,0,0.5);
+            z-index: 5;
+            animation: pulse 2s infinite;
         }
-        .popup-stop-circle {
-            position: absolute;
-            left: -28px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--card-background-color, #fff);
-            border: 4px solid var(--divider-color, #e0e0e0);
-            z-index: 2;
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0.4); }
+            70% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 8px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0); }
         }
-        .popup-stop.passed .popup-stop-circle {
-            background: var(--primary-text-color, #111);
-            border-color: var(--primary-text-color, #111);
-        }
-        .popup-stop.current .popup-stop-circle {
-            background: var(--warning-color, #ff9800);
-            border-color: var(--warning-color, #ff9800);
-            transform: translateY(-50%) scale(1.2);
-            box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
-        }
-        .popup-stop-time {
-            font-size: 1.0em;
-            font-weight: 600;
+
+        .modern-stop-time { 
+            font-size: 0.95em; 
+            font-weight: 700; 
+            min-width: 45px; 
+            color: var(--primary-text-color);
             font-variant-numeric: tabular-nums;
-            min-width: 50px;
-            color: var(--primary-text-color);
         }
-        .popup-stop-name {
-            font-size: 1.0em;
-            color: var(--primary-text-color);
-            flex: 1;
+        
+        .modern-stop-info { display: flex; flex-direction: row; align-items: baseline; flex: 1; gap: 8px; justify-content: space-between; min-width: 0; }
+        .modern-stop-name { font-size: 0.95em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modern-stop-status { font-size: 0.75em; font-weight: 600; white-space: nowrap; }
+        .modern-stop-status.on-time { color: var(--success-color, #4caf50); }
+        .modern-stop-status.delayed { color: var(--warning-color, #ff9800); }
+        .modern-stop-status.cancelled { color: var(--error-color, #f44336); }
+        
+        .modern-stop.passed .modern-stop-time, 
+        .modern-stop.passed .modern-stop-name { 
+            color: var(--secondary-text-color, #666); 
+            font-weight: 400;
         }
-        .popup-train-indicator {
-            display: none;
-            position: absolute;
-            left: 50%;
-            top: -18px;
-            transform: translate(-50%, -50%) scale(1.2);
-            background: var(--warning-color, #ff9800);
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            z-index: 3;
-            box-shadow: 0 0 0 2px var(--card-background-color, #fff), 0 0 0 4px var(--warning-color, #ff9800);
-        }
-        .popup-stop.between-previous .popup-train-indicator {
-            display: block;
+        .modern-stop.passed .modern-stop-status { display: none; }
+
+        /* Terminus special styling */
+        .modern-stop:last-child .modern-stop-name { font-weight: 700; }
+        .modern-stop:last-child .modern-stop-circle { 
+            border-radius: 3px; /* Square for terminus */
+            width: 14px;
+            height: 14px;
+            left: -27px;
         }
         .footer {
             padding: 8px 12px;
