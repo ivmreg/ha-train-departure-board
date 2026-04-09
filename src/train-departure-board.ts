@@ -228,13 +228,14 @@ export class TrainDepartureBoard extends LitElement {
         
         /* Dense Timeline */
         .timeline-container { padding: 12px 16px; background: rgba(0,0,0,0.02); }
-        .modern-stops-list { display: flex; flex-direction: column; position: relative; padding-left: 36px; }
+        .modern-stops-list { display: flex; flex-direction: column; position: relative; }
         
         /* The Line */
         .modern-stops-list::before { 
             content: ''; 
             position: absolute; 
-            left: 17px; 
+            left: 15px; 
+            transform: translateX(-50%);
             top: 14px; 
             bottom: 14px; 
             width: 4px; 
@@ -247,7 +248,8 @@ export class TrainDepartureBoard extends LitElement {
         .modern-stops-list.has-passed::after {
             content: ''; 
             position: absolute; 
-            left: 17px; 
+            left: 15px; 
+            transform: translateX(-50%);
             top: 14px; 
             bottom: 14px;
             width: 4px; 
@@ -257,14 +259,29 @@ export class TrainDepartureBoard extends LitElement {
             opacity: 0.5;
         }
 
-        .modern-stop { display: flex; align-items: center; gap: 12px; padding: 8px 0; position: relative; z-index: 3; }
+        /* Stop rows */
+        .modern-stop, .modern-train-pos-wrapper {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 12px;
+            align-items: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .modern-stop { padding: 8px 0; }
+        .modern-train-pos-wrapper { height: 6px; padding: 0; }
+
+        /* Graphics column */
+        .modern-stop-graphic {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+        }
         
         /* Station Nodes */
         .modern-stop-circle { 
-            position: absolute; 
-            left: -26px; 
-            top: 50%; 
-            transform: translateY(-50%); 
             width: 12px; 
             height: 12px; 
             border-radius: 50%; 
@@ -279,7 +296,6 @@ export class TrainDepartureBoard extends LitElement {
             background: var(--secondary-text-color, #666);
             width: 8px;
             height: 8px;
-            left: -24px;
         }
 
         .modern-stop.current .modern-stop-circle { 
@@ -289,9 +305,6 @@ export class TrainDepartureBoard extends LitElement {
         
         /* Train Position Indicator */
         .modern-train-pos {
-            position: absolute;
-            left: -28px;
-            top: -12px; /* Positioned between stations */
             width: 22px;
             height: 22px;
             background: var(--warning-color, #ff9800);
@@ -309,6 +322,13 @@ export class TrainDepartureBoard extends LitElement {
             0% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0.4); }
             70% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 8px rgba(255, 152, 0, 0); }
             100% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+
+        .modern-stop-content {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            min-width: 0;
         }
 
         .modern-stop-time { 
@@ -339,7 +359,6 @@ export class TrainDepartureBoard extends LitElement {
             border-radius: 3px; /* Square for terminus */
             width: 14px;
             height: 14px;
-            left: -27px;
         }
         .footer {
             padding: 8px 12px;
