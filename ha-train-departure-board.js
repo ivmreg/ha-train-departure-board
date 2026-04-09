@@ -93,16 +93,23 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
                             <div class="modern-stops-list ${a?"has-passed":""}">
                                 ${r.map((t,e)=>H`
                                     ${t.isBetweenPrevious?H`
-                                    <div style="position: relative; height: 6px;" aria-hidden="true">
-                                        <div class="modern-train-pos">🚆</div>
+                                    <div class="modern-train-pos-wrapper" aria-hidden="true">
+                                        <div class="modern-stop-graphic">
+                                            <div class="modern-train-pos">🚆</div>
+                                        </div>
+                                        <div></div>
                                     </div>
                                     `:""}
                                     <div class="modern-stop ${t.isPassed?"passed":""} ${t.isCurrent?"current":""}">
-                                        <div class="modern-stop-circle"></div>
-                                        <span class="modern-stop-time">${t.time}</span>
-                                        <div class="modern-stop-info">
-                                            <span class="modern-stop-name">${t.name}</span>
-                                            ${!t.isPassed&&t.statusLabel?H`<span class="modern-stop-status ${t.statusClass}">${t.statusLabel}</span>`:""}
+                                        <div class="modern-stop-graphic">
+                                            <div class="modern-stop-circle"></div>
+                                        </div>
+                                        <div class="modern-stop-content">
+                                            <span class="modern-stop-time">${t.time}</span>
+                                            <div class="modern-stop-info">
+                                                <span class="modern-stop-name">${t.name}</span>
+                                                ${!t.isPassed&&t.statusLabel?H`<span class="modern-stop-status ${t.statusClass}">${t.statusLabel}</span>`:""}
+                                            </div>
                                         </div>
                                     </div>
                                 `)}
