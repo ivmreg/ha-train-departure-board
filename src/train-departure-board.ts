@@ -510,16 +510,23 @@ export class TrainDepartureBoard extends LitElement {
                             <div class="modern-stops-list ${hasPassedStops ? 'has-passed' : ''}">
                                 ${stops.map((stop, i) => html`
                                     ${stop.isBetweenPrevious ? html`
-                                    <div style="position: relative; height: 6px;" aria-hidden="true">
-                                        <div class="modern-train-pos">🚆</div>
+                                    <div class="modern-train-pos-wrapper" aria-hidden="true">
+                                        <div class="modern-stop-graphic">
+                                            <div class="modern-train-pos">🚆</div>
+                                        </div>
+                                        <div></div>
                                     </div>
                                     ` : ''}
                                     <div class="modern-stop ${stop.isPassed ? 'passed' : ''} ${stop.isCurrent ? 'current' : ''}">
-                                        <div class="modern-stop-circle"></div>
-                                        <span class="modern-stop-time">${stop.time}</span>
-                                        <div class="modern-stop-info">
-                                            <span class="modern-stop-name">${stop.name}</span>
-                                            ${!stop.isPassed && stop.statusLabel ? html`<span class="modern-stop-status ${stop.statusClass}">${stop.statusLabel}</span>` : ''}
+                                        <div class="modern-stop-graphic">
+                                            <div class="modern-stop-circle"></div>
+                                        </div>
+                                        <div class="modern-stop-content">
+                                            <span class="modern-stop-time">${stop.time}</span>
+                                            <div class="modern-stop-info">
+                                                <span class="modern-stop-name">${stop.name}</span>
+                                                ${!stop.isPassed && stop.statusLabel ? html`<span class="modern-stop-status ${stop.statusClass}">${stop.statusLabel}</span>` : ''}
+                                            </div>
                                         </div>
                                     </div>
                                 `)}
