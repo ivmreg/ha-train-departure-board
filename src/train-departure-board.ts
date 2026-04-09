@@ -500,7 +500,7 @@ export class TrainDepartureBoard extends LitElement {
                                         <span class="modern-stop-time">${stop.time}</span>
                                         <div class="modern-stop-info">
                                             <span class="modern-stop-name">${stop.name}</span>
-                                            ${!stop.isPassed && !isCancelled ? html`<span class="modern-stop-status on-time">On time</span>` : ''}
+                                            ${!stop.isPassed && stop.statusLabel ? html`<span class="modern-stop-status ${stop.statusClass}">${stop.statusLabel}</span>` : ''}
                                         </div>
                                     </div>
                                 `)}
@@ -520,6 +520,8 @@ export class TrainDepartureBoard extends LitElement {
         isCurrent: boolean;
         isBetweenPrevious?: boolean;
         timestamp: number;
+        statusLabel?: string;
+        statusClass?: string;
     }[] {
         const stops = departure.subsequent_stops || [];
         const identifier = this.config.stops_identifier || 'description';
@@ -536,18 +538,36 @@ export class TrainDepartureBoard extends LitElement {
                 }
 
                 const datetime = stop.estimated || stop.scheduled;
-                const time = datetime ? (datetime.split(' ')[1] || '').trim() : '';
                 const parsedDate = this.parseDateTime(datetime);
                 const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
 
+                const estimatedStr = stop.estimated;
+                const scheduledStr = stop.scheduled;
+                let stopStatusLabel = 'On time';
+                let stopStatusClass = 'on-time';
+
+                if (estimatedStr && scheduledStr && estimatedStr !== scheduledStr) {
+                    const estTime = (estimatedStr.split(' ')[1] || '').trim();
+                    if (estTime) {
+                        stopStatusLabel = `Exp ${estTime}`;
+                        stopStatusClass = 'delayed';
+                    }
+                }
+                if (estimatedStr?.toLowerCase().includes('cancel') || (stop as any).is_cancelled) {
+                    stopStatusLabel = 'Cancelled';
+                    stopStatusClass = 'cancelled';
+                }
+
                 return {
                     name,
-                    time,
+                    time: datetime ? (datetime.split(' ')[1] || '').trim() : '',
                     timestamp,
                     stopCode: stop.stop || '',
                     isPassed: false,
                     isCurrent: false,
-                    isBetweenPrevious: false
+                    isBetweenPrevious: false,
+                    statusLabel: stopStatusLabel,
+                    statusClass: stopStatusClass
                 };
             })
             .filter(s => s.name)
@@ -615,7 +635,9 @@ export class TrainDepartureBoard extends LitElement {
                 stopCode: reportStation,
                 isPassed: true,
                 isCurrent: false,
-                isBetweenPrevious: false
+                isBetweenPrevious: false,
+                statusLabel: '',
+                statusClass: ''
             });
         }
 
