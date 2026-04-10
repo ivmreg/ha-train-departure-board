@@ -508,7 +508,7 @@ export class TrainDepartureBoard extends LitElement {
                         ${stops.length > 0 ? html`
                         <div class="timeline-container">
                             <div class="modern-stops-list ${hasPassedStops ? 'has-passed' : ''}">
-                                ${stops.map((stop, i) => html`
+                                ${stops.map((stop) => html`
                                     ${stop.isBetweenPrevious ? html`
                                     <div class="modern-train-pos-wrapper" aria-hidden="true">
                                         <div class="modern-stop-graphic">
@@ -552,7 +552,7 @@ export class TrainDepartureBoard extends LitElement {
         const stops = departure.subsequent_stops || [];
         const identifier = this.config.stops_identifier || 'description';
 
-        let stopsProcessed = stops
+        const stopsProcessed = stops
             .map(stop => {
                 let name = '';
                 if (identifier === 'tiploc') {
@@ -572,10 +572,16 @@ export class TrainDepartureBoard extends LitElement {
                 let stopStatusLabel = 'On time';
                 let stopStatusClass = 'on-time';
 
-                if (estimatedStr && scheduledStr && estimatedStr !== scheduledStr) {
-                    const estTime = (estimatedStr.split(' ')[1] || '').trim();
-                    if (estTime) {
-                        stopStatusLabel = `Exp ${estTime}`;
+                if (estimatedStr && scheduledStr) {
+                    const estTime = this.extractTimeLabel(estimatedStr);
+                    const schedTime = this.extractTimeLabel(scheduledStr);
+                    
+                    if (estTime !== '—' && schedTime !== '—' && estTime !== schedTime) {
+                        if (/^\d{2}:\d{2}$/.test(estTime)) {
+                            stopStatusLabel = `Exp ${estTime}`;
+                        } else {
+                            stopStatusLabel = estTime;
+                        }
                         stopStatusClass = 'delayed';
                     }
                 }
