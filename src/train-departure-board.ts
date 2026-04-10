@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { TrainDeparture, TrainDepartureBoardConfig, HomeAssistant } from './types';
+import { getStockCategory } from './utils';
 import './editor'; // Import the editor to ensure it's registered
 
 @customElement('train-departure-board')
@@ -375,6 +376,32 @@ export class TrainDepartureBoard extends LitElement {
             text-align: center;
             color: var(--secondary-text-color, #999);
         }
+        .stock-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .stock-modern {
+            background: linear-gradient(135deg, #00AEEF 0%, #0054A6 100%);
+            color: white;
+        }
+        .stock-javelin {
+            background: #002D72;
+            color: white;
+            border-left: 3px solid #C0C0C0;
+        }
+        .stock-refurb {
+            background: #003366;
+            color: white;
+            border-right: 3px solid #FF8200;
+        }
+        .stock-older {
+            color: var(--secondary-text-color);
+            font-weight: 600;
+        }
     `;
 
     render() {
@@ -464,6 +491,17 @@ export class TrainDepartureBoard extends LitElement {
         if ((e.target as HTMLElement).classList.contains('popup-overlay')) {
             this._closePopup();
         }
+    }
+
+    private _renderStockBadge(departure: TrainDeparture) {
+        const info = getStockCategory(departure.stock);
+        if (info.category === 'standard') return nothing;
+
+        return html`
+            <div class="stock-badge stock-${info.category}">
+                ${info.label}
+            </div>
+        `;
     }
 
     private _renderDetailsPopup() {
@@ -704,6 +742,7 @@ export class TrainDepartureBoard extends LitElement {
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
+                        ${this._renderStockBadge(departure)}
                         <span class="status-pill ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
                         ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                     </div>
