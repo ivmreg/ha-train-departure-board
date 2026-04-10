@@ -563,7 +563,7 @@ export class TrainDepartureBoard extends LitElement {
                     name = (stop.name || stop.stop || '').trim();
                 }
 
-                const datetime = stop.estimated || stop.scheduled;
+                const datetime = stop.scheduled || stop.estimated;
                 const parsedDate = this.parseDateTime(datetime);
                 const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
 
