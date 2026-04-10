@@ -344,6 +344,7 @@ export class TrainDepartureBoard extends LitElement {
         .modern-stop-status { font-size: 0.75em; font-weight: 600; white-space: nowrap; }
         .modern-stop-status.on-time { color: var(--success-color, #4caf50); }
         .modern-stop-status.delayed { color: var(--warning-color, #ff9800); }
+        .modern-stop-status.early { color: var(--info-color, #2196f3); }
         .modern-stop-status.cancelled { color: var(--error-color, #f44336); }
         
         .modern-stop.passed .modern-stop-time, 
@@ -577,12 +578,17 @@ export class TrainDepartureBoard extends LitElement {
                     const schedTime = this.extractTimeLabel(scheduledStr);
                     
                     if (estTime !== '—' && schedTime !== '—' && estTime !== schedTime) {
+                        stopStatusClass = 'delayed';
+                        let labelPrefix = 'Exp';
+                        if (this.calculateDelayMins(schedTime, estTime) < 0) {
+                            stopStatusClass = 'early';
+                            labelPrefix = 'Early';
+                        }
                         if (/^\d{2}:\d{2}$/.test(estTime)) {
-                            stopStatusLabel = `Exp ${estTime}`;
+                            stopStatusLabel = `${labelPrefix} ${estTime}`;
                         } else {
                             stopStatusLabel = estTime;
                         }
-                        stopStatusClass = 'delayed';
                     }
                 }
                 if (estimatedStr?.toLowerCase().includes('cancel') || (stop as any).is_cancelled) {
@@ -733,10 +739,16 @@ export class TrainDepartureBoard extends LitElement {
         }
 
         if (estimatedTime && scheduledTime && estimatedTime !== scheduledTime) {
-            if (/\d{2}:\d{2}/.test(estimatedTime)) {
-                return { statusLabel: `Exp ${estimatedTime}`, statusClass: 'delayed' };
+            let sClass = 'delayed';
+            let labelPrefix = 'Exp';
+            if (this.calculateDelayMins(scheduledTime, estimatedTime) < 0) {
+                sClass = 'early';
+                labelPrefix = 'Early';
             }
-            return { statusLabel: estimatedTime, statusClass: 'delayed' };
+            if (/\d{2}:\d{2}/.test(estimatedTime)) {
+                return { statusLabel: `${labelPrefix} ${estimatedTime}`, statusClass: sClass };
+            }
+            return { statusLabel: estimatedTime, statusClass: sClass };
         }
 
         return { statusLabel: 'On Time', statusClass: 'on-time' };
@@ -758,6 +770,18 @@ export class TrainDepartureBoard extends LitElement {
             return trimmed;
         }
         return parts.length === 2 ? parts[1] || parts[0] : trimmed;
+    }
+
+    private calculateDelayMins(scheduledTime: string, estimatedTime: string): number {
+        if (!/^\d{2}:\d{2}$/.test(scheduledTime) || !/^\d{2}:\d{2}$/.test(estimatedTime)) {
+            return 0;
+        }
+        const [sH, sM] = scheduledTime.split(':').map(Number);
+        const [eH, eM] = estimatedTime.split(':').map(Number);
+        let diff = (eH * 60 + eM) - (sH * 60 + sM);
+        if (diff < -720) diff += 1440;
+        if (diff > 720) diff -= 1440;
+        return diff;
     }
 
     private parseDateTime(datetime?: string): Date | null {
