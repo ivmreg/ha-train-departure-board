@@ -11,7 +11,8 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write src/**/*.ts",
+    "test": "ts-node --compiler-options '{\"module\":\"commonjs\"}' tests/mapping.test.ts"
   },
   "keywords": [
     "home-assistant",
