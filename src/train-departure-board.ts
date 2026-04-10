@@ -616,16 +616,22 @@ export class TrainDepartureBoard extends LitElement {
                     const schedTime = this.extractTimeLabel(scheduledStr);
                     
                     if (estTime !== '—' && schedTime !== '—' && estTime !== schedTime) {
-                        stopStatusClass = 'delayed';
-                        let labelPrefix = 'Exp';
-                        if (this.calculateDelayMins(schedTime, estTime) < 0) {
-                            stopStatusClass = 'early';
-                            labelPrefix = 'Early';
-                        }
-                        if (/^\d{2}:\d{2}$/.test(estTime)) {
-                            stopStatusLabel = `${labelPrefix} ${estTime}`;
+                        const delayMins = this.calculateDelayMins(schedTime, estTime);
+                        if (Math.abs(delayMins) <= 1) {
+                            stopStatusClass = 'on-time';
+                            stopStatusLabel = 'On time';
                         } else {
-                            stopStatusLabel = estTime;
+                            stopStatusClass = 'delayed';
+                            let labelPrefix = 'Exp';
+                            if (delayMins < 0) {
+                                stopStatusClass = 'early';
+                                labelPrefix = 'Early';
+                            }
+                            if (/^\d{2}:\d{2}$/.test(estTime)) {
+                                stopStatusLabel = `${labelPrefix} ${estTime}`;
+                            } else {
+                                stopStatusLabel = estTime;
+                            }
                         }
                     }
                 }
@@ -778,9 +784,14 @@ export class TrainDepartureBoard extends LitElement {
         }
 
         if (estimatedTime && scheduledTime && estimatedTime !== scheduledTime) {
+            const delayMins = this.calculateDelayMins(scheduledTime, estimatedTime);
+            if (Math.abs(delayMins) <= 1) {
+                return { statusLabel: 'On Time', statusClass: 'on-time' };
+            }
+
             let sClass = 'delayed';
             let labelPrefix = 'Exp';
-            if (this.calculateDelayMins(scheduledTime, estimatedTime) < 0) {
+            if (delayMins < 0) {
                 sClass = 'early';
                 labelPrefix = 'Early';
             }
