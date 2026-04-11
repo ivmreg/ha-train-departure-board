@@ -107,10 +107,9 @@ export class TrainDepartureBoard extends LitElement {
         }
         .time-wrapper {
             display: flex;
-            flex-direction: row;
-            align-items: baseline;
-            gap: 4px;
-            min-width: 55px;
+            align-items: center;
+            gap: 8px;
+            width: 100px;
             flex-shrink: 0;
         }
         .scheduled {
@@ -125,27 +124,19 @@ export class TrainDepartureBoard extends LitElement {
             color: var(--error-color, #f44336);
             text-decoration: line-through;
         }
-        .status-pill {
-            font-size: var(--train-board-status-size, 0.75rem);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            white-space: nowrap;
-            padding: 3px 10px;
-            border-radius: 12px;
-            flex-shrink: 0;
+        .offset-pill {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
-        .status-pill.on-time {
-            background: var(--success-color, #4caf50);
-            color: #fff;
+        .offset-pill.late {
+            background: var(--warning-color, #ffe0b2);
+            color: #d32f2f;
         }
-        .status-pill.delayed {
-            background: var(--warning-color, #ff9800);
-            color: #000;
-        }
-        .status-pill.cancelled {
-            background: var(--error-color, #f44336);
-            color: #fff;
+        .offset-pill.early {
+            background: var(--success-color, #c8e6c9);
+            color: #2e7d32;
         }
         .platform-badge {
             background: var(--disabled-color, #9e9e9e);
@@ -161,18 +152,16 @@ export class TrainDepartureBoard extends LitElement {
             flex-shrink: 0;
         }
         .info-box {
-            display: flex;
-            flex-direction: column;
             flex: 1;
             min-width: 0;
-            gap: 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .destination-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            width: 100%;
+            gap: 8px;
         }
         .terminus {
             margin: 0;
@@ -182,9 +171,8 @@ export class TrainDepartureBoard extends LitElement {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: var(--primary-text-color, #111);
             flex: 1;
-            min-width: 0;
+            color: var(--primary-text-color, #111);
         }
         /* Popup overlay styles */
         .popup-overlay {
