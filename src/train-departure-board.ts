@@ -716,7 +716,7 @@ export class TrainDepartureBoard extends LitElement {
 
     private renderDepartureRow(departure: TrainDeparture, index: number) {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
-        const { statusClass, statusLabel } = this.getStatusMeta(departure);
+        const { statusClass, statusLabel, offsetStr } = this.getStatusMeta(departure);
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
         const isCancelled = statusClass === 'cancelled';
@@ -732,12 +732,12 @@ export class TrainDepartureBoard extends LitElement {
             >
                 <div class="time-wrapper ${timeClass}">
                     <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
+                    ${offsetStr ? html`<span class="offset-pill ${statusClass === 'early' ? 'early' : 'late'}">${offsetStr}</span>` : ''}
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
                         ${this._renderStockBadge(departure)}
-                        <span class="status-pill ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
                         ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                     </div>
                 </div>
