@@ -122,26 +122,26 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
                     </div>
                 </div>
             </div>
-        `}_getStopsForPopup(t){var e;const i=t.subsequent_stops||[],s=this.config.stops_identifier||"description",r=i.map(t=>{var e;let i="";i="tiploc"===s?(t.stop||"").trim():"crs"===s?(t.name||"").trim():(t.name||t.stop||"").trim();const r=t.scheduled||t.estimated,o=this.parseDateTime(r),n=null!==(e=null==o?void 0:o.getTime())&&void 0!==e?e:Number.POSITIVE_INFINITY,a=t.estimated,l=t.scheduled;let d="On time",c="on-time";if(a&&l){const t=this.extractTimeLabel(a),e=this.extractTimeLabel(l);if("—"!==t&&"—"!==e&&t!==e){const i=this.calculateDelayMins(e,t);if(Math.abs(i)<=1)c="on-time",d="On time";else{c="delayed";let e="Exp";i<0&&(c="early",e="Early"),d=/^\d{2}:\d{2}$/.test(t)?`${e} ${t}`:t}}}return((null==a?void 0:a.toLowerCase().includes("cancel"))||t.is_cancelled)&&(d="Cancelled",c="cancelled"),{name:i,time:r?(r.split(" ")[1]||"").trim():"",timestamp:n,stopCode:t.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:d,statusClass:c}}).filter(t=>t.name).sort((t,e)=>t.timestamp-e.timestamp);if(!t.last_report_station||!t.last_report_type)return r;const o=t.last_report_station,n=t.last_report_type,a=t.last_report_time?null===(e=this.parseDateTime(t.last_report_time))||void 0===e?void 0:e.getTime():void 0,l=r.findIndex(t=>t.stopCode===o);if(-1!==l){for(let t=0;t<l;t++)r[t].isPassed=!0;"Arrival"===n?(r[l].isCurrent=!0,r[l].isPassed=!1):(r[l].isPassed=!0,l+1<r.length?r[l+1].isBetweenPrevious=!0:r[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let t=-1;for(let e=0;e<r.length&&r[e].timestamp<=a;e++)r[e].isPassed=!0,t=e;-1!==t&&t+1<r.length?r[t+1].isBetweenPrevious=!0:-1===t&&r.length>0&&(r[0].isBetweenPrevious=!0)}if(r.length>0&&r[0].isBetweenPrevious&&-1===l&&o){const e=t.last_report_time?this.extractTimeLabel(t.last_report_time):"";r.unshift({name:o,time:e,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return r}renderDepartureRow(t,e){const i=this.extractTimeLabel(t.scheduled),{statusClass:s,statusLabel:r}=this.getStatusMeta(t),o=t.platform?t.platform:null,n="cancelled"===s,a=n?"time-cancelled":"";return H`
+        `}_getStopsForPopup(t){var e;const i=t.subsequent_stops||[],s=this.config.stops_identifier||"description",r=i.map(t=>{var e;let i="";i="tiploc"===s?(t.stop||"").trim():"crs"===s?(t.name||"").trim():(t.name||t.stop||"").trim();const r=t.scheduled||t.estimated,o=this.parseDateTime(r),n=null!==(e=null==o?void 0:o.getTime())&&void 0!==e?e:Number.POSITIVE_INFINITY,a=t.estimated,l=t.scheduled;let d="On time",c="on-time";if(a&&l){const t=this.extractTimeLabel(a),e=this.extractTimeLabel(l);if("—"!==t&&"—"!==e&&t!==e){const i=this.calculateDelayMins(e,t);if(Math.abs(i)<=1)c="on-time",d="On time";else{c="delayed";let e="Exp";i<0&&(c="early",e="Early"),d=/^\d{2}:\d{2}$/.test(t)?`${e} ${t}`:t}}}return((null==a?void 0:a.toLowerCase().includes("cancel"))||t.is_cancelled)&&(d="Cancelled",c="cancelled"),{name:i,time:r?(r.split(" ")[1]||"").trim():"",timestamp:n,stopCode:t.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:d,statusClass:c}}).filter(t=>t.name).sort((t,e)=>t.timestamp-e.timestamp);if(!t.last_report_station||!t.last_report_type)return r;const o=t.last_report_station,n=t.last_report_type,a=t.last_report_time?null===(e=this.parseDateTime(t.last_report_time))||void 0===e?void 0:e.getTime():void 0,l=r.findIndex(t=>t.stopCode===o);if(-1!==l){for(let t=0;t<l;t++)r[t].isPassed=!0;"Arrival"===n?(r[l].isCurrent=!0,r[l].isPassed=!1):(r[l].isPassed=!0,l+1<r.length?r[l+1].isBetweenPrevious=!0:r[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let t=-1;for(let e=0;e<r.length&&r[e].timestamp<=a;e++)r[e].isPassed=!0,t=e;-1!==t&&t+1<r.length?r[t+1].isBetweenPrevious=!0:-1===t&&r.length>0&&(r[0].isBetweenPrevious=!0)}if(r.length>0&&r[0].isBetweenPrevious&&-1===l&&o){const e=t.last_report_time?this.extractTimeLabel(t.last_report_time):"";r.unshift({name:o,time:e,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return r}renderDepartureRow(t,e){const i=this.extractTimeLabel(t.scheduled),{statusClass:s,statusLabel:r,offsetStr:o}=this.getStatusMeta(t),n=t.platform?t.platform:null,a="cancelled"===s,l=a?"time-cancelled":"";return H`
             <div 
-                class="train ${0===e?"next-train":""} ${n?"cancelled-row":""}"
+                class="train ${0===e?"next-train":""} ${a?"cancelled-row":""}"
                 role="listitem" 
-                aria-label="${t.destination_name} at ${i}, ${r}${o?`, Platform ${o}`:""}"
+                aria-label="${t.destination_name} at ${i}, ${r}${n?`, Platform ${n}`:""}"
                 @click=${()=>this._showDetails(t)}
             >
-                <div class="time-wrapper ${a}">
+                <div class="time-wrapper ${l}">
                     <span class="scheduled" aria-label="Scheduled time">${i}</span>
+                    ${o?H`<span class="offset-pill ${"early"===s?"early":"late"}">${o}</span>`:""}
                 </div>
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${t.destination_name}</h3>
                         ${this._renderStockBadge(t)}
-                        <span class="status-pill ${s}" aria-label="Status: ${r}">${r}</span>
-                        ${o?H`<span class="platform-badge" aria-label="Platform ${o}">${o}</span>`:""}
+                        ${n?H`<span class="platform-badge" aria-label="Platform ${n}">${n}</span>`:""}
                     </div>
                 </div>
             </div>
-        `}getStatusMeta(t){var e,i;const s=t.scheduled||"",r=t.estimated||"",o=this.extractTimeLabel(s),n=this.extractTimeLabel(r);if(t.is_cancelled||(null===(e=t.status)||void 0===e?void 0:e.toLowerCase().includes("cancel"))||(null===(i=t.etd)||void 0===i?void 0:i.toLowerCase().includes("cancel"))||t.planned_cancel||t.cancel_reason||r.toLowerCase().includes("cancel"))return{statusLabel:"Cancelled",statusClass:"cancelled"};if(!r)return{statusLabel:"Awaiting",statusClass:"delayed"};if("on time"===r.toLowerCase())return{statusLabel:"On Time",statusClass:"on-time"};if(n&&o&&n!==o){const t=this.calculateDelayMins(o,n);if(Math.abs(t)<=1)return{statusLabel:"On Time",statusClass:"on-time"};let e="delayed",i="Exp";return t<0&&(e="early",i="Early"),/\d{2}:\d{2}/.test(n)?{statusLabel:`${i} ${n}`,statusClass:e}:{statusLabel:n,statusClass:e}}return{statusLabel:"On Time",statusClass:"on-time"}}extractTimeLabel(t){if(!t)return"—";const e=t.trim();if(!e)return"—";const i=e.split(" ");return 2===i.length&&/^\d{2}:\d{2}$/.test(i[1])?i[1]:/^\d{2}:\d{2}$/.test(e)?e:2===i.length?i[1]||i[0]:e}calculateDelayMins(t,e){if(!/^\d{2}:\d{2}$/.test(t)||!/^\d{2}:\d{2}$/.test(e))return 0;const[i,s]=t.split(":").map(Number),[r,o]=e.split(":").map(Number);let n=60*r+o-(60*i+s);return n<-720&&(n+=1440),n>720&&(n-=1440),n}parseDateTime(t){var e;if(!t)return null;if(this.dateCache.has(t))return null!==(e=this.dateCache.get(t))&&void 0!==e?e:null;const[i,s]=t.split(" ");let r=null;if(i&&s){const t=`${i.split("-").reverse().join("-")}T${s}`,e=new Date(t);r=Number.isNaN(e.getTime())?null:e}else if(/^\d{2}:\d{2}$/.test(t)){const e=`${(new Date).toISOString().split("T")[0]}T${t}`,i=new Date(e);r=Number.isNaN(i.getTime())?null:i}return this.dateCache.set(t,r),r}};ft.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)})`
+        `}getStatusMeta(t){var e,i;const s=t.scheduled||"",r=t.estimated||"",o=this.extractTimeLabel(s),n=this.extractTimeLabel(r);if(t.is_cancelled||(null===(e=t.status)||void 0===e?void 0:e.toLowerCase().includes("cancel"))||(null===(i=t.etd)||void 0===i?void 0:i.toLowerCase().includes("cancel"))||t.planned_cancel||t.cancel_reason||r.toLowerCase().includes("cancel"))return{statusLabel:"Cancelled",statusClass:"cancelled"};if(!r)return{statusLabel:"Awaiting",statusClass:"delayed"};if("on time"===r.toLowerCase())return{statusLabel:"On Time",statusClass:"on-time"};if(n&&o&&n!==o){const t=this.calculateDelayMins(o,n);if(Math.abs(t)<=1)return{statusLabel:"On Time",statusClass:"on-time"};let e="delayed",i="Exp",s=`+${t}m`;return t<0&&(e="early",i="Early",s=`${t}m`),/^\d{2}:\d{2}$/.test(n)?{statusLabel:`${i} ${n}`,statusClass:e,offsetStr:s}:{statusLabel:n,statusClass:e,offsetStr:s}}return{statusLabel:"On Time",statusClass:"on-time"}}extractTimeLabel(t){if(!t)return"—";const e=t.trim();if(!e)return"—";const i=e.split(" ");return 2===i.length&&/^\d{2}:\d{2}$/.test(i[1])?i[1]:/^\d{2}:\d{2}$/.test(e)?e:2===i.length?i[1]||i[0]:e}calculateDelayMins(t,e){if(!/^\d{2}:\d{2}$/.test(t)||!/^\d{2}:\d{2}$/.test(e))return 0;const[i,s]=t.split(":").map(Number),[r,o]=e.split(":").map(Number);let n=60*r+o-(60*i+s);return n<-720&&(n+=1440),n>720&&(n-=1440),n}parseDateTime(t){var e;if(!t)return null;if(this.dateCache.has(t))return null!==(e=this.dateCache.get(t))&&void 0!==e?e:null;const[i,s]=t.split(" ");let r=null;if(i&&s){const t=`${i.split("-").reverse().join("-")}T${s}`,e=new Date(t);r=Number.isNaN(e.getTime())?null:e}else if(/^\d{2}:\d{2}$/.test(t)){const e=`${(new Date).toISOString().split("T")[0]}T${t}`,i=new Date(e);r=Number.isNaN(i.getTime())?null:i}return this.dateCache.set(t,r),r}};ft.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)})`
         ha-card {
             height: 100%;
             background: var(--ha-card-background, var(--card-background-color, #fff));
@@ -204,10 +204,9 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
         }
         .time-wrapper {
             display: flex;
-            flex-direction: row;
-            align-items: baseline;
-            gap: 4px;
-            min-width: 55px;
+            align-items: center;
+            gap: 8px;
+            width: 100px;
             flex-shrink: 0;
         }
         .scheduled {
@@ -222,27 +221,19 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
             color: var(--error-color, #f44336);
             text-decoration: line-through;
         }
-        .status-pill {
-            font-size: var(--train-board-status-size, 0.75rem);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            white-space: nowrap;
-            padding: 3px 10px;
-            border-radius: 12px;
-            flex-shrink: 0;
+        .offset-pill {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
-        .status-pill.on-time {
-            background: var(--success-color, #4caf50);
-            color: #fff;
+        .offset-pill.late {
+            background: var(--warning-color, #ffe0b2);
+            color: #d32f2f;
         }
-        .status-pill.delayed {
-            background: var(--warning-color, #ff9800);
-            color: #000;
-        }
-        .status-pill.cancelled {
-            background: var(--error-color, #f44336);
-            color: #fff;
+        .offset-pill.early {
+            background: var(--success-color, #c8e6c9);
+            color: #2e7d32;
         }
         .platform-badge {
             background: var(--disabled-color, #9e9e9e);
@@ -258,18 +249,16 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
             flex-shrink: 0;
         }
         .info-box {
-            display: flex;
-            flex-direction: column;
             flex: 1;
             min-width: 0;
-            gap: 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .destination-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            width: 100%;
+            gap: 8px;
         }
         .terminus {
             margin: 0;
@@ -279,9 +268,8 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: var(--primary-text-color, #111);
             flex: 1;
-            min-width: 0;
+            color: var(--primary-text-color, #111);
         }
         /* Popup overlay styles */
         .popup-overlay {
