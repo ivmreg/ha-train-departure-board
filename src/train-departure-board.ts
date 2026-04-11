@@ -757,7 +757,7 @@ export class TrainDepartureBoard extends LitElement {
         `;
     }
 
-    private getStatusMeta(departure: TrainDeparture): { statusLabel: string; statusClass: string } {
+    private getStatusMeta(departure: TrainDeparture): { statusLabel: string; statusClass: string; offsetStr?: string } {
         const scheduledRaw = departure.scheduled || '';
         const estimatedRaw = departure.estimated || '';
         const scheduledTime = this.extractTimeLabel(scheduledRaw);
@@ -791,14 +791,17 @@ export class TrainDepartureBoard extends LitElement {
 
             let sClass = 'delayed';
             let labelPrefix = 'Exp';
+            let offsetStr = `+${delayMins}m`;
+
             if (delayMins < 0) {
                 sClass = 'early';
                 labelPrefix = 'Early';
+                offsetStr = `${delayMins}m`;
             }
-            if (/\d{2}:\d{2}/.test(estimatedTime)) {
-                return { statusLabel: `${labelPrefix} ${estimatedTime}`, statusClass: sClass };
+            if (/^\d{2}:\d{2}$/.test(estimatedTime)) {
+                return { statusLabel: `${labelPrefix} ${estimatedTime}`, statusClass: sClass, offsetStr };
             }
-            return { statusLabel: estimatedTime, statusClass: sClass };
+            return { statusLabel: estimatedTime, statusClass: sClass, offsetStr };
         }
 
         return { statusLabel: 'On Time', statusClass: 'on-time' };
