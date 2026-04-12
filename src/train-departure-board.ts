@@ -736,22 +736,34 @@ export class TrainDepartureBoard extends LitElement {
             : '';
 
         const timeClass = isCancelled ? 'time-cancelled' : '';
+        const delayLayout = this.config.delay_layout || 'inline';
+        const delayLayoutClass = `layout-${delayLayout}`;
+        const rowSizeClass = `row-size-${this.config.row_size || 'normal'}`;
+
+        const pillHtml = offsetStr ? html`<span class="offset-pill ${statusClass === 'early' ? 'early' : 'late'}">${offsetStr}</span>` : '';
 
         return html`
             <div 
-                class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled ? 'cancelled-row' : ''} ${stockRowClass}"
+                class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled ? 'cancelled-row' : ''} ${stockRowClass} ${delayLayoutClass} ${rowSizeClass}"
                 role="listitem" 
                 aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform ? `, Platform ${platform}` : ''}"
                 @click=${() => this._showDetails(departure)}
             >
                 <div class="time-wrapper ${timeClass}">
                     <span class="scheduled" aria-label="Scheduled time">${scheduledTime}</span>
-                    ${offsetStr ? html`<span class="offset-pill ${statusClass === 'early' ? 'early' : 'late'}">${offsetStr}</span>` : ''}
+                    ${delayLayout === 'stacked' || delayLayout === 'inline' ? pillHtml : ''}
                 </div>
                 <div class="info-box">
-                    <div class="destination-row">
-                        <h3 class="terminus">${departure.destination_name}</h3>
-                        ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
+                    <div class="destination-col">
+                        <div class="destination-row">
+                            <h3 class="terminus">${departure.destination_name}</h3>
+                            ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
+                        </div>
+                        ${delayLayout === 'status_line' && offsetStr ? html`
+                            <div class="status-row">
+                                ${pillHtml}
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
