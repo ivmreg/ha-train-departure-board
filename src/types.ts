@@ -70,4 +70,6 @@ export interface TrainDepartureBoardConfig {
     font_size_time?: string;
     font_size_destination?: string;
     font_size_status?: string;
+    delay_layout?: 'inline' | 'stacked' | 'status_line';
+    row_size?: 'compact' | 'normal' | 'comfortable';
 }
