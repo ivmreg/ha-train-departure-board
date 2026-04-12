@@ -50,6 +50,45 @@ const SCHEMA: HaFormSchema[] = [
             }
         ]
     },
+
+    {
+        type: 'expandable',
+        name: 'layout_options',
+        schema: [
+            {
+                type: 'grid',
+                name: '',
+                schema: [
+                    {
+                        name: 'delay_layout',
+                        selector: {
+                            select: {
+                                options: [
+                                    { value: 'inline', label: 'Inline (Default)' },
+                                    { value: 'stacked', label: 'Stacked' },
+                                    { value: 'status_line', label: 'Status Line' }
+                                ],
+                                mode: 'dropdown'
+                            }
+                        }
+                    },
+                    {
+                        name: 'row_size',
+                        selector: {
+                            select: {
+                                options: [
+                                    { value: 'compact', label: 'Compact' },
+                                    { value: 'normal', label: 'Normal (Default)' },
+                                    { value: 'comfortable', label: 'Comfortable' }
+                                ],
+                                mode: 'dropdown'
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    },
     {
         type: 'expandable',
         name: '',
@@ -82,6 +121,9 @@ const LABELS: Record<string, string> = {
     title: 'Card Title',
     attribute: 'Data Attribute',
     stops_identifier: 'Station Identifier',
+    layout_options: 'Layout Options',
+    delay_layout: 'Delay Pill Layout',
+    row_size: 'Row Size',
     '': 'Font Sizes',
     font_size_time: 'Time',
     font_size_destination: 'Destination',
@@ -93,6 +135,8 @@ const HELPERS: Record<string, string> = {
     entity: 'Select a realtime trains sensor',
     attribute: 'Attribute with departure data (default: next_trains)',
     stops_identifier: 'How stations are identified in the data',
+    delay_layout: 'Position of the delay/early pill',
+    row_size: 'Vertical padding of the departure rows',
     font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
     font_size_destination: 'e.g. 1.2rem (default: 1rem)',
     font_size_status: 'e.g. 0.85rem (default: 0.75rem)'
