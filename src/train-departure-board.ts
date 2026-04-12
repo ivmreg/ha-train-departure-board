@@ -123,7 +123,8 @@ export class TrainDepartureBoard extends LitElement {
             display: flex;
             align-items: center;
             gap: 8px;
-            flex-shrink: 0;
+            flex: 0 0 7.5rem;
+            min-width: 7.5rem;
         }
         .scheduled {
             font-size: var(--train-board-time-size, 1.25rem);
