@@ -228,6 +228,7 @@ export class TrainDepartureBoard extends LitElement {
         .modern-badge.status-delayed { background: rgba(255, 152, 0, 0.15); color: var(--warning-color, #ff9800); }
         .modern-badge.status-cancelled { background: rgba(244, 67, 54, 0.15); color: var(--error-color, #f44336); }
         .modern-badge.platform { background: rgba(255, 255, 255, 0.1); }
+        .modern-badge.stock-badge { font-size: 0.85em; padding: 4px 8px; }
         
         /* Dense Timeline */
         .timeline-container { padding: 12px 16px; background: rgba(0,0,0,0.02); }
@@ -495,17 +496,6 @@ export class TrainDepartureBoard extends LitElement {
         }
     }
 
-    private _renderStockBadge(departure: TrainDeparture) {
-        const info = getStockCategory(departure.stock);
-        if (info.category === 'standard') return nothing;
-
-        return html`
-            <div class="stock-badge stock-${info.category}">
-                ${info.label}
-            </div>
-        `;
-    }
-
     private _renderDetailsPopup() {
         if (!this._selectedDeparture) return nothing;
         
@@ -544,7 +534,7 @@ export class TrainDepartureBoard extends LitElement {
                                 Platform ${departure.platform}
                             </div>` : ''}
                             ${stockInfo.category !== 'standard' ? html`
-                            <div class="modern-badge stock-badge stock-${stockInfo.category}" style="font-size: 0.85em; padding: 4px 8px;">
+                            <div class="modern-badge stock-badge stock-${stockInfo.category}">
                                 ${stockInfo.label}
                             </div>` : ''}
                         </div>
