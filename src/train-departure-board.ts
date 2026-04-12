@@ -739,7 +739,10 @@ export class TrainDepartureBoard extends LitElement {
         const isNextTrain = index === 0;
         const isCancelled = statusClass === 'cancelled';
         const stockInfo = getStockCategory(departure.stock);
-        const stockRowClass = stockInfo.category !== 'standard' ? `stock-row-${stockInfo.category}` : '';
+        const styledStockCategories = ['modern', 'javelin', 'refurb'];
+        const stockRowClass = styledStockCategories.includes(stockInfo.category)
+            ? `stock-row-${stockInfo.category}`
+            : '';
 
         const timeClass = isCancelled ? 'time-cancelled' : '';
 
