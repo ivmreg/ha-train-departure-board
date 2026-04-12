@@ -105,12 +105,26 @@ export class TrainDepartureBoard extends LitElement {
         .train.cancelled-row.next-train {
             border-left: 4px solid var(--error-color, #f44336);
         }
+
+        /* Right border for train type / stock */
+        .train.stock-row-modern {
+            border-right: 4px solid #00AEEF;
+            padding-right: 8px;
+        }
+        .train.stock-row-javelin {
+            border-right: 4px solid #002D72;
+            padding-right: 8px;
+        }
+        .train.stock-row-refurb {
+            border-right: 4px solid #003366;
+            padding-right: 8px;
+        }
         .time-wrapper {
             display: flex;
             align-items: center;
             gap: 8px;
-            width: 100px;
-            flex-shrink: 0;
+            flex: 0 0 7.5rem;
+            min-width: 7.5rem;
         }
         .scheduled {
             font-size: var(--train-board-time-size, 1.25rem);
@@ -214,6 +228,7 @@ export class TrainDepartureBoard extends LitElement {
         .modern-badge.status-delayed { background: rgba(255, 152, 0, 0.15); color: var(--warning-color, #ff9800); }
         .modern-badge.status-cancelled { background: rgba(244, 67, 54, 0.15); color: var(--error-color, #f44336); }
         .modern-badge.platform { background: rgba(255, 255, 255, 0.1); }
+        .modern-badge.stock-badge { font-size: 0.85em; padding: 4px 8px; }
         
         /* Dense Timeline */
         .timeline-container { padding: 12px 16px; background: rgba(0,0,0,0.02); }
@@ -481,17 +496,6 @@ export class TrainDepartureBoard extends LitElement {
         }
     }
 
-    private _renderStockBadge(departure: TrainDeparture) {
-        const info = getStockCategory(departure.stock);
-        if (info.category === 'standard') return nothing;
-
-        return html`
-            <div class="stock-badge stock-${info.category}">
-                ${info.label}
-            </div>
-        `;
-    }
-
     private _renderDetailsPopup() {
         if (!this._selectedDeparture) return nothing;
         
@@ -500,6 +504,7 @@ export class TrainDepartureBoard extends LitElement {
         const scheduledTime = this.extractTimeLabel(departure.scheduled);
         const stops = this._getStopsForPopup(departure);
         const isCancelled = statusClass === 'cancelled';
+        const stockInfo = getStockCategory(departure.stock);
 
         const statusBadgeClass = statusClass === 'on-time' ? 'status-ok' : statusClass === 'cancelled' ? 'status-cancelled' : 'status-delayed';
         
@@ -527,6 +532,10 @@ export class TrainDepartureBoard extends LitElement {
                             ${departure.platform ? html`
                             <div class="modern-badge platform">
                                 Platform ${departure.platform}
+                            </div>` : ''}
+                            ${stockInfo.category !== 'standard' ? html`
+                            <div class="modern-badge stock-badge stock-${stockInfo.category}">
+                                ${stockInfo.label}
                             </div>` : ''}
                         </div>
                     </div>
@@ -720,12 +729,17 @@ export class TrainDepartureBoard extends LitElement {
         const platform = departure.platform ? departure.platform : null;
         const isNextTrain = index === 0;
         const isCancelled = statusClass === 'cancelled';
+        const stockInfo = getStockCategory(departure.stock);
+        const styledStockCategories = ['modern', 'javelin', 'refurb'];
+        const stockRowClass = styledStockCategories.includes(stockInfo.category)
+            ? `stock-row-${stockInfo.category}`
+            : '';
 
         const timeClass = isCancelled ? 'time-cancelled' : '';
 
         return html`
             <div 
-                class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled ? 'cancelled-row' : ''}"
+                class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled ? 'cancelled-row' : ''} ${stockRowClass}"
                 role="listitem" 
                 aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform ? `, Platform ${platform}` : ''}"
                 @click=${() => this._showDetails(departure)}
@@ -737,7 +751,6 @@ export class TrainDepartureBoard extends LitElement {
                 <div class="info-box">
                     <div class="destination-row">
                         <h3 class="terminus">${departure.destination_name}</h3>
-                        ${this._renderStockBadge(departure)}
                         ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                     </div>
                 </div>
