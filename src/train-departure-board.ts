@@ -186,7 +186,9 @@ export class TrainDepartureBoard extends LitElement {
         .destination-row {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
+            width: 100%;
         }
         .terminus {
             margin: 0;
@@ -199,6 +201,18 @@ export class TrainDepartureBoard extends LitElement {
             flex: 1;
             color: var(--primary-text-color, #111);
         }
+        .status-pill {
+            font-size: var(--train-board-status-size, 0.85rem);
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .status-pill.on-time { background: var(--success-color, #2e7d32); }
+        .status-pill.delayed { background: var(--warning-color, #e65100); }
+        .status-pill.cancelled { background: var(--error-color, #d32f2f); }
         /* Popup overlay styles */
         .popup-overlay {
             position: fixed;
