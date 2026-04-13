@@ -50,66 +50,53 @@ const SCHEMA: HaFormSchema[] = [
             }
         ]
     },
-
     {
-        type: 'expandable',
-        name: 'layout_options',
+        type: 'grid',
+        name: '',
         schema: [
             {
-                type: 'grid',
-                name: '',
-                schema: [
-                    {
-                        name: 'delay_layout',
-                        selector: {
-                            select: {
-                                options: [
-                                    { value: 'inline', label: 'Inline (Default)' },
-                                    { value: 'stacked', label: 'Stacked' },
-                                    { value: 'status_line', label: 'Status Line' }
-                                ],
-                                mode: 'dropdown'
-                            }
-                        }
-                    },
-                    {
-                        name: 'row_size',
-                        selector: {
-                            select: {
-                                options: [
-                                    { value: 'compact', label: 'Compact' },
-                                    { value: 'normal', label: 'Normal (Default)' },
-                                    { value: 'comfortable', label: 'Comfortable' }
-                                ],
-                                mode: 'dropdown'
-                            }
-                        }
+                name: 'delay_layout',
+                selector: {
+                    select: {
+                        options: [
+                            { value: 'inline', label: 'Inline (Default)' },
+                            { value: 'stacked', label: 'Stacked' },
+                            { value: 'status_line', label: 'Status Line' }
+                        ],
+                        mode: 'dropdown'
                     }
-                ]
+                }
+            },
+            {
+                name: 'row_size',
+                selector: {
+                    select: {
+                        options: [
+                            { value: 'compact', label: 'Compact' },
+                            { value: 'normal', label: 'Normal (Default)' },
+                            { value: 'comfortable', label: 'Comfortable' }
+                        ],
+                        mode: 'dropdown'
+                    }
+                }
             }
         ]
     },
     {
-        type: 'expandable',
+        type: 'grid',
         name: '',
         schema: [
             {
-                type: 'grid',
-                name: '',
-                schema: [
-                    {
-                        name: 'font_size_time',
-                        selector: { text: {} }
-                    },
-                    {
-                        name: 'font_size_destination',
-                        selector: { text: {} }
-                    },
-                    {
-                        name: 'font_size_status',
-                        selector: { text: {} }
-                    }
-                ]
+                name: 'font_size_time',
+                selector: { text: {} }
+            },
+            {
+                name: 'font_size_destination',
+                selector: { text: {} }
+            },
+            {
+                name: 'font_size_status',
+                selector: { text: {} }
             }
         ]
     }
@@ -121,13 +108,11 @@ const LABELS: Record<string, string> = {
     title: 'Card Title',
     attribute: 'Data Attribute',
     stops_identifier: 'Station Identifier',
-    layout_options: 'Layout Options',
     delay_layout: 'Delay Pill Layout',
     row_size: 'Row Size',
-    '': 'Font Sizes',
-    font_size_time: 'Time',
-    font_size_destination: 'Destination',
-    font_size_status: 'Status Pill'
+    font_size_time: 'Time Font Size',
+    font_size_destination: 'Destination Font Size',
+    font_size_status: 'Status Pill Font Size'
 };
 
 // Helper text for fields
