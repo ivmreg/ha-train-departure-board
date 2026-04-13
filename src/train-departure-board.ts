@@ -786,8 +786,8 @@ export class TrainDepartureBoard extends LitElement {
                     <div class="destination-col">
                         <div class="destination-row">
                             <h3 class="terminus">${departure.destination_name}</h3>
-                            ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                             ${pillHtml}
+                            ${platform ? html`<span class="platform-badge" aria-label="Platform ${platform}">${platform}</span>` : ''}
                         </div>
                     </div>
                 </div>

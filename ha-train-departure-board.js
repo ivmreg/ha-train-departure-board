@@ -136,8 +136,8 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
                     <div class="destination-col">
                         <div class="destination-row">
                             <h3 class="terminus">${t.destination_name}</h3>
-                            ${n?H`<span class="platform-badge" aria-label="Platform ${n}">${n}</span>`:""}
                             ${h}
+                            ${n?H`<span class="platform-badge" aria-label="Platform ${n}">${n}</span>`:""}
                         </div>
                     </div>
                 </div>
