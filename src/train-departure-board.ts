@@ -210,36 +210,16 @@ export class TrainDepartureBoard extends LitElement {
       flex: 1;
       color: var(--primary-text-color, #111);
     }
-    .carriage-ticks {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      display: flex;
-      flex-direction: column;
-      justify-content: stretch;
-      gap: 2px;
-      padding: 4px 0;
-      pointer-events: none;
-    }
-    .tick-segment {
-      flex: 1;
-      background: var(--disabled-color, #9e9e9e);
-      opacity: 0.7;
-      border-radius: 1px;
-    }
-    .carriage-ticks.stock-modern .tick-segment {
-      background: #00aeef;
-      opacity: 1;
-    }
-    .carriage-ticks.stock-javelin .tick-segment {
-      background: #002d72;
-      opacity: 1;
-    }
-    .carriage-ticks.stock-refurb .tick-segment {
-      background: #003366;
-      opacity: 1;
+    .carriages-badge {
+      font-size: 0.7em;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+      color: var(--secondary-text-color, #666);
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .status-pill {
       font-size: var(--train-board-status-size, 0.85rem);
@@ -857,9 +837,8 @@ export class TrainDepartureBoard extends LitElement {
     const timeClass = isCancelled ? 'time-cancelled' : '';
     const rowSizeClass = `row-size-${this.config.row_size || 'normal'}`;
     const showCarriages = this.config.show_carriages !== false;
-    const hasTicks = !!(showCarriages && departure.length && departure.length > 0);
     const styledStockCategories = ['modern', 'javelin', 'refurb'];
-    const stockRowClass = (styledStockCategories.includes(stockInfo.category) && !hasTicks)
+    const stockRowClass = styledStockCategories.includes(stockInfo.category)
       ? `stock-row-${stockInfo.category}`
       : '';
 
@@ -895,6 +874,9 @@ export class TrainDepartureBoard extends LitElement {
             <div class="destination-row">
               <h3 class="terminus">${departure.destination_name}</h3>
               ${pillHtml}
+              ${showCarriages && departure.length
+                ? html`<span class="carriages-badge">${departure.length}c</span>`
+                : ''}
               ${platform
                 ? html`<span
                     class="platform-badge"
@@ -905,15 +887,6 @@ export class TrainDepartureBoard extends LitElement {
             </div>
           </div>
         </div>
-        ${hasTicks
-          ? html`
-              <div class="carriage-ticks stock-${stockInfo.category}">
-                ${Array.from({ length: departure.length || 0 }).map(
-                  () => html`<div class="tick-segment"></div>`
-                )}
-              </div>
-            `
-          : ''}
       </div>
     `;
   }
