@@ -173,17 +173,20 @@ export class TrainDepartureBoard extends LitElement {
       color: #2e7d32;
     }
     .platform-badge {
-      background: var(--disabled-color, #9e9e9e);
-      color: #fff;
-      font-size: 0.95em;
+      font-size: 0.75em;
       font-weight: 700;
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      display: flex;
+      padding: 2px 6px;
+      min-width: 26px;
+      height: 22px;
+      border-radius: 4px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+      color: var(--secondary-text-color, #666);
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
       flex-shrink: 0;
+      box-sizing: border-box;
     }
     .info-box {
       flex: 1;
@@ -211,37 +214,54 @@ export class TrainDepartureBoard extends LitElement {
       color: var(--primary-text-color, #111);
     }
     .carriages-badge {
-      font-size: 0.7em;
+      font-size: 0.75em;
       font-weight: 700;
       padding: 2px 4px;
       width: 44px;
-      text-align: center;
+      height: 22px;
       border-radius: 4px;
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
       color: var(--secondary-text-color, #666);
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
       white-space: nowrap;
       flex-shrink: 0;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       box-sizing: border-box;
     }
     .status-pill {
-      font-size: var(--train-board-status-size, 0.85rem);
+      font-size: var(--train-board-status-size, 0.75rem);
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 2px 6px;
+      height: 22px;
       border-radius: 4px;
       white-space: nowrap;
-      color: #fff;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
     }
     .status-pill.on-time {
-      background: var(--success-color, #2e7d32);
+      background: rgba(46, 125, 50, 0.1);
+      color: var(--success-color, #2e7d32);
+      border: 1px solid rgba(46, 125, 50, 0.25);
     }
     .status-pill.delayed {
-      background: var(--warning-color, #e65100);
+      background: rgba(230, 81, 0, 0.1);
+      color: var(--warning-color, #e65100);
+      border: 1px solid rgba(230, 81, 0, 0.25);
+    }
+    .status-pill.early {
+      background: rgba(33, 150, 243, 0.1);
+      color: var(--info-color, #2196f3);
+      border: 1px solid rgba(33, 150, 243, 0.25);
     }
     .status-pill.cancelled {
-      background: var(--error-color, #d32f2f);
+      background: rgba(211, 47, 47, 0.1);
+      color: var(--error-color, #d32f2f);
+      border: 1px solid rgba(211, 47, 47, 0.25);
     }
     /* Popup overlay styles */
     .popup-overlay {
@@ -850,8 +870,9 @@ export class TrainDepartureBoard extends LitElement {
     if (isCancelled) {
       pillHtml = html`<span class="status-pill cancelled">Cancelled</span>`;
     } else if (offsetStr) {
-      pillHtml = html`<span class="status-pill delayed"
-        >${statusClass === 'early' ? 'Early ' : ''}${offsetStr}</span
+      const isEarly = statusClass === 'early';
+      pillHtml = html`<span class="status-pill ${isEarly ? 'early' : 'delayed'}"
+        >${isEarly ? 'Early ' : ''}${offsetStr}</span
       >`;
     }
 
@@ -877,7 +898,7 @@ export class TrainDepartureBoard extends LitElement {
               <h3 class="terminus">${departure.destination_name}</h3>
               ${pillHtml}
               ${showCarriages && departure.length
-                ? html`<span class="carriages-badge">${departure.length}c</span>`
+                ? html`<span class="carriages-badge">${departure.length}-car</span>`
                 : ''}
               ${platform
                 ? html`<span
