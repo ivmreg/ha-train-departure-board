@@ -72,4 +72,5 @@ export interface TrainDepartureBoardConfig {
   font_size_status?: string;
   delay_layout?: 'inline' | 'stacked' | 'status_line';
   row_size?: 'compact' | 'normal' | 'comfortable';
+  show_carriages?: boolean;
 }

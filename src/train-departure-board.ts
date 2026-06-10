@@ -210,6 +210,15 @@ export class TrainDepartureBoard extends LitElement {
       flex: 1;
       color: var(--primary-text-color, #111);
     }
+    .train-meta {
+      font-size: 0.8em;
+      color: var(--secondary-text-color, #666);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.2;
+    }
     .status-pill {
       font-size: var(--train-board-status-size, 0.85rem);
       font-weight: 700;
@@ -746,6 +755,11 @@ export class TrainDepartureBoard extends LitElement {
                     Platform ${departure.platform}
                   </div>`
                 : ''}
+              ${departure.length
+                ? html` <div class="modern-badge carriages">
+                    ${departure.length} carriages
+                  </div>`
+                : ''}
               ${stockInfo.category !== 'standard'
                 ? html` <div
                     class="modern-badge stock-badge stock-${stockInfo.category}"
@@ -825,6 +839,7 @@ export class TrainDepartureBoard extends LitElement {
 
     const timeClass = isCancelled ? 'time-cancelled' : '';
     const rowSizeClass = `row-size-${this.config.row_size || 'normal'}`;
+    const showCarriages = this.config.show_carriages !== false;
 
     let pillHtml = html``;
     if (isCancelled) {
@@ -866,6 +881,13 @@ export class TrainDepartureBoard extends LitElement {
                   >`
                 : ''}
             </div>
+            ${showCarriages && departure.length
+              ? html`
+                  <div class="train-meta">
+                    <span class="carriages">${departure.length} carriages</span>
+                  </div>
+                `
+              : ''}
           </div>
         </div>
       </div>

@@ -87,6 +87,16 @@ const SCHEMA: HaFormSchema[] = [
     name: '',
     schema: [
       {
+        name: 'show_carriages',
+        selector: { boolean: {} },
+      },
+    ],
+  },
+  {
+    type: 'grid',
+    name: '',
+    schema: [
+      {
         name: 'font_size_time',
         selector: { text: {} },
       },
@@ -113,6 +123,7 @@ const LABELS: Record<string, string> = {
   font_size_time: 'Time Font Size',
   font_size_destination: 'Destination Font Size',
   font_size_status: 'Status Pill Font Size',
+  show_carriages: 'Show Carriage Count',
 };
 
 // Helper text for fields
@@ -125,6 +136,7 @@ const HELPERS: Record<string, string> = {
   font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
   font_size_destination: 'e.g. 1.2rem (default: 1rem)',
   font_size_status: 'e.g. 0.85rem (default: 0.75rem)',
+  show_carriages: 'Display carriage/length details when available',
 };
 
 declare global {

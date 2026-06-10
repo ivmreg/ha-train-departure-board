@@ -18,6 +18,7 @@ entity: sensor.train_departures
 | `title` | string | "Train Departures" | Title displayed at the top of the card |
 | `entity` | string | required | Entity ID that contains the departure data |
 | `attribute` | string | `next_trains` | Name of the entity attribute that holds the departures array |
+| `show_carriages` | boolean | `true` | Show train carriage/length count details if available |
 
 ## Expected Entity Data Structure
 
