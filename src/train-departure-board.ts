@@ -213,13 +213,17 @@ export class TrainDepartureBoard extends LitElement {
     .carriages-badge {
       font-size: 0.7em;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 4px;
+      width: 44px;
+      text-align: center;
       border-radius: 4px;
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
       color: var(--secondary-text-color, #666);
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
       white-space: nowrap;
       flex-shrink: 0;
+      display: inline-block;
+      box-sizing: border-box;
     }
     .status-pill {
       font-size: var(--train-board-status-size, 0.85rem);
@@ -845,8 +849,6 @@ export class TrainDepartureBoard extends LitElement {
     let pillHtml = html``;
     if (isCancelled) {
       pillHtml = html`<span class="status-pill cancelled">Cancelled</span>`;
-    } else if (statusClass === 'on-time') {
-      pillHtml = html`<span class="status-pill on-time">On time</span>`;
     } else if (offsetStr) {
       pillHtml = html`<span class="status-pill delayed"
         >${statusClass === 'early' ? 'Early ' : ''}${offsetStr}</span

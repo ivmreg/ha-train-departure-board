@@ -158,7 +158,7 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
           </div>
         </div>
       </div>
-    `}renderDepartureRow(t,e){const i=pt(t.scheduled),{statusClass:s,statusLabel:r,offsetStr:o}=ft(t),n=t.platform?t.platform:null,a=0===e,l="cancelled"===s,d=ct(t.stock),c=l?"time-cancelled":"",p=`row-size-${this.config.row_size||"normal"}`,u=!1!==this.config.show_carriages,h=["modern","javelin","refurb"].includes(d.category)?`stock-row-${d.category}`:"";let f=H``;return l?f=H`<span class="status-pill cancelled">Cancelled</span>`:"on-time"===s?f=H`<span class="status-pill on-time">On time</span>`:o&&(f=H`<span class="status-pill delayed"
+    `}renderDepartureRow(t,e){const i=pt(t.scheduled),{statusClass:s,statusLabel:r,offsetStr:o}=ft(t),n=t.platform?t.platform:null,a=0===e,l="cancelled"===s,d=ct(t.stock),c=l?"time-cancelled":"",p=`row-size-${this.config.row_size||"normal"}`,u=!1!==this.config.show_carriages,h=["modern","javelin","refurb"].includes(d.category)?`stock-row-${d.category}`:"";let f=H``;return l?f=H`<span class="status-pill cancelled">Cancelled</span>`:o&&(f=H`<span class="status-pill delayed"
         >${"early"===s?"Early ":""}${o}</span
       >`),H`
       <div
@@ -347,13 +347,17 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
     .carriages-badge {
       font-size: 0.7em;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 4px;
+      width: 44px;
+      text-align: center;
       border-radius: 4px;
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
       color: var(--secondary-text-color, #666);
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
       white-space: nowrap;
       flex-shrink: 0;
+      display: inline-block;
+      box-sizing: border-box;
     }
     .status-pill {
       font-size: var(--train-board-status-size, 0.85rem);
