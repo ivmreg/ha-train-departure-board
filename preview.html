@@ -187,82 +187,12 @@
             <p>Home Assistant Custom Card Preview</p>
         </div>
 
-        <div class="card">
-            <div class="card-header">Train Departures</div>
-            
-            <!-- The card is instantiated below using the same dataset format you'd pass from a Home Assistant sensor. -->
-            <div id="card-host">
-                <!-- fallback static rows shown while card is loading -->
-                <div class="departure-row">
-                    <div class="time">22:51</div>
-                    <div class="destination">London Charing Cross
-                            <div class="via">via LBG 23:03 • CST 23:15</div>
-                    </div>
-                    <div class="minutes">in 14 min</div>
-                    <div class="platform">Platform 1</div>
-                    <div class="status on-time">On Time</div>
-                </div>
-            </div>
-
-            <div class="departure-row">
-                <div class="time">23:04</div>
-                <div class="destination">London Bridge
-                    <div class="via">via WBY 23:20</div>
-                </div>
-                <div class="minutes">in 27 min</div>
-                <div class="platform">Platform 3</div>
-                <div class="status on-time">On Time</div>
-            </div>
-
-            <div class="departure-row">
-                <div class="time">23:17</div>
-                <div class="destination">Cannon Street
-                    <div class="via">via LBG 23:03</div>
-                </div>
-                <div class="minutes">in 40 min</div>
-                <div class="platform">Platform 2</div>
-                <div class="status delayed">Delayed +5 min</div>
-            </div>
-
-            <div class="departure-row">
-                <div class="time">23:35</div>
-                <div class="destination">Victoria</div>
-                <div class="minutes">in 58 min</div>
-                <div class="platform">Platform 4</div>
-                <div class="status on-time">On Time</div>
-            </div>
-
-            <div class="departure-row">
-                <div class="time">23:52</div>
-                <div class="destination">London Bridge</div>
-                <div class="minutes">in 75 min</div>
-                <div class="platform">Platform 5</div>
-                <div class="status delayed">Delayed +12 min</div>
-            </div>
-
-            <div class="departure-row">
-                <div class="time">00:15</div>
-                <div class="destination">Cannon Street</div>
-                <div class="minutes">in 98 min</div>
-                <div class="platform">Platform 1</div>
-                <div class="status on-time">On Time</div>
-            </div>
-        </div>
-
-        <div class="info-box">
-            <strong>ℹ️ About this preview:</strong><br>
-            This is a static preview showing how the card renders. In Home Assistant, the card will:
-            <ul style="margin-left: 20px; margin-top: 8px;">
-                <li>Dynamically update with real train departure data from your sensor</li>
-                <li>Support customizable titles and entity configuration</li>
-                <li>Automatically color-code departures based on status</li>
-                <li>Display platform numbers and detailed departure times</li>
-            </ul>
-        </div>
+        <div id="card-host"></div>
     </div>
 
     <script type="module">
         // import card bundle built locally
+        // @ts-ignore
         import './ha-train-departure-board.js';
 
         // Sample sensor object (from the data you provided). This mirrors the actual HA sensor payload
@@ -281,6 +211,8 @@
                                 minutes: 12,
                                 platform: '1',
                                 operator_name: 'Southeastern',
+                                length: 10,
+                                stock: 'City Beam',
                                 stops_of_interest: [
                                     {
                                         stop: 'LBG',
@@ -302,6 +234,8 @@
                                 minutes: 23,
                                 platform: '1',
                                 operator_name: 'Southeastern',
+                                length: 8,
+                                stock: 'Javelin',
                                 stops_of_interest: [
                                     {
                                         stop: 'LBG',
@@ -319,10 +253,12 @@
                                 destination_name: 'London Victoria',
                                 service_uid: 'P15912',
                                 scheduled: '15-11-2025 18:28',
-                                estimated: '15-11-2025 18:29',
+                                estimated: '15-11-2025 18:33',
                                 minutes: 28,
                                 platform: '1',
                                 operator_name: 'Southeastern',
+                                length: 12,
+                                stock: 'Networker',
                                 stops_of_interest: [],
                                 stops: 14
                             }
@@ -334,7 +270,12 @@
 
         // Create a card and append it to the preview
         const card = document.createElement('train-departure-board');
-        card.config = { type: 'custom:train-departure-board', title: 'Train Departures', entity: 'sensor.train_deps' };
+        card.config = {
+            type: 'custom:train-departure-board',
+            title: 'Train Departures',
+            entity: 'sensor.train_deps',
+            attribute: 'departures'
+        };
         // Provide Home Assistant-like object
         card.hass = sampleHass;
 
