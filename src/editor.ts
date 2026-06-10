@@ -4,185 +4,187 @@ import { TrainDepartureBoardConfig, HomeAssistant } from './types';
 
 // Schema type definition for ha-form
 interface HaFormSchema {
-    name: string;
-    required?: boolean;
-    selector?: Record<string, unknown>;
-    type?: 'grid' | 'expandable';
-    schema?: HaFormSchema[];
-    context?: Record<string, string>;
+  name: string;
+  required?: boolean;
+  selector?: Record<string, unknown>;
+  type?: 'grid' | 'expandable';
+  schema?: HaFormSchema[];
+  context?: Record<string, string>;
 }
 
 // Define the configuration schema
 const SCHEMA: HaFormSchema[] = [
-    {
-        name: 'entity',
-        required: true,
+  {
+    name: 'entity',
+    required: true,
+    selector: {
+      entity: {
+        filter: [{ domain: 'sensor' }],
+      },
+    },
+  },
+  {
+    name: 'title',
+    selector: { text: {} },
+  },
+  {
+    type: 'grid',
+    name: '',
+    schema: [
+      {
+        name: 'attribute',
+        selector: { text: {} },
+      },
+      {
+        name: 'stops_identifier',
         selector: {
-            entity: {
-                filter: [{ domain: 'sensor' }]
-            }
-        }
-    },
-    {
-        name: 'title',
-        selector: { text: {} }
-    },
-    {
-        type: 'grid',
-        name: '',
-        schema: [
-            {
-                name: 'attribute',
-                selector: { text: {} }
-            },
-            {
-                name: 'stops_identifier',
-                selector: {
-                    select: {
-                        options: [
-                            { value: 'description', label: 'Description (Default)' },
-                            { value: 'tiploc', label: 'TIPLOC' },
-                            { value: 'crs', label: 'CRS' }
-                        ],
-                        mode: 'dropdown'
-                    }
-                }
-            }
-        ]
-    },
-    {
-        type: 'grid',
-        name: '',
-        schema: [
-            {
-                name: 'delay_layout',
-                selector: {
-                    select: {
-                        options: [
-                            { value: 'inline', label: 'Inline (Default)' },
-                            { value: 'stacked', label: 'Stacked' },
-                            { value: 'status_line', label: 'Status Line' }
-                        ],
-                        mode: 'dropdown'
-                    }
-                }
-            },
-            {
-                name: 'row_size',
-                selector: {
-                    select: {
-                        options: [
-                            { value: 'compact', label: 'Compact' },
-                            { value: 'normal', label: 'Normal (Default)' },
-                            { value: 'comfortable', label: 'Comfortable' }
-                        ],
-                        mode: 'dropdown'
-                    }
-                }
-            }
-        ]
-    },
-    {
-        type: 'grid',
-        name: '',
-        schema: [
-            {
-                name: 'font_size_time',
-                selector: { text: {} }
-            },
-            {
-                name: 'font_size_destination',
-                selector: { text: {} }
-            },
-            {
-                name: 'font_size_status',
-                selector: { text: {} }
-            }
-        ]
-    }
+          select: {
+            options: [
+              { value: 'description', label: 'Description (Default)' },
+              { value: 'tiploc', label: 'TIPLOC' },
+              { value: 'crs', label: 'CRS' },
+            ],
+            mode: 'dropdown',
+          },
+        },
+      },
+    ],
+  },
+  {
+    type: 'grid',
+    name: '',
+    schema: [
+      {
+        name: 'delay_layout',
+        selector: {
+          select: {
+            options: [
+              { value: 'inline', label: 'Inline (Default)' },
+              { value: 'stacked', label: 'Stacked' },
+              { value: 'status_line', label: 'Status Line' },
+            ],
+            mode: 'dropdown',
+          },
+        },
+      },
+      {
+        name: 'row_size',
+        selector: {
+          select: {
+            options: [
+              { value: 'compact', label: 'Compact' },
+              { value: 'normal', label: 'Normal (Default)' },
+              { value: 'comfortable', label: 'Comfortable' },
+            ],
+            mode: 'dropdown',
+          },
+        },
+      },
+    ],
+  },
+  {
+    type: 'grid',
+    name: '',
+    schema: [
+      {
+        name: 'font_size_time',
+        selector: { text: {} },
+      },
+      {
+        name: 'font_size_destination',
+        selector: { text: {} },
+      },
+      {
+        name: 'font_size_status',
+        selector: { text: {} },
+      },
+    ],
+  },
 ];
 
 // Labels for each field
 const LABELS: Record<string, string> = {
-    entity: 'Entity',
-    title: 'Card Title',
-    attribute: 'Data Attribute',
-    stops_identifier: 'Station Identifier',
-    delay_layout: 'Delay Pill Layout',
-    row_size: 'Row Size',
-    font_size_time: 'Time Font Size',
-    font_size_destination: 'Destination Font Size',
-    font_size_status: 'Status Pill Font Size'
+  entity: 'Entity',
+  title: 'Card Title',
+  attribute: 'Data Attribute',
+  stops_identifier: 'Station Identifier',
+  delay_layout: 'Delay Pill Layout',
+  row_size: 'Row Size',
+  font_size_time: 'Time Font Size',
+  font_size_destination: 'Destination Font Size',
+  font_size_status: 'Status Pill Font Size',
 };
 
 // Helper text for fields
 const HELPERS: Record<string, string> = {
-    entity: 'Select a realtime trains sensor',
-    attribute: 'Attribute with departure data (default: next_trains)',
-    stops_identifier: 'How stations are identified in the data',
-    delay_layout: 'Position of the delay/early pill',
-    row_size: 'Vertical padding of the departure rows',
-    font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
-    font_size_destination: 'e.g. 1.2rem (default: 1rem)',
-    font_size_status: 'e.g. 0.85rem (default: 0.75rem)'
+  entity: 'Select a realtime trains sensor',
+  attribute: 'Attribute with departure data (default: next_trains)',
+  stops_identifier: 'How stations are identified in the data',
+  delay_layout: 'Position of the delay/early pill',
+  row_size: 'Vertical padding of the departure rows',
+  font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
+  font_size_destination: 'e.g. 1.2rem (default: 1rem)',
+  font_size_status: 'e.g. 0.85rem (default: 0.75rem)',
 };
 
 declare global {
-    interface HTMLElementTagNameMap {
-        'train-departure-board-editor': TrainDepartureBoardEditor;
-    }
+  interface HTMLElementTagNameMap {
+    'train-departure-board-editor': TrainDepartureBoardEditor;
+  }
 }
 
 @customElement('train-departure-board-editor')
 export class TrainDepartureBoardEditor extends LitElement {
-    @property({ attribute: false }) public hass!: HomeAssistant;
-    @state() private _config?: TrainDepartureBoardConfig;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+  @state() private _config?: TrainDepartureBoardConfig;
 
-    public setConfig(config: TrainDepartureBoardConfig): void {
-        this._config = config;
+  public setConfig(config: TrainDepartureBoardConfig): void {
+    this._config = config;
+  }
+
+  private _computeLabel = (schema: HaFormSchema): string => {
+    return LABELS[schema.name] || schema.name;
+  };
+
+  private _computeHelper = (schema: HaFormSchema): string | undefined => {
+    return HELPERS[schema.name];
+  };
+
+  protected render() {
+    if (!this.hass || !this._config) {
+      return nothing;
     }
 
-    private _computeLabel = (schema: HaFormSchema): string => {
-        return LABELS[schema.name] || schema.name;
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .data=${this._config}
+        .schema=${SCHEMA}
+        .computeLabel=${this._computeLabel}
+        .computeHelper=${this._computeHelper}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+    `;
+  }
+
+  private _valueChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    const config = ev.detail.value;
+
+    // Ensure defaults are preserved
+    const newConfig = {
+      ...this._config,
+      ...config,
+      attribute: config.attribute || 'next_trains',
+      stops_identifier: config.stops_identifier || 'description',
     };
 
-    private _computeHelper = (schema: HaFormSchema): string | undefined => {
-        return HELPERS[schema.name];
-    };
-
-    protected render() {
-        if (!this.hass || !this._config) {
-            return nothing;
-        }
-
-        return html`
-            <ha-form
-                .hass=${this.hass}
-                .data=${this._config}
-                .schema=${SCHEMA}
-                .computeLabel=${this._computeLabel}
-                .computeHelper=${this._computeHelper}
-                @value-changed=${this._valueChanged}
-            ></ha-form>
-        `;
-    }
-
-    private _valueChanged(ev: CustomEvent): void {
-        ev.stopPropagation();
-        const config = ev.detail.value;
-
-        // Ensure defaults are preserved
-        const newConfig = {
-            ...this._config,
-            ...config,
-            attribute: config.attribute || 'next_trains',
-            stops_identifier: config.stops_identifier || 'description'
-        };
-
-        this.dispatchEvent(new CustomEvent('config-changed', {
-            detail: { config: newConfig },
-            bubbles: true,
-            composed: true
-        }));
-    }
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: { config: newConfig },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
 }

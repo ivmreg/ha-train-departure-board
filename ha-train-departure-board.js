@@ -15,7 +15,7 @@ const e=window,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow)&&"
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var g;v[m]=!0,v.elementProperties=new Map,v.elementStyles=[],v.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:v}),(null!==(a=l.reactiveElementVersions)&&void 0!==a?a:l.reactiveElementVersions=[]).push("1.6.3");const b=window,_=b.trustedTypes,y=_?_.createPolicy("lit-html",{createHTML:t=>t}):void 0,$="$lit$",x=`lit$${(Math.random()+"").slice(9)}$`,w="?"+x,A=`<${w}>`,E=document,C=()=>E.createComment(""),k=t=>null===t||"object"!=typeof t&&"function"!=typeof t,S=Array.isArray,P="[ \t\n\f\r]",T=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,z=/-->/g,L=/>/g,D=RegExp(`>|${P}(?:([^\\s"'>=/]+)(${P}*=${P}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),N=/'/g,O=/"/g,U=/^(?:script|style|textarea|title)$/i,H=(t=>(e,...i)=>({_$litType$:t,strings:e,values:i}))(1),R=Symbol.for("lit-noChange"),j=Symbol.for("lit-nothing"),M=new WeakMap,I=E.createTreeWalker(E,129,null,!1);function B(t,e){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==y?y.createHTML(e):e}const F=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":"",n=T;for(let e=0;e<i;e++){const i=t[e];let a,l,d=-1,c=0;for(;c<i.length&&(n.lastIndex=c,l=n.exec(i),null!==l);)c=n.lastIndex,n===T?"!--"===l[1]?n=z:void 0!==l[1]?n=L:void 0!==l[2]?(U.test(l[2])&&(r=RegExp("</"+l[2],"g")),n=D):void 0!==l[3]&&(n=D):n===D?">"===l[0]?(n=null!=r?r:T,d=-1):void 0===l[1]?d=-2:(d=n.lastIndex-l[2].length,a=l[1],n=void 0===l[3]?D:'"'===l[3]?O:N):n===O||n===N?n=D:n===z||n===L?n=T:(n=D,r=void 0);const p=n===D&&t[e+1].startsWith("/>")?" ":"";o+=n===T?i+A:d>=0?(s.push(a),i.slice(0,d)+$+i.slice(d)+x+p):i+x+(-2===d?(s.push(void 0),e):p)}return[B(t,o+(t[i]||"<?>")+(2===e?"</svg>":"")),s]};class V{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[l,d]=F(t,e);if(this.el=V.createElement(l,i),I.currentNode=this.el.content,2===e){const t=this.el.content,e=t.firstChild;e.remove(),t.append(...e.childNodes)}for(;null!==(s=I.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes()){const t=[];for(const e of s.getAttributeNames())if(e.endsWith($)||e.startsWith(x)){const i=d[o++];if(t.push(e),void 0!==i){const t=s.getAttribute(i.toLowerCase()+$).split(x),e=/([.?@])?(.*)/.exec(i);a.push({type:1,index:r,name:e[2],strings:t,ctor:"."===e[1]?Y:"?"===e[1]?Z:"@"===e[1]?G:J})}else a.push({type:6,index:r})}for(const e of t)s.removeAttribute(e)}if(U.test(s.tagName)){const t=s.textContent.split(x),e=t.length-1;if(e>0){s.textContent=_?_.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],C()),I.nextNode(),a.push({type:2,index:++r});s.append(t[e],C())}}}else if(8===s.nodeType)if(s.data===w)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(x,t+1));)a.push({type:7,index:r}),t+=x.length-1}r++}}static createElement(t,e){const i=E.createElement("template");return i.innerHTML=t,i}}function q(t,e,i=t,s){var r,o,n,a;if(e===R)return e;let l=void 0!==s?null===(r=i._$Co)||void 0===r?void 0:r[s]:i._$Cl;const d=k(e)?void 0:e._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(t),l._$AT(t,i,s)),void 0!==s?(null!==(n=(a=i)._$Co)&&void 0!==n?n:a._$Co=[])[s]=l:i._$Cl=l),void 0!==l&&(e=q(t,l._$AS(t,e.values),l,s)),e}class K{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){var e;const{el:{content:i},parts:s}=this._$AD,r=(null!==(e=null==t?void 0:t.creationScope)&&void 0!==e?e:E).importNode(i,!0);I.currentNode=r;let o=I.nextNode(),n=0,a=0,l=s[0];for(;void 0!==l;){if(n===l.index){let e;2===l.type?e=new W(o,o.nextSibling,this,t):1===l.type?e=new l.ctor(o,l.name,l.strings,this,t):6===l.type&&(e=new Q(o,this,t)),this._$AV.push(e),l=s[++a]}n!==(null==l?void 0:l.index)&&(o=I.nextNode(),n++)}return I.currentNode=E,r}v(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class W{constructor(t,e,i,s){var r;this.type=2,this._$AH=j,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cp=null===(r=null==s?void 0:s.isConnected)||void 0===r||r}get _$AU(){var t,e;return null!==(e=null===(t=this._$AM)||void 0===t?void 0:t._$AU)&&void 0!==e?e:this._$Cp}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===(null==t?void 0:t.nodeType)&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=q(this,t,e),k(t)?t===j||null==t||""===t?(this._$AH!==j&&this._$AR(),this._$AH=j):t!==this._$AH&&t!==R&&this._(t):void 0!==t._$litType$?this.g(t):void 0!==t.nodeType?this.$(t):(t=>S(t)||"function"==typeof(null==t?void 0:t[Symbol.iterator]))(t)?this.T(t):this._(t)}k(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}$(t){this._$AH!==t&&(this._$AR(),this._$AH=this.k(t))}_(t){this._$AH!==j&&k(this._$AH)?this._$AA.nextSibling.data=t:this.$(E.createTextNode(t)),this._$AH=t}g(t){var e;const{values:i,_$litType$:s}=t,r="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=V.createElement(B(s.h,s.h[0]),this.options)),s);if((null===(e=this._$AH)||void 0===e?void 0:e._$AD)===r)this._$AH.v(i);else{const t=new K(r,this),e=t.u(this.options);t.v(i),this.$(e),this._$AH=t}}_$AC(t){let e=M.get(t.strings);return void 0===e&&M.set(t.strings,e=new V(t)),e}T(t){S(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new W(this.k(C()),this.k(C()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){var i;for(null===(i=this._$AP)||void 0===i||i.call(this,!1,!0,e);t&&t!==this._$AB;){const e=t.nextSibling;t.remove(),t=e}}setConnected(t){var e;void 0===this._$AM&&(this._$Cp=t,null===(e=this._$AP)||void 0===e||e.call(this,t))}}class J{constructor(t,e,i,s,r){this.type=1,this._$AH=j,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=j}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=q(this,t,e,0),o=!k(t)||t!==this._$AH&&t!==R,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=q(this,s[i+n],e,n),a===R&&(a=this._$AH[n]),o||(o=!k(a)||a!==this._$AH[n]),a===j?t=j:t!==j&&(t+=(null!=a?a:"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===j?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=t?t:"")}}class Y extends J{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===j?void 0:t}}const X=_?_.emptyScript:"";class Z extends J{constructor(){super(...arguments),this.type=4}j(t){t&&t!==j?this.element.setAttribute(this.name,X):this.element.removeAttribute(this.name)}}class G extends J{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){var i;if((t=null!==(i=q(this,t,e,0))&&void 0!==i?i:j)===R)return;const s=this._$AH,r=t===j&&s!==j||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,o=t!==j&&(s===j||r);r&&this.element.removeEventListener(this.name,this,s),o&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){var e,i;"function"==typeof this._$AH?this._$AH.call(null!==(i=null===(e=this.options)||void 0===e?void 0:e.host)&&void 0!==i?i:this.element,t):this._$AH.handleEvent(t)}}class Q{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){q(this,t)}}const tt=b.litHtmlPolyfillSupport;null==tt||tt(V,W),(null!==(g=b.litHtmlVersions)&&void 0!==g?g:b.litHtmlVersions=[]).push("2.8.0");
+var g;v[m]=!0,v.elementProperties=new Map,v.elementStyles=[],v.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:v}),(null!==(a=l.reactiveElementVersions)&&void 0!==a?a:l.reactiveElementVersions=[]).push("1.6.3");const b=window,_=b.trustedTypes,y=_?_.createPolicy("lit-html",{createHTML:t=>t}):void 0,$="$lit$",x=`lit$${(Math.random()+"").slice(9)}$`,w="?"+x,A=`<${w}>`,E=document,C=()=>E.createComment(""),k=t=>null===t||"object"!=typeof t&&"function"!=typeof t,S=Array.isArray,P="[ \t\n\f\r]",z=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,T=/-->/g,N=/>/g,O=RegExp(`>|${P}(?:([^\\s"'>=/]+)(${P}*=${P}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),L=/'/g,D=/"/g,U=/^(?:script|style|textarea|title)$/i,H=(t=>(e,...i)=>({_$litType$:t,strings:e,values:i}))(1),R=Symbol.for("lit-noChange"),j=Symbol.for("lit-nothing"),M=new WeakMap,I=E.createTreeWalker(E,129,null,!1);function B(t,e){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==y?y.createHTML(e):e}const V=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":"",n=z;for(let e=0;e<i;e++){const i=t[e];let a,l,d=-1,c=0;for(;c<i.length&&(n.lastIndex=c,l=n.exec(i),null!==l);)c=n.lastIndex,n===z?"!--"===l[1]?n=T:void 0!==l[1]?n=N:void 0!==l[2]?(U.test(l[2])&&(r=RegExp("</"+l[2],"g")),n=O):void 0!==l[3]&&(n=O):n===O?">"===l[0]?(n=null!=r?r:z,d=-1):void 0===l[1]?d=-2:(d=n.lastIndex-l[2].length,a=l[1],n=void 0===l[3]?O:'"'===l[3]?D:L):n===D||n===L?n=O:n===T||n===N?n=z:(n=O,r=void 0);const p=n===O&&t[e+1].startsWith("/>")?" ":"";o+=n===z?i+A:d>=0?(s.push(a),i.slice(0,d)+$+i.slice(d)+x+p):i+x+(-2===d?(s.push(void 0),e):p)}return[B(t,o+(t[i]||"<?>")+(2===e?"</svg>":"")),s]};class F{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[l,d]=V(t,e);if(this.el=F.createElement(l,i),I.currentNode=this.el.content,2===e){const t=this.el.content,e=t.firstChild;e.remove(),t.append(...e.childNodes)}for(;null!==(s=I.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes()){const t=[];for(const e of s.getAttributeNames())if(e.endsWith($)||e.startsWith(x)){const i=d[o++];if(t.push(e),void 0!==i){const t=s.getAttribute(i.toLowerCase()+$).split(x),e=/([.?@])?(.*)/.exec(i);a.push({type:1,index:r,name:e[2],strings:t,ctor:"."===e[1]?Y:"?"===e[1]?Z:"@"===e[1]?G:J})}else a.push({type:6,index:r})}for(const e of t)s.removeAttribute(e)}if(U.test(s.tagName)){const t=s.textContent.split(x),e=t.length-1;if(e>0){s.textContent=_?_.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],C()),I.nextNode(),a.push({type:2,index:++r});s.append(t[e],C())}}}else if(8===s.nodeType)if(s.data===w)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(x,t+1));)a.push({type:7,index:r}),t+=x.length-1}r++}}static createElement(t,e){const i=E.createElement("template");return i.innerHTML=t,i}}function q(t,e,i=t,s){var r,o,n,a;if(e===R)return e;let l=void 0!==s?null===(r=i._$Co)||void 0===r?void 0:r[s]:i._$Cl;const d=k(e)?void 0:e._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(t),l._$AT(t,i,s)),void 0!==s?(null!==(n=(a=i)._$Co)&&void 0!==n?n:a._$Co=[])[s]=l:i._$Cl=l),void 0!==l&&(e=q(t,l._$AS(t,e.values),l,s)),e}class K{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){var e;const{el:{content:i},parts:s}=this._$AD,r=(null!==(e=null==t?void 0:t.creationScope)&&void 0!==e?e:E).importNode(i,!0);I.currentNode=r;let o=I.nextNode(),n=0,a=0,l=s[0];for(;void 0!==l;){if(n===l.index){let e;2===l.type?e=new W(o,o.nextSibling,this,t):1===l.type?e=new l.ctor(o,l.name,l.strings,this,t):6===l.type&&(e=new Q(o,this,t)),this._$AV.push(e),l=s[++a]}n!==(null==l?void 0:l.index)&&(o=I.nextNode(),n++)}return I.currentNode=E,r}v(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class W{constructor(t,e,i,s){var r;this.type=2,this._$AH=j,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cp=null===(r=null==s?void 0:s.isConnected)||void 0===r||r}get _$AU(){var t,e;return null!==(e=null===(t=this._$AM)||void 0===t?void 0:t._$AU)&&void 0!==e?e:this._$Cp}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===(null==t?void 0:t.nodeType)&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=q(this,t,e),k(t)?t===j||null==t||""===t?(this._$AH!==j&&this._$AR(),this._$AH=j):t!==this._$AH&&t!==R&&this._(t):void 0!==t._$litType$?this.g(t):void 0!==t.nodeType?this.$(t):(t=>S(t)||"function"==typeof(null==t?void 0:t[Symbol.iterator]))(t)?this.T(t):this._(t)}k(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}$(t){this._$AH!==t&&(this._$AR(),this._$AH=this.k(t))}_(t){this._$AH!==j&&k(this._$AH)?this._$AA.nextSibling.data=t:this.$(E.createTextNode(t)),this._$AH=t}g(t){var e;const{values:i,_$litType$:s}=t,r="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=F.createElement(B(s.h,s.h[0]),this.options)),s);if((null===(e=this._$AH)||void 0===e?void 0:e._$AD)===r)this._$AH.v(i);else{const t=new K(r,this),e=t.u(this.options);t.v(i),this.$(e),this._$AH=t}}_$AC(t){let e=M.get(t.strings);return void 0===e&&M.set(t.strings,e=new F(t)),e}T(t){S(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new W(this.k(C()),this.k(C()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){var i;for(null===(i=this._$AP)||void 0===i||i.call(this,!1,!0,e);t&&t!==this._$AB;){const e=t.nextSibling;t.remove(),t=e}}setConnected(t){var e;void 0===this._$AM&&(this._$Cp=t,null===(e=this._$AP)||void 0===e||e.call(this,t))}}class J{constructor(t,e,i,s,r){this.type=1,this._$AH=j,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=j}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=q(this,t,e,0),o=!k(t)||t!==this._$AH&&t!==R,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=q(this,s[i+n],e,n),a===R&&(a=this._$AH[n]),o||(o=!k(a)||a!==this._$AH[n]),a===j?t=j:t!==j&&(t+=(null!=a?a:"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===j?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=t?t:"")}}class Y extends J{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===j?void 0:t}}const X=_?_.emptyScript:"";class Z extends J{constructor(){super(...arguments),this.type=4}j(t){t&&t!==j?this.element.setAttribute(this.name,X):this.element.removeAttribute(this.name)}}class G extends J{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){var i;if((t=null!==(i=q(this,t,e,0))&&void 0!==i?i:j)===R)return;const s=this._$AH,r=t===j&&s!==j||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,o=t!==j&&(s===j||r);r&&this.element.removeEventListener(this.name,this,s),o&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){var e,i;"function"==typeof this._$AH?this._$AH.call(null!==(i=null===(e=this.options)||void 0===e?void 0:e.host)&&void 0!==i?i:this.element,t):this._$AH.handleEvent(t)}}class Q{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){q(this,t)}}const tt=b.litHtmlPolyfillSupport;null==tt||tt(F,W),(null!==(g=b.litHtmlVersions)&&void 0!==g?g:b.litHtmlVersions=[]).push("2.8.0");
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -42,491 +42,651 @@ const ot=t=>e=>"function"==typeof e?((t,e)=>(customElements.define(t,e),e))(t,e)
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var dt;function ct(t){const e=(t||"").toLowerCase();return e.includes("city beam")||e.includes("707")?{category:"modern",label:"CITY BEAM"}:e.includes("javelin")||e.includes("395")?{category:"javelin",label:"JAVELIN"}:e.includes("376")?{category:"refurb",label:"REFURB 376"}:e.includes("465")||e.includes("466")||e.includes("networker")?{category:"older",label:"CLASS 465"}:{category:"standard",label:""}}null===(dt=window.HTMLSlotElement)||void 0===dt||dt.prototype.assignedElements;const pt=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"delay_layout",selector:{select:{options:[{value:"inline",label:"Inline (Default)"},{value:"stacked",label:"Stacked"},{value:"status_line",label:"Status Line"}],mode:"dropdown"}}},{name:"row_size",selector:{select:{options:[{value:"compact",label:"Compact"},{value:"normal",label:"Normal (Default)"},{value:"comfortable",label:"Comfortable"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}],ut={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier",delay_layout:"Delay Pill Layout",row_size:"Row Size",font_size_time:"Time Font Size",font_size_destination:"Destination Font Size",font_size_status:"Status Pill Font Size"},ht={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",delay_layout:"Position of the delay/early pill",row_size:"Vertical padding of the departure rows",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)"};let ft=class extends st{constructor(){super(...arguments),this._computeLabel=t=>ut[t.name]||t.name,this._computeHelper=t=>ht[t.name]}setConfig(t){this._config=t}render(){return this.hass&&this._config?H`
-            <ha-form
-                .hass=${this.hass}
-                .data=${this._config}
-                .schema=${pt}
-                .computeLabel=${this._computeLabel}
-                .computeHelper=${this._computeHelper}
-                @value-changed=${this._valueChanged}
-            ></ha-form>
-        `:j}_valueChanged(t){t.stopPropagation();const e=t.detail.value,i=Object.assign(Object.assign(Object.assign({},this._config),e),{attribute:e.attribute||"next_trains",stops_identifier:e.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:i},bubbles:!0,composed:!0}))}};t([at({attribute:!1})],ft.prototype,"hass",void 0),t([lt()],ft.prototype,"_config",void 0),ft=t([ot("train-departure-board-editor")],ft);let mt=class extends st{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this.dateCache=new Map,this.lastEntityId=null,this._handleKeyDown=t=>{"Escape"===t.key&&this._selectedDeparture&&this._closePopup()}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(t){if(!t)throw new Error("Invalid configuration");const e=Object.assign({attribute:"next_trains"},t);"string"==typeof e.attribute?e.attribute=e.attribute.trim()||"next_trains":e.attribute="next_trains",this.config=e}render(){var t,e,i;if(!this.config)return H`<div class="card">No configuration provided</div>`;if(!this.config.entity)return H`<div class="card">Please configure an entity</div>`;const s=null===(e=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===e?void 0:e[this.config.entity];if(!s)return H`<div class="card">Entity not found: ${this.config.entity}</div>`;this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity);const r=this.config.attribute||"next_trains",o=null===(i=s.attributes)||void 0===i?void 0:i[r],n=Array.isArray(o)?o:[],a=s.last_updated?new Date(s.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";void 0===o&&console.warn(`train-departure-board: attribute "${r}" was not found on entity ${this.config.entity}`),Array.isArray(o)||void 0===o||console.warn(`train-departure-board: attribute "${r}" is not an array, falling back to empty list`);const l=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; ");return H`
-            <ha-card style="${l}">
-                ${this.config.title?H`<div class="card-header">${this.config.title}</div>`:""}
-                <div class="card">
-                    ${n.length>0?H`<div class="departure-list" role="list" aria-label="Train departures">
-                            ${n.map((t,e)=>this.renderDepartureRow(t,e))}
-                        </div>`:H`<div class="no-departures">No departures available</div>`}
-                    ${a?H`<div class="footer">Last updated: ${a}</div>`:""}
+ */var dt;function ct(t){const e=(t||"").toLowerCase();return e.includes("city beam")||e.includes("707")?{category:"modern",label:"CITY BEAM"}:e.includes("javelin")||e.includes("395")?{category:"javelin",label:"JAVELIN"}:e.includes("376")?{category:"refurb",label:"REFURB 376"}:e.includes("465")||e.includes("466")||e.includes("networker")?{category:"older",label:"CLASS 465"}:{category:"standard",label:""}}function pt(t){if(!t)return"—";const e=t.trim();if(!e)return"—";const i=e.split(" ");return 2===i.length&&/^\d{2}:\d{2}$/.test(i[1])?i[1]:/^\d{2}:\d{2}$/.test(e)?e:2===i.length?i[1]||i[0]:e}function ut(t,e){if(!/^\d{2}:\d{2}$/.test(t)||!/^\d{2}:\d{2}$/.test(e))return 0;const[i,s]=t.split(":").map(Number),[r,o]=e.split(":").map(Number);let n=60*r+o-(60*i+s);return n<-720&&(n+=1440),n>720&&(n-=1440),n}function ht(t,e){var i;if(!t)return null;if(e&&e.has(t))return null!==(i=e.get(t))&&void 0!==i?i:null;const[s,r]=t.split(" ");let o=null;if(s&&r){const t=`${s.split("-").reverse().join("-")}T${r}`,e=new Date(t);o=Number.isNaN(e.getTime())?null:e}else if(/^\d{2}:\d{2}$/.test(t)){const e=`${(new Date).toISOString().split("T")[0]}T${t}`,i=new Date(e);o=Number.isNaN(i.getTime())?null:i}return e&&e.set(t,o),o}function ft(t){var e,i;const s=t.scheduled||"",r=t.estimated||"",o=pt(s),n=pt(r);if(t.is_cancelled||(null===(e=t.status)||void 0===e?void 0:e.toLowerCase().includes("cancel"))||(null===(i=t.etd)||void 0===i?void 0:i.toLowerCase().includes("cancel"))||t.planned_cancel||t.cancel_reason||r.toLowerCase().includes("cancel"))return{statusLabel:"Cancelled",statusClass:"cancelled"};if(!r)return{statusLabel:"Awaiting",statusClass:"delayed"};if("on time"===r.toLowerCase())return{statusLabel:"On Time",statusClass:"on-time"};if(n&&o&&n!==o){const t=ut(o,n);if(Math.abs(t)<=1)return{statusLabel:"On Time",statusClass:"on-time"};let e="delayed",i="Exp",s=`+${t}m`;return t<0&&(e="early",i="Early",s=`${t}m`),/^\d{2}:\d{2}$/.test(n)?{statusLabel:`${i} ${n}`,statusClass:e,offsetStr:s}:{statusLabel:n,statusClass:e,offsetStr:s}}return{statusLabel:"On Time",statusClass:"on-time"}}null===(dt=window.HTMLSlotElement)||void 0===dt||dt.prototype.assignedElements;const mt=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"delay_layout",selector:{select:{options:[{value:"inline",label:"Inline (Default)"},{value:"stacked",label:"Stacked"},{value:"status_line",label:"Status Line"}],mode:"dropdown"}}},{name:"row_size",selector:{select:{options:[{value:"compact",label:"Compact"},{value:"normal",label:"Normal (Default)"},{value:"comfortable",label:"Comfortable"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}],vt={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier",delay_layout:"Delay Pill Layout",row_size:"Row Size",font_size_time:"Time Font Size",font_size_destination:"Destination Font Size",font_size_status:"Status Pill Font Size"},gt={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",delay_layout:"Position of the delay/early pill",row_size:"Vertical padding of the departure rows",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)"};let bt=class extends st{constructor(){super(...arguments),this._computeLabel=t=>vt[t.name]||t.name,this._computeHelper=t=>gt[t.name]}setConfig(t){this._config=t}render(){return this.hass&&this._config?H`
+      <ha-form
+        .hass=${this.hass}
+        .data=${this._config}
+        .schema=${mt}
+        .computeLabel=${this._computeLabel}
+        .computeHelper=${this._computeHelper}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+    `:j}_valueChanged(t){t.stopPropagation();const e=t.detail.value,i=Object.assign(Object.assign(Object.assign({},this._config),e),{attribute:e.attribute||"next_trains",stops_identifier:e.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:i},bubbles:!0,composed:!0}))}};t([at({attribute:!1})],bt.prototype,"hass",void 0),t([lt()],bt.prototype,"_config",void 0),bt=t([ot("train-departure-board-editor")],bt);let _t=class extends st{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this.dateCache=new Map,this.lastEntityId=null,this._handleKeyDown=t=>{"Escape"===t.key&&this._selectedDeparture&&this._closePopup()}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(t){if(!t)throw new Error("Invalid configuration");const e=Object.assign({attribute:"next_trains"},t);"string"==typeof e.attribute?e.attribute=e.attribute.trim()||"next_trains":e.attribute="next_trains",this.config=e}render(){var t,e,i;if(!this.config)return H`<div class="card">No configuration provided</div>`;if(!this.config.entity)return H`<div class="card">Please configure an entity</div>`;const s=null===(e=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===e?void 0:e[this.config.entity];if(!s)return H`<div class="card">
+        Entity not found: ${this.config.entity}
+      </div>`;this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity);const r=this.config.attribute||"next_trains",o=null===(i=s.attributes)||void 0===i?void 0:i[r],n=Array.isArray(o)?o:[],a=s.last_updated?new Date(s.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";void 0===o&&console.warn(`train-departure-board: attribute "${r}" was not found on entity ${this.config.entity}`),Array.isArray(o)||void 0===o||console.warn(`train-departure-board: attribute "${r}" is not an array, falling back to empty list`);const l=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; ");return H`
+      <ha-card style="${l}">
+        ${this.config.title?H`<div class="card-header">${this.config.title}</div>`:""}
+        <div class="card">
+          ${n.length>0?H`<div
+                class="departure-list"
+                role="list"
+                aria-label="Train departures"
+              >
+                ${n.map((t,e)=>this.renderDepartureRow(t,e))}
+              </div>`:H`<div class="no-departures">No departures available</div>`}
+          ${a?H`<div class="footer">Last updated: ${a}</div>`:""}
+        </div>
+      </ha-card>
+      ${this._renderDetailsPopup()}
+    `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown)}_showDetails(t){this._selectedDeparture=t}_closePopup(){this._selectedDeparture=null}_handleOverlayClick(t){t.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){if(!this._selectedDeparture)return j;const t=this._selectedDeparture,{statusClass:e,statusLabel:i}=ft(t),s=pt(t.scheduled),r=function(t,e="description",i){var s;const r=(t.subsequent_stops||[]).map(t=>{var s;let r="";r="tiploc"===e?(t.stop||"").trim():"crs"===e?(t.name||"").trim():(t.name||t.stop||"").trim();const o=t.scheduled||t.estimated,n=ht(o,i),a=null!==(s=null==n?void 0:n.getTime())&&void 0!==s?s:Number.POSITIVE_INFINITY,l=t.estimated,d=t.scheduled;let c="On time",p="on-time";if(l&&d){const t=pt(l),e=pt(d);if("—"!==t&&"—"!==e&&t!==e){const i=ut(e,t);if(Math.abs(i)<=1)p="on-time",c="On time";else{p="delayed";let e="Exp";i<0&&(p="early",e="Early"),c=/^\d{2}:\d{2}$/.test(t)?`${e} ${t}`:t}}}return((null==l?void 0:l.toLowerCase().includes("cancel"))||t.is_cancelled)&&(c="Cancelled",p="cancelled"),{name:r,time:o?(o.split(" ")[1]||"").trim():"",timestamp:a,stopCode:t.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:c,statusClass:p}}).filter(t=>t.name).sort((t,e)=>t.timestamp-e.timestamp);if(!t.last_report_station||!t.last_report_type)return r;const o=t.last_report_station,n=t.last_report_type,a=t.last_report_time?null===(s=ht(t.last_report_time,i))||void 0===s?void 0:s.getTime():void 0,l=r.findIndex(t=>t.stopCode===o);if(-1!==l){for(let t=0;t<l;t++)r[t].isPassed=!0;"Arrival"===n?(r[l].isCurrent=!0,r[l].isPassed=!1):(r[l].isPassed=!0,l+1<r.length?r[l+1].isBetweenPrevious=!0:r[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let t=-1;for(let e=0;e<r.length&&r[e].timestamp<=a;e++)r[e].isPassed=!0,t=e;-1!==t&&t+1<r.length?r[t+1].isBetweenPrevious=!0:-1===t&&r.length>0&&(r[0].isBetweenPrevious=!0)}if(r.length>0&&r[0].isBetweenPrevious&&-1===l&&o){const e=t.last_report_time?pt(t.last_report_time):"";r.unshift({name:o,time:e,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return r}(t,this.config.stops_identifier||"description",this.dateCache),o="cancelled"===e,n=ct(t.stock),a="on-time"===e?"status-ok":"cancelled"===e?"status-cancelled":"status-delayed",l=r.some(t=>t.isPassed);return H`
+      <div
+        class="popup-overlay"
+        @click=${this._handleOverlayClick}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Train details"
+      >
+        <div class="popup-card">
+          <div class="modern-header">
+            <div class="modern-header-top">
+              <div class="modern-dest-group">
+                <div class="modern-time-group">
+                  <span
+                    class="modern-scheduled ${o?"time-cancelled":""}"
+                    >${s}</span
+                  >
+                  ${t.operator_name?H`<span class="modern-operator"
+                        >${t.operator_name}</span
+                      >`:""}
                 </div>
-            </ha-card>
-            ${this._renderDetailsPopup()}
-        `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown)}_showDetails(t){this._selectedDeparture=t}_closePopup(){this._selectedDeparture=null}_handleOverlayClick(t){t.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){if(!this._selectedDeparture)return j;const t=this._selectedDeparture,{statusClass:e,statusLabel:i}=this.getStatusMeta(t),s=this.extractTimeLabel(t.scheduled),r=this._getStopsForPopup(t),o="cancelled"===e,n=ct(t.stock),a="on-time"===e?"status-ok":"cancelled"===e?"status-cancelled":"status-delayed",l=r.some(t=>t.isPassed);return H`
-            <div class="popup-overlay" @click=${this._handleOverlayClick} role="dialog" aria-modal="true" aria-label="Train details">
-                <div class="popup-card">
-                    <div class="modern-header">
-                        <div class="modern-header-top">
-                            <div class="modern-dest-group">
-                                <div class="modern-time-group">
-                                    <span class="modern-scheduled ${o?"time-cancelled":""}">${s}</span>
-                                    ${t.operator_name?H`<span class="modern-operator">${t.operator_name}</span>`:""}
+                <h2 class="modern-dest">${t.destination_name}</h2>
+              </div>
+              <button
+                class="popup-close"
+                @click=${this._closePopup}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div class="modern-badges">
+              <div class="modern-badge ${a}">
+                <span style="font-size: 1.2em; line-height: 1;">●</span>
+                ${i}
+              </div>
+              ${t.platform?H` <div class="modern-badge platform">
+                    Platform ${t.platform}
+                  </div>`:""}
+              ${"standard"!==n.category?H` <div
+                    class="modern-badge stock-badge stock-${n.category}"
+                  >
+                    ${n.label}
+                  </div>`:""}
+            </div>
+          </div>
+
+          <div class="modern-content">
+            ${r.length>0?H` <div class="timeline-container">
+                  <div
+                    class="modern-stops-list ${l?"has-passed":""}"
+                  >
+                    ${r.map(t=>H`
+                        ${t.isBetweenPrevious?H`
+                              <div
+                                class="modern-train-pos-wrapper"
+                                aria-hidden="true"
+                              >
+                                <div class="modern-stop-graphic">
+                                  <div class="modern-train-pos">🚆</div>
                                 </div>
-                                <h2 class="modern-dest">${t.destination_name}</h2>
+                                <div></div>
+                              </div>
+                            `:""}
+                        <div
+                          class="modern-stop ${t.isPassed?"passed":""} ${t.isCurrent?"current":""}"
+                        >
+                          <div class="modern-stop-graphic">
+                            <div class="modern-stop-circle"></div>
+                          </div>
+                          <div class="modern-stop-content">
+                            <span class="modern-stop-time">${t.time}</span>
+                            <div class="modern-stop-info">
+                              <span class="modern-stop-name">${t.name}</span>
+                              ${!t.isPassed&&t.statusLabel?H`<span
+                                    class="modern-stop-status ${t.statusClass}"
+                                    >${t.statusLabel}</span
+                                  >`:""}
                             </div>
-                            <button class="popup-close" @click=${this._closePopup} aria-label="Close">&times;</button>
+                          </div>
                         </div>
-                        <div class="modern-badges">
-                            <div class="modern-badge ${a}">
-                                <span style="font-size: 1.2em; line-height: 1;">●</span> ${i}
-                            </div>
-                            ${t.platform?H`
-                            <div class="modern-badge platform">
-                                Platform ${t.platform}
-                            </div>`:""}
-                            ${"standard"!==n.category?H`
-                            <div class="modern-badge stock-badge stock-${n.category}">
-                                ${n.label}
-                            </div>`:""}
-                        </div>
-                    </div>
-                    
-                    <div class="modern-content">
-                        ${r.length>0?H`
-                        <div class="timeline-container">
-                            <div class="modern-stops-list ${l?"has-passed":""}">
-                                ${r.map(t=>H`
-                                    ${t.isBetweenPrevious?H`
-                                    <div class="modern-train-pos-wrapper" aria-hidden="true">
-                                        <div class="modern-stop-graphic">
-                                            <div class="modern-train-pos">🚆</div>
-                                        </div>
-                                        <div></div>
-                                    </div>
-                                    `:""}
-                                    <div class="modern-stop ${t.isPassed?"passed":""} ${t.isCurrent?"current":""}">
-                                        <div class="modern-stop-graphic">
-                                            <div class="modern-stop-circle"></div>
-                                        </div>
-                                        <div class="modern-stop-content">
-                                            <span class="modern-stop-time">${t.time}</span>
-                                            <div class="modern-stop-info">
-                                                <span class="modern-stop-name">${t.name}</span>
-                                                ${!t.isPassed&&t.statusLabel?H`<span class="modern-stop-status ${t.statusClass}">${t.statusLabel}</span>`:""}
-                                            </div>
-                                        </div>
-                                    </div>
-                                `)}
-                            </div>
-                        </div>`:""}
-                    </div>
-                </div>
+                      `)}
+                  </div>
+                </div>`:""}
+          </div>
+        </div>
+      </div>
+    `}renderDepartureRow(t,e){const i=pt(t.scheduled),{statusClass:s,statusLabel:r,offsetStr:o}=ft(t),n=t.platform?t.platform:null,a=0===e,l="cancelled"===s,d=ct(t.stock),c=["modern","javelin","refurb"].includes(d.category)?`stock-row-${d.category}`:"",p=l?"time-cancelled":"",u=`row-size-${this.config.row_size||"normal"}`;let h=H``;return l?h=H`<span class="status-pill cancelled">Cancelled</span>`:"on-time"===s?h=H`<span class="status-pill on-time">On time</span>`:o&&(h=H`<span class="status-pill delayed"
+        >${"early"===s?"Early ":""}${o}</span
+      >`),H`
+      <div
+        class="train ${a?"next-train":""} ${l?"cancelled-row":""} ${c} ${u}"
+        role="listitem"
+        aria-label="${t.destination_name} at ${i}, ${r}${n?`, Platform ${n}`:""}"
+        @click=${()=>this._showDetails(t)}
+      >
+        <div class="time-wrapper ${p}">
+          <span class="scheduled" aria-label="Scheduled time"
+            >${i}</span
+          >
+        </div>
+        <div class="info-box">
+          <div class="destination-col">
+            <div class="destination-row">
+              <h3 class="terminus">${t.destination_name}</h3>
+              ${h}
+              ${n?H`<span
+                    class="platform-badge"
+                    aria-label="Platform ${n}"
+                    >${n}</span
+                  >`:""}
             </div>
-        `}_getStopsForPopup(t){var e;const i=t.subsequent_stops||[],s=this.config.stops_identifier||"description",r=i.map(t=>{var e;let i="";i="tiploc"===s?(t.stop||"").trim():"crs"===s?(t.name||"").trim():(t.name||t.stop||"").trim();const r=t.scheduled||t.estimated,o=this.parseDateTime(r),n=null!==(e=null==o?void 0:o.getTime())&&void 0!==e?e:Number.POSITIVE_INFINITY,a=t.estimated,l=t.scheduled;let d="On time",c="on-time";if(a&&l){const t=this.extractTimeLabel(a),e=this.extractTimeLabel(l);if("—"!==t&&"—"!==e&&t!==e){const i=this.calculateDelayMins(e,t);if(Math.abs(i)<=1)c="on-time",d="On time";else{c="delayed";let e="Exp";i<0&&(c="early",e="Early"),d=/^\d{2}:\d{2}$/.test(t)?`${e} ${t}`:t}}}return((null==a?void 0:a.toLowerCase().includes("cancel"))||t.is_cancelled)&&(d="Cancelled",c="cancelled"),{name:i,time:r?(r.split(" ")[1]||"").trim():"",timestamp:n,stopCode:t.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:d,statusClass:c}}).filter(t=>t.name).sort((t,e)=>t.timestamp-e.timestamp);if(!t.last_report_station||!t.last_report_type)return r;const o=t.last_report_station,n=t.last_report_type,a=t.last_report_time?null===(e=this.parseDateTime(t.last_report_time))||void 0===e?void 0:e.getTime():void 0,l=r.findIndex(t=>t.stopCode===o);if(-1!==l){for(let t=0;t<l;t++)r[t].isPassed=!0;"Arrival"===n?(r[l].isCurrent=!0,r[l].isPassed=!1):(r[l].isPassed=!0,l+1<r.length?r[l+1].isBetweenPrevious=!0:r[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let t=-1;for(let e=0;e<r.length&&r[e].timestamp<=a;e++)r[e].isPassed=!0,t=e;-1!==t&&t+1<r.length?r[t+1].isBetweenPrevious=!0:-1===t&&r.length>0&&(r[0].isBetweenPrevious=!0)}if(r.length>0&&r[0].isBetweenPrevious&&-1===l&&o){const e=t.last_report_time?this.extractTimeLabel(t.last_report_time):"";r.unshift({name:o,time:e,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return r}renderDepartureRow(t,e){const i=this.extractTimeLabel(t.scheduled),{statusClass:s,statusLabel:r,offsetStr:o}=this.getStatusMeta(t),n=t.platform?t.platform:null,a=0===e,l="cancelled"===s,d=ct(t.stock),c=["modern","javelin","refurb"].includes(d.category)?`stock-row-${d.category}`:"",p=l?"time-cancelled":"",u=`row-size-${this.config.row_size||"normal"}`;let h=H``;return l?h=H`<span class="status-pill cancelled">Cancelled</span>`:"on-time"===s?h=H`<span class="status-pill on-time">On time</span>`:o&&(h=H`<span class="status-pill delayed">${"early"===s?"Early ":""}${o}</span>`),H`
-            <div 
-                class="train ${a?"next-train":""} ${l?"cancelled-row":""} ${c} ${u}"
-                role="listitem" 
-                aria-label="${t.destination_name} at ${i}, ${r}${n?`, Platform ${n}`:""}"
-                @click=${()=>this._showDetails(t)}
-            >
-                <div class="time-wrapper ${p}">
-                    <span class="scheduled" aria-label="Scheduled time">${i}</span>
-                </div>
-                <div class="info-box">
-                    <div class="destination-col">
-                        <div class="destination-row">
-                            <h3 class="terminus">${t.destination_name}</h3>
-                            ${h}
-                            ${n?H`<span class="platform-badge" aria-label="Platform ${n}">${n}</span>`:""}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `}getStatusMeta(t){var e,i;const s=t.scheduled||"",r=t.estimated||"",o=this.extractTimeLabel(s),n=this.extractTimeLabel(r);if(t.is_cancelled||(null===(e=t.status)||void 0===e?void 0:e.toLowerCase().includes("cancel"))||(null===(i=t.etd)||void 0===i?void 0:i.toLowerCase().includes("cancel"))||t.planned_cancel||t.cancel_reason||r.toLowerCase().includes("cancel"))return{statusLabel:"Cancelled",statusClass:"cancelled"};if(!r)return{statusLabel:"Awaiting",statusClass:"delayed"};if("on time"===r.toLowerCase())return{statusLabel:"On Time",statusClass:"on-time"};if(n&&o&&n!==o){const t=this.calculateDelayMins(o,n);if(Math.abs(t)<=1)return{statusLabel:"On Time",statusClass:"on-time"};let e="delayed",i="Exp",s=`+${t}m`;return t<0&&(e="early",i="Early",s=`${t}m`),/^\d{2}:\d{2}$/.test(n)?{statusLabel:`${i} ${n}`,statusClass:e,offsetStr:s}:{statusLabel:n,statusClass:e,offsetStr:s}}return{statusLabel:"On Time",statusClass:"on-time"}}extractTimeLabel(t){if(!t)return"—";const e=t.trim();if(!e)return"—";const i=e.split(" ");return 2===i.length&&/^\d{2}:\d{2}$/.test(i[1])?i[1]:/^\d{2}:\d{2}$/.test(e)?e:2===i.length?i[1]||i[0]:e}calculateDelayMins(t,e){if(!/^\d{2}:\d{2}$/.test(t)||!/^\d{2}:\d{2}$/.test(e))return 0;const[i,s]=t.split(":").map(Number),[r,o]=e.split(":").map(Number);let n=60*r+o-(60*i+s);return n<-720&&(n+=1440),n>720&&(n-=1440),n}parseDateTime(t){var e;if(!t)return null;if(this.dateCache.has(t))return null!==(e=this.dateCache.get(t))&&void 0!==e?e:null;const[i,s]=t.split(" ");let r=null;if(i&&s){const t=`${i.split("-").reverse().join("-")}T${s}`,e=new Date(t);r=Number.isNaN(e.getTime())?null:e}else if(/^\d{2}:\d{2}$/.test(t)){const e=`${(new Date).toISOString().split("T")[0]}T${t}`,i=new Date(e);r=Number.isNaN(i.getTime())?null:i}return this.dateCache.set(t,r),r}};mt.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)})`
-        ha-card {
-            height: 100%;
-            background: var(--ha-card-background, var(--card-background-color, #fff));
-            color: var(--primary-text-color, #111);
-            display: flex;
-            flex-direction: column;
-        }
-        .card-header {
-            padding: 12px 16px;
-            font-size: 1.2em;
-            font-weight: 500;
-            color: var(--primary-text-color);
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
-        }
-        .card {
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-        .departure-list {
-            display: flex;
-            flex-direction: column;
-            padding: 8px;
-            gap: 8px;
-            flex: 1;
-        }
-        .train {
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
-            padding: 8px 12px;
-            background: var(--card-background-color, #fff);
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-            cursor: pointer;
-            transition: background-color 0.15s ease;
-        }
-        .train:hover {
-            background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
-        }
-        .train:last-child {
-            border-bottom: none;
-        }
-        .train.next-train {
-            background: var(--secondary-background-color, rgba(255, 193, 7, 0.1));
-            border-left: 4px solid var(--warning-color, #ff9800);
-            padding-left: 8px; /* Compensate for border */
-        }
-        .train.next-train:hover {
-            background: rgba(255, 193, 7, 0.18);
-        }
-        .train.cancelled-row {
-            border-left: 4px solid var(--error-color, #f44336);
-            padding-left: 8px;
-        }
-        .train.cancelled-row.next-train {
-            border-left: 4px solid var(--error-color, #f44336);
-        }
+          </div>
+        </div>
+      </div>
+    `}};_t.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)})`
+    ha-card {
+      height: 100%;
+      background: var(--ha-card-background, var(--card-background-color, #fff));
+      color: var(--primary-text-color, #111);
+      display: flex;
+      flex-direction: column;
+    }
+    .card-header {
+      padding: 12px 16px;
+      font-size: 1.2em;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    }
+    .card {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .departure-list {
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      gap: 8px;
+      flex: 1;
+    }
+    .train {
+      border-bottom: 1px solid var(--divider-color, #e0e0e0);
+      padding: 8px 12px;
+      background: var(--card-background-color, #fff);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+    .train:hover {
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+    }
+    .train:last-child {
+      border-bottom: none;
+    }
+    .train.next-train {
+      background: var(--secondary-background-color, rgba(255, 193, 7, 0.1));
+      border-left: 4px solid var(--warning-color, #ff9800);
+      padding-left: 8px; /* Compensate for border */
+    }
+    .train.next-train:hover {
+      background: rgba(255, 193, 7, 0.18);
+    }
+    .train.cancelled-row {
+      border-left: 4px solid var(--error-color, #f44336);
+      padding-left: 8px;
+    }
+    .train.cancelled-row.next-train {
+      border-left: 4px solid var(--error-color, #f44336);
+    }
 
-        /* Right border for train type / stock */
-        .train.stock-row-modern {
-            border-right: 4px solid #00AEEF;
-            padding-right: 8px;
-        }
-        .train.stock-row-javelin {
-            border-right: 4px solid #002D72;
-            padding-right: 8px;
-        }
-        .train.stock-row-refurb {
-            border-right: 4px solid #003366;
-            padding-right: 8px;
-        }
-        .time-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 0 0 auto;
-            min-width: auto;
-        }
-        .layout-stacked .time-wrapper {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-            flex: 0 0 auto;
-            min-width: auto;
-        }
-        .layout-status_line .time-wrapper {
-            flex: 0 0 auto;
-            min-width: auto;
-        }
-        .scheduled {
-            font-size: var(--train-board-time-size, 1.25rem);
-            font-weight: 700;
-            line-height: 1;
-            color: var(--primary-text-color, #111);
-            font-family: var(--primary-font-family, sans-serif);
-            font-variant-numeric: tabular-nums;
-        }
-        .time-cancelled .scheduled {
-            color: var(--error-color, #f44336);
-            text-decoration: line-through;
-        }
-        .offset-pill {
-            font-size: 0.85rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .offset-pill.late {
-            background: var(--warning-color, #ffe0b2);
-            color: #d32f2f;
-        }
-        .offset-pill.early {
-            background: var(--success-color, #c8e6c9);
-            color: #2e7d32;
-        }
-        .platform-badge {
-            background: var(--disabled-color, #9e9e9e);
-            color: #fff;
-            font-size: 0.95em;
-            font-weight: 700;
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .info-box {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .destination-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            width: 100%;
-        }
-        .terminus {
-            margin: 0;
-            font-size: var(--train-board-destination-size, 1rem);
-            font-weight: 600;
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-            color: var(--primary-text-color, #111);
-        }
-        .status-pill {
-            font-size: var(--train-board-status-size, 0.85rem);
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
-            color: #fff;
-            flex-shrink: 0;
-        }
-        .status-pill.on-time { background: var(--success-color, #2e7d32); }
-        .status-pill.delayed { background: var(--warning-color, #e65100); }
-        .status-pill.cancelled { background: var(--error-color, #d32f2f); }
-        /* Popup overlay styles */
-        .popup-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-        .popup-card {
-            background: var(--card-background-color, #fff);
-            border-radius: 12px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 80vh;
-            overflow: auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        /* --- MODERN POPUP (DENSE JOURNEY FOCUS) --- */
-        .modern-header {
-            padding: 12px 16px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
-            border-bottom: 1px solid var(--divider-color, #e0e0e0);
-            position: relative;
-            border-radius: 12px 12px 0 0;
-        }
-        .modern-header-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .modern-dest-group { display: flex; flex-direction: column; gap: 4px; }
-        .modern-time-group { display: flex; align-items: baseline; gap: 8px; }
-        .modern-scheduled { font-size: 1.4em; color: var(--primary-text-color); font-weight: 700; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
-        .modern-operator { font-size: 0.85em; color: var(--secondary-text-color, #666); font-weight: 500; }
-        .modern-dest { margin: 0; font-size: 1.15em; font-weight: 600; line-height: 1.2; color: var(--primary-text-color); }
-        .modern-badges { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-        .modern-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; background: var(--secondary-background-color, rgba(0,0,0,0.05)); }
-        .modern-badge.status-ok { background: rgba(76, 175, 80, 0.15); color: var(--success-color, #4caf50); }
-        .modern-badge.status-delayed { background: rgba(255, 152, 0, 0.15); color: var(--warning-color, #ff9800); }
-        .modern-badge.status-cancelled { background: rgba(244, 67, 54, 0.15); color: var(--error-color, #f44336); }
-        .modern-badge.platform { background: rgba(255, 255, 255, 0.1); }
-        .modern-badge.stock-badge { font-size: 0.85em; padding: 4px 8px; }
-        
-        /* Dense Timeline */
-        .timeline-container { padding: 12px 16px; background: rgba(0,0,0,0.02); }
-        .modern-stops-list { display: flex; flex-direction: column; position: relative; }
-        
-        /* The Line */
-        .modern-stops-list::before { 
-            content: ''; 
-            position: absolute; 
-            left: 15px; 
-            transform: translateX(-50%);
-            top: 14px; 
-            bottom: 14px; 
-            width: 4px; 
-            background: var(--info-color, #03a9f4); 
-            border-radius: 2px;
-            z-index: 1; 
-        }
-        
-        /* Passed portion of the line */
-        .modern-stops-list.has-passed::after {
-            content: ''; 
-            position: absolute; 
-            left: 15px; 
-            transform: translateX(-50%);
-            top: 14px; 
-            bottom: 14px;
-            width: 4px; 
-            background: var(--secondary-text-color, #666); 
-            border-radius: 2px 2px 0 0;
-            z-index: 2;
-            opacity: 0.5;
-        }
+    /* Right border for train type / stock */
+    .train.stock-row-modern {
+      border-right: 4px solid #00aeef;
+      padding-right: 8px;
+    }
+    .train.stock-row-javelin {
+      border-right: 4px solid #002d72;
+      padding-right: 8px;
+    }
+    .train.stock-row-refurb {
+      border-right: 4px solid #003366;
+      padding-right: 8px;
+    }
+    .time-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+      min-width: auto;
+    }
+    .layout-stacked .time-wrapper {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      flex: 0 0 auto;
+      min-width: auto;
+    }
+    .layout-status_line .time-wrapper {
+      flex: 0 0 auto;
+      min-width: auto;
+    }
+    .scheduled {
+      font-size: var(--train-board-time-size, 1.25rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--primary-text-color, #111);
+      font-family: var(--primary-font-family, sans-serif);
+      font-variant-numeric: tabular-nums;
+    }
+    .time-cancelled .scheduled {
+      color: var(--error-color, #f44336);
+      text-decoration: line-through;
+    }
+    .offset-pill {
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .offset-pill.late {
+      background: var(--warning-color, #ffe0b2);
+      color: #d32f2f;
+    }
+    .offset-pill.early {
+      background: var(--success-color, #c8e6c9);
+      color: #2e7d32;
+    }
+    .platform-badge {
+      background: var(--disabled-color, #9e9e9e);
+      color: #fff;
+      font-size: 0.95em;
+      font-weight: 700;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .info-box {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .destination-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+    }
+    .terminus {
+      margin: 0;
+      font-size: var(--train-board-destination-size, 1rem);
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      color: var(--primary-text-color, #111);
+    }
+    .status-pill {
+      font-size: var(--train-board-status-size, 0.85rem);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .status-pill.on-time {
+      background: var(--success-color, #2e7d32);
+    }
+    .status-pill.delayed {
+      background: var(--warning-color, #e65100);
+    }
+    .status-pill.cancelled {
+      background: var(--error-color, #d32f2f);
+    }
+    /* Popup overlay styles */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .popup-card {
+      background: var(--card-background-color, #fff);
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 80vh;
+      overflow: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    /* --- MODERN POPUP (DENSE JOURNEY FOCUS) --- */
+    .modern-header {
+      padding: 12px 16px;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.05),
+        transparent
+      );
+      border-bottom: 1px solid var(--divider-color, #e0e0e0);
+      position: relative;
+      border-radius: 12px 12px 0 0;
+    }
+    .modern-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .modern-dest-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .modern-time-group {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .modern-scheduled {
+      font-size: 1.4em;
+      color: var(--primary-text-color);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    .modern-operator {
+      font-size: 0.85em;
+      color: var(--secondary-text-color, #666);
+      font-weight: 500;
+    }
+    .modern-dest {
+      margin: 0;
+      font-size: 1.15em;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--primary-text-color);
+    }
+    .modern-badges {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .modern-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      font-weight: 600;
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.05));
+    }
+    .modern-badge.status-ok {
+      background: rgba(76, 175, 80, 0.15);
+      color: var(--success-color, #4caf50);
+    }
+    .modern-badge.status-delayed {
+      background: rgba(255, 152, 0, 0.15);
+      color: var(--warning-color, #ff9800);
+    }
+    .modern-badge.status-cancelled {
+      background: rgba(244, 67, 54, 0.15);
+      color: var(--error-color, #f44336);
+    }
+    .modern-badge.platform {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .modern-badge.stock-badge {
+      font-size: 0.85em;
+      padding: 4px 8px;
+    }
 
-        /* Stop rows */
-        .modern-stop, .modern-train-pos-wrapper {
-            display: grid;
-            grid-template-columns: 30px 1fr;
-            gap: 12px;
-            align-items: center;
-            position: relative;
-            z-index: 3;
-        }
+    /* Dense Timeline */
+    .timeline-container {
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.02);
+    }
+    .modern-stops-list {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
 
-        .modern-stop { padding: 8px 0; }
-        .modern-train-pos-wrapper { height: 6px; padding: 0; }
+    /* The Line */
+    .modern-stops-list::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      transform: translateX(-50%);
+      top: 14px;
+      bottom: 14px;
+      width: 4px;
+      background: var(--info-color, #03a9f4);
+      border-radius: 2px;
+      z-index: 1;
+    }
 
-        /* Graphics column */
-        .modern-stop-graphic {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 30px;
-        }
-        
-        /* Station Nodes */
-        .modern-stop-circle { 
-            width: 12px; 
-            height: 12px; 
-            border-radius: 50%; 
-            background: var(--card-background-color, #fff); 
-            border: 3px solid var(--info-color, #03a9f4); 
-            z-index: 4;
-            transition: all 0.2s ease;
-        }
-        
-        .modern-stop.passed .modern-stop-circle { 
-            border-color: var(--secondary-text-color, #666);
-            background: var(--secondary-text-color, #666);
-            width: 8px;
-            height: 8px;
-        }
+    /* Passed portion of the line */
+    .modern-stops-list.has-passed::after {
+      content: '';
+      position: absolute;
+      left: 15px;
+      transform: translateX(-50%);
+      top: 14px;
+      bottom: 14px;
+      width: 4px;
+      background: var(--secondary-text-color, #666);
+      border-radius: 2px 2px 0 0;
+      z-index: 2;
+      opacity: 0.5;
+    }
 
-        .modern-stop.current .modern-stop-circle { 
-            border-color: var(--warning-color, #ff9800);
-            background: var(--warning-color, #ff9800);
-        }
-        
-        /* Train Position Indicator */
-        .modern-train-pos {
-            width: 22px;
-            height: 22px;
-            background: var(--warning-color, #ff9800);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 2px 6px rgba(0,0,0,0.5);
-            z-index: 5;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0.4); }
-            70% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 8px rgba(255, 152, 0, 0); }
-            100% { box-shadow: 0 0 0 3px var(--card-background-color, #fff), 0 0 0 0 rgba(255, 152, 0, 0); }
-        }
+    /* Stop rows */
+    .modern-stop,
+    .modern-train-pos-wrapper {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+    }
 
-        .modern-stop-content {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-            min-width: 0;
-        }
+    .modern-stop {
+      padding: 8px 0;
+    }
+    .modern-train-pos-wrapper {
+      height: 6px;
+      padding: 0;
+    }
 
-        .modern-stop-time { 
-            font-size: 0.95em; 
-            font-weight: 700; 
-            min-width: 45px; 
-            color: var(--primary-text-color);
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .modern-stop-info { display: flex; flex-direction: row; align-items: baseline; flex: 1; gap: 8px; justify-content: space-between; min-width: 0; }
-        .modern-stop-name { font-size: 0.95em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .modern-stop-status { font-size: 0.75em; font-weight: 600; white-space: nowrap; }
-        .modern-stop-status.on-time { color: var(--success-color, #4caf50); }
-        .modern-stop-status.delayed { color: var(--warning-color, #ff9800); }
-        .modern-stop-status.early { color: var(--info-color, #2196f3); }
-        .modern-stop-status.cancelled { color: var(--error-color, #f44336); }
-        
-        .modern-stop.passed .modern-stop-time, 
-        .modern-stop.passed .modern-stop-name { 
-            color: var(--secondary-text-color, #666); 
-            font-weight: 400;
-        }
-        .modern-stop.passed .modern-stop-status { display: none; }
+    /* Graphics column */
+    .modern-stop-graphic {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 30px;
+    }
 
-        /* Terminus special styling */
-        .modern-stop:last-child .modern-stop-name { font-weight: 700; }
-        .modern-stop:last-child .modern-stop-circle { 
-            border-radius: 3px; /* Square for terminus */
-            width: 14px;
-            height: 14px;
-        }
-        .footer {
-            padding: 8px 12px;
-            border-top: 1px solid var(--divider-color, #e0e0e0);
-            font-size: 0.85em;
-            color: var(--secondary-text-color, #666);
-            text-align: right;
-            background: var(--card-background-color, #fff);
-            border-radius: 0 0 8px 8px;
-        }
-        .no-departures {
-            padding: 24px 0;
-            text-align: center;
-            color: var(--secondary-text-color, #999);
-        }
-        .stock-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-        .stock-modern {
-            background: linear-gradient(135deg, #00AEEF 0%, #0054A6 100%);
-            color: white;
-        }
-        .stock-javelin {
-            background: #002D72;
-            color: white;
-            border-left: 3px solid #C0C0C0;
-        }
-        .stock-refurb {
-            background: #003366;
-            color: white;
-            border-right: 3px solid #FF8200;
-        }
-        .stock-older {
-            color: var(--secondary-text-color);
-            font-weight: 600;
-        }
-    `,t([at({type:Object})],mt.prototype,"hass",void 0),t([at({type:Object})],mt.prototype,"config",void 0),t([at({type:Array})],mt.prototype,"nextTrains",void 0),t([lt()],mt.prototype,"_selectedDeparture",void 0),mt=t([ot("train-departure-board")],mt),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-board",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{mt as TrainDepartureBoard};
+    /* Station Nodes */
+    .modern-stop-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--card-background-color, #fff);
+      border: 3px solid var(--info-color, #03a9f4);
+      z-index: 4;
+      transition: all 0.2s ease;
+    }
+
+    .modern-stop.passed .modern-stop-circle {
+      border-color: var(--secondary-text-color, #666);
+      background: var(--secondary-text-color, #666);
+      width: 8px;
+      height: 8px;
+    }
+
+    .modern-stop.current .modern-stop-circle {
+      border-color: var(--warning-color, #ff9800);
+      background: var(--warning-color, #ff9800);
+    }
+
+    /* Train Position Indicator */
+    .modern-train-pos {
+      width: 22px;
+      height: 22px;
+      background: var(--warning-color, #ff9800);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      box-shadow: 0 0 0 3px var(--card-background-color, #fff),
+        0 2px 6px rgba(0, 0, 0, 0.5);
+      z-index: 5;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 3px var(--card-background-color, #fff),
+          0 0 0 0 rgba(255, 152, 0, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 3px var(--card-background-color, #fff),
+          0 0 0 8px rgba(255, 152, 0, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 3px var(--card-background-color, #fff),
+          0 0 0 0 rgba(255, 152, 0, 0);
+      }
+    }
+
+    .modern-stop-content {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .modern-stop-time {
+      font-size: 0.95em;
+      font-weight: 700;
+      min-width: 45px;
+      color: var(--primary-text-color);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .modern-stop-info {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      flex: 1;
+      gap: 8px;
+      justify-content: space-between;
+      min-width: 0;
+    }
+    .modern-stop-name {
+      font-size: 0.95em;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .modern-stop-status {
+      font-size: 0.75em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .modern-stop-status.on-time {
+      color: var(--success-color, #4caf50);
+    }
+    .modern-stop-status.delayed {
+      color: var(--warning-color, #ff9800);
+    }
+    .modern-stop-status.early {
+      color: var(--info-color, #2196f3);
+    }
+    .modern-stop-status.cancelled {
+      color: var(--error-color, #f44336);
+    }
+
+    .modern-stop.passed .modern-stop-time,
+    .modern-stop.passed .modern-stop-name {
+      color: var(--secondary-text-color, #666);
+      font-weight: 400;
+    }
+    .modern-stop.passed .modern-stop-status {
+      display: none;
+    }
+
+    /* Terminus special styling */
+    .modern-stop:last-child .modern-stop-name {
+      font-weight: 700;
+    }
+    .modern-stop:last-child .modern-stop-circle {
+      border-radius: 3px; /* Square for terminus */
+      width: 14px;
+      height: 14px;
+    }
+    .footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--divider-color, #e0e0e0);
+      font-size: 0.85em;
+      color: var(--secondary-text-color, #666);
+      text-align: right;
+      background: var(--card-background-color, #fff);
+      border-radius: 0 0 8px 8px;
+    }
+    .no-departures {
+      padding: 24px 0;
+      text-align: center;
+      color: var(--secondary-text-color, #999);
+    }
+    .stock-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .stock-modern {
+      background: linear-gradient(135deg, #00aeef 0%, #0054a6 100%);
+      color: white;
+    }
+    .stock-javelin {
+      background: #002d72;
+      color: white;
+      border-left: 3px solid #c0c0c0;
+    }
+    .stock-refurb {
+      background: #003366;
+      color: white;
+      border-right: 3px solid #ff8200;
+    }
+    .stock-older {
+      color: var(--secondary-text-color);
+      font-weight: 600;
+    }
+  `,t([at({type:Object})],_t.prototype,"hass",void 0),t([at({type:Object})],_t.prototype,"config",void 0),t([at({type:Array})],_t.prototype,"nextTrains",void 0),t([lt()],_t.prototype,"_selectedDeparture",void 0),_t=t([ot("train-departure-board")],_t),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-board",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{_t as TrainDepartureBoard};
 //# sourceMappingURL=ha-train-departure-board.js.map
