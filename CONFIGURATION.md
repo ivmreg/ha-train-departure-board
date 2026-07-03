@@ -1,5 +1,11 @@
 # Example Configuration and Data Structure
 
+> The canonical definition of the departure-array schema lives in the
+> producing integration's
+> [CONTRACT.md](https://github.com/ivmreg/ha_realtime_trains_api/blob/main/CONTRACT.md);
+> `tests/contract.test.ts` validates `sample_entity.json` against the card's
+> expectations so drift on either side fails CI.
+
 ## Basic Card Configuration
 
 Add this to your Lovelace dashboard YAML or use the visual editor:

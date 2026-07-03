@@ -3,6 +3,7 @@
     "state": "11.0",
     "attributes": {
         "journey_start": "BKH",
+        "journey_end": "CHX",
         "platforms_of_interest": [
             "1"
         ],
@@ -11,74 +12,94 @@
                 "origin_name": "Barnehurst",
                 "destination_name": "London Charing Cross",
                 "service_uid": "P16684",
-                "scheduled": "15-11-2025 21:51",
-                "estimated": "15-11-2025 21:51",
-                "minutes": 11,
-                "platform": "1",
+                "headcode": "2A69",
+                "type": "TRAIN",
                 "operator_name": "Southeastern",
-                "stops_of_interest": [
+                "scheduled": "15-11-2025 21:51",
+                "estimated": "15-11-2025 21:53",
+                "minutes": 11,
+                "lateness": 2,
+                "is_cancelled": false,
+                "platform": "1",
+                "length": 8,
+                "stock": "Networker",
+                "scheduled_arrival": "15-11-2025 22:08",
+                "estimate_arrival": "15-11-2025 22:10",
+                "journey_time_mins": 17,
+                "stops": 10,
+                "status": "Delayed",
+                "subsequent_stops": [
+                    {
+                        "stop": "LEW",
+                        "name": "Lewisham",
+                        "scheduled": "15-11-2025 21:55",
+                        "estimated": "15-11-2025 21:57"
+                    },
                     {
                         "stop": "LBG",
                         "name": "London Bridge",
-                        "scheduled_stop": "15-11-2025 22:03",
-                        "estimate_stop": "15-11-2025 22:03",
-                        "journey_time_mins": 12,
-                        "stops": 7
+                        "scheduled": "15-11-2025 22:03",
+                        "estimated": "15-11-2025 22:05"
+                    },
+                    {
+                        "stop": "CHX",
+                        "name": "London Charing Cross",
+                        "scheduled": "15-11-2025 22:08",
+                        "estimated": "15-11-2025 22:10"
                     }
                 ],
-                "stops": 10
+                "last_report_station": "KDB",
+                "last_report_type": "Departure",
+                "last_report_time": "15-11-2025 21:48",
+                "is_pinned": true
             },
             {
                 "origin_name": "Gravesend",
                 "destination_name": "London Victoria",
                 "service_uid": "P15897",
+                "headcode": "2V56",
+                "type": "TRAIN",
+                "operator_name": "Southeastern",
                 "scheduled": "15-11-2025 21:58",
                 "estimated": "15-11-2025 21:58",
                 "minutes": 18,
+                "lateness": null,
+                "is_cancelled": false,
                 "platform": "1",
-                "operator_name": "Southeastern",
-                "stops_of_interest": [],
-                "stops": 14
+                "length": 6,
+                "stock": null
             },
             {
-                "origin_name": "London Cannon Street",
+                "origin_name": "Dartford",
                 "destination_name": "London Cannon Street",
                 "service_uid": "P16177",
+                "headcode": "2C71",
+                "type": "TRAIN",
+                "operator_name": "Southeastern",
                 "scheduled": "15-11-2025 22:05",
                 "estimated": "15-11-2025 22:05",
                 "minutes": 25,
-                "platform": "1",
-                "operator_name": "Southeastern",
-                "stops_of_interest": [
-                    {
-                        "stop": "LBG",
-                        "name": "London Bridge",
-                        "scheduled_stop": "16-11-2025 20:59",
-                        "estimate_stop": "16-11-2025 20:58",
-                        "journey_time_mins": 1373,
-                        "stops": 0
-                    },
-                    {
-                        "stop": "LBG",
-                        "name": "London Bridge",
-                        "scheduled_stop": "15-11-2025 22:19",
-                        "estimate_stop": "15-11-2025 22:19",
-                        "journey_time_mins": 14,
-                        "stops": 23
-                    }
-                ],
-                "stops": 25
+                "lateness": null,
+                "is_cancelled": true,
+                "platform": null,
+                "length": null,
+                "stock": "City Beam"
             }
         ],
+        "current_polling_interval": 60,
+        "next_update_at": "2025-11-15T21:41:00+00:00",
+        "data_stale": false,
+        "last_successful_update": "2025-11-15T21:40:00+00:00",
+        "error": null,
         "unit_of_measurement": "min",
         "icon": "mdi:train",
-        "friendly_name": "blackheath_station"
+        "friendly_name": "Blackheath Station"
     },
     "context": {
-        "id": "01KA4QA41HA3XJQT2PAWHDXFPC",
+        "id": "01HXSAMPLE",
         "parent_id": null,
         "user_id": null
     },
-    "last_changed": "2025-11-15T21:39:01.809Z",
-    "last_updated": "2025-11-15T21:39:01.809Z"
+    "last_changed": "2025-11-15T21:40:00+00:00",
+    "last_updated": "2025-11-15T21:40:00+00:00"
 }
