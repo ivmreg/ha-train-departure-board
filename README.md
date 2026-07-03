@@ -52,9 +52,16 @@ type: custom:train-departure-board
 title: Train Departures
 entity: sensor.your_train_sensor
 attribute: next_trains # optional; use e.g. "departures" if your sensor uses another attribute name
+row_size: normal # optional: compact | normal | comfortable
+time_display: scheduled # optional: scheduled | relative ("4 min") | both
+walk_time_minutes: 12 # optional: highlight the first train you can still reach
+show_carriages: true # optional
+stale_indicator: true # optional: warn when the data source is stale
 ```
 
 If your integration exposes the departures array under a different attribute (for example `departures`), set the `attribute` field to that exact name so the card can find it.
+
+See [CONFIGURATION.md](CONFIGURATION.md) for the full option reference and the expected data structure.
 
 ### Expected Data Format
 

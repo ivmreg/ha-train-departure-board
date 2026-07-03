@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-lint-test:
+    name: Build, lint & test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Ensure the committed bundle is up to date
+        run: |
+          if ! git diff --quiet -- ha-train-departure-board.js; then
+            echo "::error::ha-train-departure-board.js is out of date. Run 'npm run build' and commit the result."
+            git diff --stat -- ha-train-departure-board.js
+            exit 1
+          fi
