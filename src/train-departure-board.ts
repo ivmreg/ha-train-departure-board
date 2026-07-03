@@ -24,6 +24,14 @@ export class TrainDepartureBoard extends LitElement {
   private dateCache = new Map<string, Date | null>();
   private lastEntityId: string | null = null;
   private _returnFocusTo: HTMLElement | null = null;
+  // Previous rendered values per service, used to trigger the flap
+  // animation only when a value actually changes (not on every re-render)
+  private _prevRowValues = new Map<
+    string,
+    { time: string; platform: string; status: string }
+  >();
+  private _flapCounters = new Map<string, number>();
+  private _tickTimer: number | undefined;
 
   static getConfigElement() {
     return document.createElement('train-departure-board-editor');
@@ -159,6 +167,7 @@ export class TrainDepartureBoard extends LitElement {
       min-width: auto;
     }
     .scheduled {
+      display: inline-block; /* transformable for the flap animation */
       font-size: var(--train-board-time-size, 1.25rem);
       font-weight: 700;
       line-height: 1;
@@ -647,6 +656,48 @@ export class TrainDepartureBoard extends LitElement {
       font-size: 0.8em;
       color: var(--secondary-text-color, #666);
     }
+    .journey-summary {
+      margin-top: 10px;
+      font-size: 0.9em;
+      font-weight: 500;
+      color: var(--primary-text-color, #111);
+    }
+    .pin-marker {
+      font-size: 0.8em;
+      margin-right: 4px;
+    }
+    /* Split-flap-style flip when a displayed value changes. Two identical
+       animations so consecutive changes both restart the effect. */
+    @keyframes flap-a {
+      0% {
+        transform: rotateX(0);
+      }
+      50% {
+        transform: rotateX(90deg);
+        opacity: 0.25;
+      }
+      100% {
+        transform: rotateX(0);
+      }
+    }
+    @keyframes flap-b {
+      0% {
+        transform: rotateX(0);
+      }
+      50% {
+        transform: rotateX(90deg);
+        opacity: 0.25;
+      }
+      100% {
+        transform: rotateX(0);
+      }
+    }
+    .flap-a {
+      animation: flap-a 0.5s ease;
+    }
+    .flap-b {
+      animation: flap-b 0.5s ease;
+    }
     @media (prefers-reduced-motion: reduce) {
       .modern-train-pos {
         animation: none;
@@ -656,6 +707,10 @@ export class TrainDepartureBoard extends LitElement {
       }
       .modern-stop-circle {
         transition: none;
+      }
+      .flap-a,
+      .flap-b {
+        animation: none;
       }
     }
     .stock-badge {
@@ -746,6 +801,10 @@ export class TrainDepartureBoard extends LitElement {
       this.dateCache.clear();
       this.lastEntityId = this.config.entity;
     }
+    // Keys include dates, so an always-on dashboard accumulates entries
+    if (this.dateCache.size > 500) {
+      this.dateCache.clear();
+    }
 
     const attributeName = this.config.attribute || 'next_trains';
     const attributeValue = entity.attributes?.[attributeName];
@@ -797,6 +856,7 @@ export class TrainDepartureBoard extends LitElement {
     }
 
     const isStale = this._isDataStale(entity);
+    this._updateFlapCounters(departures);
 
     return html`
       <ha-card style="${customStyles}">
@@ -837,11 +897,69 @@ export class TrainDepartureBoard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener('keydown', this._handleKeyDown);
+    // Keep relative countdowns honest even when HA is quiet
+    this._tickTimer = window.setInterval(() => {
+      const mode = this.config?.time_display;
+      if (mode === 'relative' || mode === 'both') {
+        this.requestUpdate();
+      }
+    }, 30_000);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('keydown', this._handleKeyDown);
+    if (this._tickTimer !== undefined) {
+      window.clearInterval(this._tickTimer);
+      this._tickTimer = undefined;
+    }
+  }
+
+  private _departureKey(departure: TrainDeparture): string {
+    return (
+      departure.service_uid ||
+      `${departure.scheduled}-${departure.destination_name}`
+    );
+  }
+
+  private _updateFlapCounters(departures: TrainDeparture[]) {
+    // Bound both maps; entries accumulate as services roll through the day
+    if (this._prevRowValues.size > 200) {
+      this._prevRowValues.clear();
+      this._flapCounters.clear();
+    }
+    for (const departure of departures) {
+      const key = this._departureKey(departure);
+      const current = {
+        time: departure.estimated || departure.scheduled || '',
+        platform: departure.platform || '',
+        status: getStatusMeta(departure).statusLabel,
+      };
+      const prev = this._prevRowValues.get(key);
+      if (prev) {
+        for (const field of ['time', 'platform', 'status'] as const) {
+          if (prev[field] !== current[field]) {
+            const flapKey = `${key}:${field}`;
+            this._flapCounters.set(
+              flapKey,
+              (this._flapCounters.get(flapKey) || 0) + 1
+            );
+          }
+        }
+      }
+      this._prevRowValues.set(key, current);
+    }
+  }
+
+  private _flapClass(departure: TrainDeparture, field: string): string {
+    const count =
+      this._flapCounters.get(`${this._departureKey(departure)}:${field}`) || 0;
+    if (count === 0) {
+      return '';
+    }
+    // Alternate between two identical animations so consecutive changes
+    // both restart the flap
+    return count % 2 ? 'flap-a' : 'flap-b';
   }
 
   private _handleKeyDown = (e: KeyboardEvent) => {
@@ -984,6 +1102,7 @@ export class TrainDepartureBoard extends LitElement {
                   </div>`
                 : ''}
             </div>
+            ${this._renderJourneySummary(departure)}
             ${departure.last_report_station
               ? html`<div class="last-seen">
                   Last seen at ${departure.last_report_station}${departure.last_report_time
@@ -1048,6 +1167,24 @@ export class TrainDepartureBoard extends LitElement {
     `;
   }
 
+  private _renderJourneySummary(departure: TrainDeparture) {
+    const arrival = departure.estimate_arrival || departure.scheduled_arrival;
+    const parts: string[] = [];
+    if (departure.journey_time_mins != null) {
+      parts.push(`${departure.journey_time_mins} min journey`);
+    }
+    if (departure.stops != null && departure.stops > 0) {
+      parts.push(`${departure.stops} ${departure.stops === 1 ? 'stop' : 'stops'}`);
+    }
+    if (arrival) {
+      parts.push(`arrives ${extractTimeLabel(arrival)}`);
+    }
+    if (parts.length === 0) {
+      return nothing;
+    }
+    return html`<div class="journey-summary">${parts.join(' · ')}</div>`;
+  }
+
   private renderDepartureRow(
     departure: TrainDeparture,
     index: number,
@@ -1077,12 +1214,16 @@ export class TrainDepartureBoard extends LitElement {
     const primaryTimeLabel =
       timeDisplay === 'relative' && relativeTime ? relativeTime : scheduledTime;
 
+    const statusFlap = this._flapClass(departure, 'status');
     let pillHtml = html``;
     if (isCancelled) {
-      pillHtml = html`<span class="status-pill cancelled">Cancelled</span>`;
+      pillHtml = html`<span class="status-pill cancelled ${statusFlap}"
+        >Cancelled</span
+      >`;
     } else if (offsetStr) {
       const isEarly = statusClass === 'early';
-      pillHtml = html`<span class="status-pill ${isEarly ? 'early' : 'delayed'}"
+      pillHtml = html`<span
+        class="status-pill ${isEarly ? 'early' : 'delayed'} ${statusFlap}"
         >${isEarly ? 'Early ' : ''}${offsetStr}</span
       >`;
     }
@@ -1104,7 +1245,9 @@ export class TrainDepartureBoard extends LitElement {
         @keydown=${(e: KeyboardEvent) => this._handleRowKeyDown(e, departure)}
       >
         <div class="time-wrapper ${timeClass}">
-          <span class="scheduled" aria-label="Scheduled time"
+          <span
+            class="scheduled ${this._flapClass(departure, 'time')}"
+            aria-label="Scheduled time"
             >${primaryTimeLabel}</span
           >
           ${timeDisplay === 'both' && relativeTime
@@ -1116,14 +1259,26 @@ export class TrainDepartureBoard extends LitElement {
         <div class="info-box">
           <div class="destination-col">
             <div class="destination-row">
-              <h3 class="terminus">${departure.destination_name}</h3>
+              <h3 class="terminus">
+                ${departure.is_pinned
+                  ? html`<span
+                      class="pin-marker"
+                      title="Your pinned train"
+                      aria-label="Pinned train"
+                      >📌</span
+                    >`
+                  : ''}${departure.destination_name}
+              </h3>
               ${pillHtml}
               ${showCarriages && departure.length
                 ? html`<span class="carriages-badge">${departure.length}-car</span>`
                 : ''}
               ${platform
                 ? html`<span
-                    class="platform-badge"
+                    class="platform-badge ${this._flapClass(
+                      departure,
+                      'platform'
+                    )}"
                     aria-label="Platform ${platform}"
                     >${platform}</span
                   >`

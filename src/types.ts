@@ -51,6 +51,14 @@ export interface TrainDeparture {
   etd?: string;
   planned_cancel?: boolean;
   cancel_reason?: string;
+  // Journey enrichment fields (present when the integration's
+  // journey_data_for_next_X_trains covers this train)
+  scheduled_arrival?: string;
+  estimate_arrival?: string;
+  journey_time_mins?: number;
+  reason?: string;
+  // Set when this is the query's pinned recurring train
+  is_pinned?: boolean;
 }
 
 export interface SubsequentStop {

@@ -83,6 +83,10 @@ attributes:
 - **length**: Number of coaches
 - **stock**: Train stock description (e.g. City Beam)
 - **last_report_station** / **last_report_type** / **last_report_time**: The train's last reported position; shown as "Last seen at …" in the details popup and used to place the live train marker on the timeline
+- **journey_time_mins** / **stops** / **scheduled_arrival** / **estimate_arrival**: Journey enrichment; shown as a "33 min journey · 7 stops · arrives 20:54" summary in the details popup
+- **is_pinned**: Marks the query's pinned recurring train; the row gets a 📌 marker
+
+When a displayed time, platform, or status *changes* between refreshes, the affected value plays a brief split-flap-style flip (disabled under `prefers-reduced-motion`).
 
 ### Optional Entity-Level Attributes
 

@@ -210,3 +210,78 @@ describe('train-departure-board component', () => {
     expect(rows[1].classList.contains('stock-row-javelin')).toBe(false);
   });
 });
+
+describe('new card behaviours', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('shows the journey summary in the popup when enrichment data exists', async () => {
+    const card = await mountCard({ entity: 'sensor.trains' }, [
+      makeDeparture({
+        journey_time_mins: 33,
+        stops: 7,
+        estimate_arrival: inMinutes(43),
+      }),
+    ]);
+
+    (card.shadowRoot!.querySelector('.train') as HTMLElement).click();
+    await card.updateComplete;
+
+    const summary = card.shadowRoot!.querySelector('.journey-summary');
+    expect(summary).not.toBeNull();
+    expect(summary!.textContent).toContain('33 min journey');
+    expect(summary!.textContent).toContain('7 stops');
+    expect(summary!.textContent).toContain('arrives');
+  });
+
+  it('omits the journey summary without enrichment data', async () => {
+    const card = await mountCard({ entity: 'sensor.trains' }, [
+      makeDeparture({ stops: 0 }),
+    ]);
+    (card.shadowRoot!.querySelector('.train') as HTMLElement).click();
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.journey-summary')).toBeNull();
+  });
+
+  it('marks the pinned train with a pin marker', async () => {
+    const card = await mountCard({ entity: 'sensor.trains' }, [
+      makeDeparture(),
+      makeDeparture({ is_pinned: true, destination_name: 'Dartford' }),
+    ]);
+
+    const rows = card.shadowRoot!.querySelectorAll('.train');
+    expect(rows[0].querySelector('.pin-marker')).toBeNull();
+    expect(rows[1].querySelector('.pin-marker')).not.toBeNull();
+  });
+
+  it('applies a flap class only when a rendered value changes', async () => {
+    const first = makeDeparture({ platform: '1' });
+    const card = await mountCard({ entity: 'sensor.trains' }, [first]);
+
+    expect(
+      card.shadowRoot!.querySelector('.platform-badge')!.className
+    ).not.toContain('flap');
+
+    // Same data again: no flap
+    card.hass = makeHass([makeDeparture({ platform: '1' })]) as never;
+    await card.updateComplete;
+    expect(
+      card.shadowRoot!.querySelector('.platform-badge')!.className
+    ).not.toContain('flap');
+
+    // Platform change: flap
+    card.hass = makeHass([makeDeparture({ platform: '4' })]) as never;
+    await card.updateComplete;
+    expect(
+      card.shadowRoot!.querySelector('.platform-badge')!.className
+    ).toContain('flap-a');
+
+    // Change again: alternate animation class so it restarts
+    card.hass = makeHass([makeDeparture({ platform: '5' })]) as never;
+    await card.updateComplete;
+    expect(
+      card.shadowRoot!.querySelector('.platform-badge')!.className
+    ).toContain('flap-b');
+  });
+});
