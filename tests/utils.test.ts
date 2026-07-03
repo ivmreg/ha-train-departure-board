@@ -3,9 +3,11 @@ import {
   getStockCategory,
   extractTimeLabel,
   calculateDelayMins,
+  formatRelativeMinutes,
   parseDateTime,
   getStatusMeta,
   getStopsForPopup,
+  isCatchable,
 } from '../src/utils';
 import { TrainDeparture, SubsequentStop } from '../src/types';
 
@@ -71,6 +73,69 @@ describe('getStockCategory', () => {
       category: 'standard',
       label: '',
     });
+  });
+
+  it('applies the Southeastern table when the operator matches', () => {
+    expect(getStockCategory('City Beam', 'Southeastern').category).toBe('modern');
+    expect(getStockCategory('395', 'southeastern').category).toBe('javelin');
+  });
+
+  it('does not apply Southeastern stock styling to other operators', () => {
+    // "376" could be a coincidental substring in another operator's branding
+    expect(getStockCategory('376', 'Avanti West Coast').category).toBe('standard');
+    expect(getStockCategory('Javelin', 'Thameslink').category).toBe('standard');
+  });
+
+  it('falls back to matching all tables when no operator is given', () => {
+    expect(getStockCategory('Javelin', null).category).toBe('javelin');
+    expect(getStockCategory('Javelin', '').category).toBe('javelin');
+  });
+});
+
+describe('formatRelativeMinutes', () => {
+  const now = new Date('2026-06-10T12:00:00');
+
+  it('formats minutes until the estimated departure', () => {
+    const departure = makeDeparture({ estimated: '10-06-2026 12:04' });
+    expect(formatRelativeMinutes(departure, now)).toBe('4 min');
+  });
+
+  it('returns Due for imminent or past departures', () => {
+    expect(
+      formatRelativeMinutes(makeDeparture({ estimated: '10-06-2026 12:00' }), now)
+    ).toBe('Due');
+    expect(
+      formatRelativeMinutes(makeDeparture({ estimated: '10-06-2026 11:58' }), now)
+    ).toBe('Due');
+  });
+
+  it('falls back to the scheduled time and handles garbage', () => {
+    const departure = makeDeparture({
+      estimated: '',
+      scheduled: '10-06-2026 12:30',
+    });
+    expect(formatRelativeMinutes(departure, now)).toBe('30 min');
+    expect(
+      formatRelativeMinutes(
+        makeDeparture({ estimated: 'nonsense', scheduled: '' }),
+        now
+      )
+    ).toBeNull();
+  });
+});
+
+describe('isCatchable', () => {
+  const now = new Date('2026-06-10T12:00:00');
+
+  it('is true when the walk time fits before departure', () => {
+    const departure = makeDeparture({ estimated: '10-06-2026 12:10' });
+    expect(isCatchable(departure, 10, now)).toBe(true);
+    expect(isCatchable(departure, 11, now)).toBe(false);
+  });
+
+  it('does not rule out departures without a parseable time', () => {
+    const departure = makeDeparture({ estimated: 'garbage', scheduled: '' });
+    expect(isCatchable(departure, 15, now)).toBe(true);
   });
 });
 

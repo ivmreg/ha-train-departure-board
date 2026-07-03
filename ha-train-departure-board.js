@@ -15,13 +15,13 @@ const t=window,i=t.ShadowRoot&&(void 0===t.ShadyCSS||t.ShadyCSS.nativeShadow)&&"
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var v;g[m]=!0,g.elementProperties=new Map,g.elementStyles=[],g.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:g}),(null!==(a=l.reactiveElementVersions)&&void 0!==a?a:l.reactiveElementVersions=[]).push("1.6.3");const b=window,_=b.trustedTypes,y=_?_.createPolicy("lit-html",{createHTML:e=>e}):void 0,$="$lit$",x=`lit$${(Math.random()+"").slice(9)}$`,w="?"+x,A=`<${w}>`,C=document,E=()=>C.createComment(""),k=e=>null===e||"object"!=typeof e&&"function"!=typeof e,S=Array.isArray,P="[ \t\n\f\r]",z=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,T=/-->/g,N=/>/g,O=RegExp(`>|${P}(?:([^\\s"'>=/]+)(${P}*=${P}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),L=/'/g,D=/"/g,U=/^(?:script|style|textarea|title)$/i,H=(e=>(t,...i)=>({_$litType$:e,strings:t,values:i}))(1),j=Symbol.for("lit-noChange"),R=Symbol.for("lit-nothing"),M=new WeakMap,I=C.createTreeWalker(C,129,null,!1);function B(e,t){if(!Array.isArray(e)||!e.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==y?y.createHTML(t):t}const V=(e,t)=>{const i=e.length-1,r=[];let s,o=2===t?"<svg>":"",n=z;for(let t=0;t<i;t++){const i=e[t];let a,l,d=-1,c=0;for(;c<i.length&&(n.lastIndex=c,l=n.exec(i),null!==l);)c=n.lastIndex,n===z?"!--"===l[1]?n=T:void 0!==l[1]?n=N:void 0!==l[2]?(U.test(l[2])&&(s=RegExp("</"+l[2],"g")),n=O):void 0!==l[3]&&(n=O):n===O?">"===l[0]?(n=null!=s?s:z,d=-1):void 0===l[1]?d=-2:(d=n.lastIndex-l[2].length,a=l[1],n=void 0===l[3]?O:'"'===l[3]?D:L):n===D||n===L?n=O:n===T||n===N?n=z:(n=O,s=void 0);const p=n===O&&e[t+1].startsWith("/>")?" ":"";o+=n===z?i+A:d>=0?(r.push(a),i.slice(0,d)+$+i.slice(d)+x+p):i+x+(-2===d?(r.push(void 0),t):p)}return[B(e,o+(e[i]||"<?>")+(2===t?"</svg>":"")),r]};class F{constructor({strings:e,_$litType$:t},i){let r;this.parts=[];let s=0,o=0;const n=e.length-1,a=this.parts,[l,d]=V(e,t);if(this.el=F.createElement(l,i),I.currentNode=this.el.content,2===t){const e=this.el.content,t=e.firstChild;t.remove(),e.append(...t.childNodes)}for(;null!==(r=I.nextNode())&&a.length<n;){if(1===r.nodeType){if(r.hasAttributes()){const e=[];for(const t of r.getAttributeNames())if(t.endsWith($)||t.startsWith(x)){const i=d[o++];if(e.push(t),void 0!==i){const e=r.getAttribute(i.toLowerCase()+$).split(x),t=/([.?@])?(.*)/.exec(i);a.push({type:1,index:s,name:t[2],strings:e,ctor:"."===t[1]?Y:"?"===t[1]?Z:"@"===t[1]?G:J})}else a.push({type:6,index:s})}for(const t of e)r.removeAttribute(t)}if(U.test(r.tagName)){const e=r.textContent.split(x),t=e.length-1;if(t>0){r.textContent=_?_.emptyScript:"";for(let i=0;i<t;i++)r.append(e[i],E()),I.nextNode(),a.push({type:2,index:++s});r.append(e[t],E())}}}else if(8===r.nodeType)if(r.data===w)a.push({type:2,index:s});else{let e=-1;for(;-1!==(e=r.data.indexOf(x,e+1));)a.push({type:7,index:s}),e+=x.length-1}s++}}static createElement(e,t){const i=C.createElement("template");return i.innerHTML=e,i}}function q(e,t,i=e,r){var s,o,n,a;if(t===j)return t;let l=void 0!==r?null===(s=i._$Co)||void 0===s?void 0:s[r]:i._$Cl;const d=k(t)?void 0:t._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(e),l._$AT(e,i,r)),void 0!==r?(null!==(n=(a=i)._$Co)&&void 0!==n?n:a._$Co=[])[r]=l:i._$Cl=l),void 0!==l&&(t=q(e,l._$AS(e,t.values),l,r)),t}class K{constructor(e,t){this._$AV=[],this._$AN=void 0,this._$AD=e,this._$AM=t}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(e){var t;const{el:{content:i},parts:r}=this._$AD,s=(null!==(t=null==e?void 0:e.creationScope)&&void 0!==t?t:C).importNode(i,!0);I.currentNode=s;let o=I.nextNode(),n=0,a=0,l=r[0];for(;void 0!==l;){if(n===l.index){let t;2===l.type?t=new W(o,o.nextSibling,this,e):1===l.type?t=new l.ctor(o,l.name,l.strings,this,e):6===l.type&&(t=new Q(o,this,e)),this._$AV.push(t),l=r[++a]}n!==(null==l?void 0:l.index)&&(o=I.nextNode(),n++)}return I.currentNode=C,s}v(e){let t=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(e,i,t),t+=i.strings.length-2):i._$AI(e[t])),t++}}class W{constructor(e,t,i,r){var s;this.type=2,this._$AH=R,this._$AN=void 0,this._$AA=e,this._$AB=t,this._$AM=i,this.options=r,this._$Cp=null===(s=null==r?void 0:r.isConnected)||void 0===s||s}get _$AU(){var e,t;return null!==(t=null===(e=this._$AM)||void 0===e?void 0:e._$AU)&&void 0!==t?t:this._$Cp}get parentNode(){let e=this._$AA.parentNode;const t=this._$AM;return void 0!==t&&11===(null==e?void 0:e.nodeType)&&(e=t.parentNode),e}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(e,t=this){e=q(this,e,t),k(e)?e===R||null==e||""===e?(this._$AH!==R&&this._$AR(),this._$AH=R):e!==this._$AH&&e!==j&&this._(e):void 0!==e._$litType$?this.g(e):void 0!==e.nodeType?this.$(e):(e=>S(e)||"function"==typeof(null==e?void 0:e[Symbol.iterator]))(e)?this.T(e):this._(e)}k(e){return this._$AA.parentNode.insertBefore(e,this._$AB)}$(e){this._$AH!==e&&(this._$AR(),this._$AH=this.k(e))}_(e){this._$AH!==R&&k(this._$AH)?this._$AA.nextSibling.data=e:this.$(C.createTextNode(e)),this._$AH=e}g(e){var t;const{values:i,_$litType$:r}=e,s="number"==typeof r?this._$AC(e):(void 0===r.el&&(r.el=F.createElement(B(r.h,r.h[0]),this.options)),r);if((null===(t=this._$AH)||void 0===t?void 0:t._$AD)===s)this._$AH.v(i);else{const e=new K(s,this),t=e.u(this.options);e.v(i),this.$(t),this._$AH=e}}_$AC(e){let t=M.get(e.strings);return void 0===t&&M.set(e.strings,t=new F(e)),t}T(e){S(this._$AH)||(this._$AH=[],this._$AR());const t=this._$AH;let i,r=0;for(const s of e)r===t.length?t.push(i=new W(this.k(E()),this.k(E()),this,this.options)):i=t[r],i._$AI(s),r++;r<t.length&&(this._$AR(i&&i._$AB.nextSibling,r),t.length=r)}_$AR(e=this._$AA.nextSibling,t){var i;for(null===(i=this._$AP)||void 0===i||i.call(this,!1,!0,t);e&&e!==this._$AB;){const t=e.nextSibling;e.remove(),e=t}}setConnected(e){var t;void 0===this._$AM&&(this._$Cp=e,null===(t=this._$AP)||void 0===t||t.call(this,e))}}class J{constructor(e,t,i,r,s){this.type=1,this._$AH=R,this._$AN=void 0,this.element=e,this.name=t,this._$AM=r,this.options=s,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=R}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(e,t=this,i,r){const s=this.strings;let o=!1;if(void 0===s)e=q(this,e,t,0),o=!k(e)||e!==this._$AH&&e!==j,o&&(this._$AH=e);else{const r=e;let n,a;for(e=s[0],n=0;n<s.length-1;n++)a=q(this,r[i+n],t,n),a===j&&(a=this._$AH[n]),o||(o=!k(a)||a!==this._$AH[n]),a===R?e=R:e!==R&&(e+=(null!=a?a:"")+s[n+1]),this._$AH[n]=a}o&&!r&&this.j(e)}j(e){e===R?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=e?e:"")}}class Y extends J{constructor(){super(...arguments),this.type=3}j(e){this.element[this.name]=e===R?void 0:e}}const X=_?_.emptyScript:"";class Z extends J{constructor(){super(...arguments),this.type=4}j(e){e&&e!==R?this.element.setAttribute(this.name,X):this.element.removeAttribute(this.name)}}class G extends J{constructor(e,t,i,r,s){super(e,t,i,r,s),this.type=5}_$AI(e,t=this){var i;if((e=null!==(i=q(this,e,t,0))&&void 0!==i?i:R)===j)return;const r=this._$AH,s=e===R&&r!==R||e.capture!==r.capture||e.once!==r.once||e.passive!==r.passive,o=e!==R&&(r===R||s);s&&this.element.removeEventListener(this.name,this,r),o&&this.element.addEventListener(this.name,this,e),this._$AH=e}handleEvent(e){var t,i;"function"==typeof this._$AH?this._$AH.call(null!==(i=null===(t=this.options)||void 0===t?void 0:t.host)&&void 0!==i?i:this.element,e):this._$AH.handleEvent(e)}}class Q{constructor(e,t,i){this.element=e,this.type=6,this._$AN=void 0,this._$AM=t,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(e){q(this,e)}}const ee=b.litHtmlPolyfillSupport;null==ee||ee(F,W),(null!==(v=b.litHtmlVersions)&&void 0!==v?v:b.litHtmlVersions=[]).push("2.8.0");
+var v;g[m]=!0,g.elementProperties=new Map,g.elementStyles=[],g.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:g}),(null!==(a=l.reactiveElementVersions)&&void 0!==a?a:l.reactiveElementVersions=[]).push("1.6.3");const b=window,_=b.trustedTypes,y=_?_.createPolicy("lit-html",{createHTML:e=>e}):void 0,x="$lit$",$=`lit$${(Math.random()+"").slice(9)}$`,w="?"+$,A=`<${w}>`,k=document,C=()=>k.createComment(""),E=e=>null===e||"object"!=typeof e&&"function"!=typeof e,S=Array.isArray,z="[ \t\n\f\r]",P=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,T=/-->/g,D=/>/g,N=RegExp(`>|${z}(?:([^\\s"'>=/]+)(${z}*=${z}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),O=/'/g,L=/"/g,j=/^(?:script|style|textarea|title)$/i,R=(e=>(t,...i)=>({_$litType$:e,strings:t,values:i}))(1),U=Symbol.for("lit-noChange"),H=Symbol.for("lit-nothing"),M=new WeakMap,I=k.createTreeWalker(k,129,null,!1);function B(e,t){if(!Array.isArray(e)||!e.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==y?y.createHTML(t):t}const V=(e,t)=>{const i=e.length-1,r=[];let s,o=2===t?"<svg>":"",n=P;for(let t=0;t<i;t++){const i=e[t];let a,l,d=-1,c=0;for(;c<i.length&&(n.lastIndex=c,l=n.exec(i),null!==l);)c=n.lastIndex,n===P?"!--"===l[1]?n=T:void 0!==l[1]?n=D:void 0!==l[2]?(j.test(l[2])&&(s=RegExp("</"+l[2],"g")),n=N):void 0!==l[3]&&(n=N):n===N?">"===l[0]?(n=null!=s?s:P,d=-1):void 0===l[1]?d=-2:(d=n.lastIndex-l[2].length,a=l[1],n=void 0===l[3]?N:'"'===l[3]?L:O):n===L||n===O?n=N:n===T||n===D?n=P:(n=N,s=void 0);const p=n===N&&e[t+1].startsWith("/>")?" ":"";o+=n===P?i+A:d>=0?(r.push(a),i.slice(0,d)+x+i.slice(d)+$+p):i+$+(-2===d?(r.push(void 0),t):p)}return[B(e,o+(e[i]||"<?>")+(2===t?"</svg>":"")),r]};class F{constructor({strings:e,_$litType$:t},i){let r;this.parts=[];let s=0,o=0;const n=e.length-1,a=this.parts,[l,d]=V(e,t);if(this.el=F.createElement(l,i),I.currentNode=this.el.content,2===t){const e=this.el.content,t=e.firstChild;t.remove(),e.append(...t.childNodes)}for(;null!==(r=I.nextNode())&&a.length<n;){if(1===r.nodeType){if(r.hasAttributes()){const e=[];for(const t of r.getAttributeNames())if(t.endsWith(x)||t.startsWith($)){const i=d[o++];if(e.push(t),void 0!==i){const e=r.getAttribute(i.toLowerCase()+x).split($),t=/([.?@])?(.*)/.exec(i);a.push({type:1,index:s,name:t[2],strings:e,ctor:"."===t[1]?Y:"?"===t[1]?Z:"@"===t[1]?G:J})}else a.push({type:6,index:s})}for(const t of e)r.removeAttribute(t)}if(j.test(r.tagName)){const e=r.textContent.split($),t=e.length-1;if(t>0){r.textContent=_?_.emptyScript:"";for(let i=0;i<t;i++)r.append(e[i],C()),I.nextNode(),a.push({type:2,index:++s});r.append(e[t],C())}}}else if(8===r.nodeType)if(r.data===w)a.push({type:2,index:s});else{let e=-1;for(;-1!==(e=r.data.indexOf($,e+1));)a.push({type:7,index:s}),e+=$.length-1}s++}}static createElement(e,t){const i=k.createElement("template");return i.innerHTML=e,i}}function K(e,t,i=e,r){var s,o,n,a;if(t===U)return t;let l=void 0!==r?null===(s=i._$Co)||void 0===s?void 0:s[r]:i._$Cl;const d=E(t)?void 0:t._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(e),l._$AT(e,i,r)),void 0!==r?(null!==(n=(a=i)._$Co)&&void 0!==n?n:a._$Co=[])[r]=l:i._$Cl=l),void 0!==l&&(t=K(e,l._$AS(e,t.values),l,r)),t}class W{constructor(e,t){this._$AV=[],this._$AN=void 0,this._$AD=e,this._$AM=t}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(e){var t;const{el:{content:i},parts:r}=this._$AD,s=(null!==(t=null==e?void 0:e.creationScope)&&void 0!==t?t:k).importNode(i,!0);I.currentNode=s;let o=I.nextNode(),n=0,a=0,l=r[0];for(;void 0!==l;){if(n===l.index){let t;2===l.type?t=new q(o,o.nextSibling,this,e):1===l.type?t=new l.ctor(o,l.name,l.strings,this,e):6===l.type&&(t=new Q(o,this,e)),this._$AV.push(t),l=r[++a]}n!==(null==l?void 0:l.index)&&(o=I.nextNode(),n++)}return I.currentNode=k,s}v(e){let t=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(e,i,t),t+=i.strings.length-2):i._$AI(e[t])),t++}}class q{constructor(e,t,i,r){var s;this.type=2,this._$AH=H,this._$AN=void 0,this._$AA=e,this._$AB=t,this._$AM=i,this.options=r,this._$Cp=null===(s=null==r?void 0:r.isConnected)||void 0===s||s}get _$AU(){var e,t;return null!==(t=null===(e=this._$AM)||void 0===e?void 0:e._$AU)&&void 0!==t?t:this._$Cp}get parentNode(){let e=this._$AA.parentNode;const t=this._$AM;return void 0!==t&&11===(null==e?void 0:e.nodeType)&&(e=t.parentNode),e}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(e,t=this){e=K(this,e,t),E(e)?e===H||null==e||""===e?(this._$AH!==H&&this._$AR(),this._$AH=H):e!==this._$AH&&e!==U&&this._(e):void 0!==e._$litType$?this.g(e):void 0!==e.nodeType?this.$(e):(e=>S(e)||"function"==typeof(null==e?void 0:e[Symbol.iterator]))(e)?this.T(e):this._(e)}k(e){return this._$AA.parentNode.insertBefore(e,this._$AB)}$(e){this._$AH!==e&&(this._$AR(),this._$AH=this.k(e))}_(e){this._$AH!==H&&E(this._$AH)?this._$AA.nextSibling.data=e:this.$(k.createTextNode(e)),this._$AH=e}g(e){var t;const{values:i,_$litType$:r}=e,s="number"==typeof r?this._$AC(e):(void 0===r.el&&(r.el=F.createElement(B(r.h,r.h[0]),this.options)),r);if((null===(t=this._$AH)||void 0===t?void 0:t._$AD)===s)this._$AH.v(i);else{const e=new W(s,this),t=e.u(this.options);e.v(i),this.$(t),this._$AH=e}}_$AC(e){let t=M.get(e.strings);return void 0===t&&M.set(e.strings,t=new F(e)),t}T(e){S(this._$AH)||(this._$AH=[],this._$AR());const t=this._$AH;let i,r=0;for(const s of e)r===t.length?t.push(i=new q(this.k(C()),this.k(C()),this,this.options)):i=t[r],i._$AI(s),r++;r<t.length&&(this._$AR(i&&i._$AB.nextSibling,r),t.length=r)}_$AR(e=this._$AA.nextSibling,t){var i;for(null===(i=this._$AP)||void 0===i||i.call(this,!1,!0,t);e&&e!==this._$AB;){const t=e.nextSibling;e.remove(),e=t}}setConnected(e){var t;void 0===this._$AM&&(this._$Cp=e,null===(t=this._$AP)||void 0===t||t.call(this,e))}}class J{constructor(e,t,i,r,s){this.type=1,this._$AH=H,this._$AN=void 0,this.element=e,this.name=t,this._$AM=r,this.options=s,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=H}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(e,t=this,i,r){const s=this.strings;let o=!1;if(void 0===s)e=K(this,e,t,0),o=!E(e)||e!==this._$AH&&e!==U,o&&(this._$AH=e);else{const r=e;let n,a;for(e=s[0],n=0;n<s.length-1;n++)a=K(this,r[i+n],t,n),a===U&&(a=this._$AH[n]),o||(o=!E(a)||a!==this._$AH[n]),a===H?e=H:e!==H&&(e+=(null!=a?a:"")+s[n+1]),this._$AH[n]=a}o&&!r&&this.j(e)}j(e){e===H?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=e?e:"")}}class Y extends J{constructor(){super(...arguments),this.type=3}j(e){this.element[this.name]=e===H?void 0:e}}const X=_?_.emptyScript:"";class Z extends J{constructor(){super(...arguments),this.type=4}j(e){e&&e!==H?this.element.setAttribute(this.name,X):this.element.removeAttribute(this.name)}}class G extends J{constructor(e,t,i,r,s){super(e,t,i,r,s),this.type=5}_$AI(e,t=this){var i;if((e=null!==(i=K(this,e,t,0))&&void 0!==i?i:H)===U)return;const r=this._$AH,s=e===H&&r!==H||e.capture!==r.capture||e.once!==r.once||e.passive!==r.passive,o=e!==H&&(r===H||s);s&&this.element.removeEventListener(this.name,this,r),o&&this.element.addEventListener(this.name,this,e),this._$AH=e}handleEvent(e){var t,i;"function"==typeof this._$AH?this._$AH.call(null!==(i=null===(t=this.options)||void 0===t?void 0:t.host)&&void 0!==i?i:this.element,e):this._$AH.handleEvent(e)}}class Q{constructor(e,t,i){this.element=e,this.type=6,this._$AN=void 0,this._$AM=t,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(e){K(this,e)}}const ee=b.litHtmlPolyfillSupport;null==ee||ee(F,q),(null!==(v=b.litHtmlVersions)&&void 0!==v?v:b.litHtmlVersions=[]).push("2.8.0");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var te,ie;class re extends g{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var e,t;const i=super.createRenderRoot();return null!==(e=(t=this.renderOptions).renderBefore)&&void 0!==e||(t.renderBefore=i.firstChild),i}update(e){const t=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(e),this._$Do=((e,t,i)=>{var r,s;const o=null!==(r=null==i?void 0:i.renderBefore)&&void 0!==r?r:t;let n=o._$litPart$;if(void 0===n){const e=null!==(s=null==i?void 0:i.renderBefore)&&void 0!==s?s:null;o._$litPart$=n=new W(t.insertBefore(E(),e),e,void 0,null!=i?i:{})}return n._$AI(e),n})(t,this.renderRoot,this.renderOptions)}connectedCallback(){var e;super.connectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!0)}disconnectedCallback(){var e;super.disconnectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!1)}render(){return j}}re.finalized=!0,re._$litElement$=!0,null===(te=globalThis.litElementHydrateSupport)||void 0===te||te.call(globalThis,{LitElement:re});const se=globalThis.litElementPolyfillSupport;null==se||se({LitElement:re}),(null!==(ie=globalThis.litElementVersions)&&void 0!==ie?ie:globalThis.litElementVersions=[]).push("3.3.3");
+var te,ie;class re extends g{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var e,t;const i=super.createRenderRoot();return null!==(e=(t=this.renderOptions).renderBefore)&&void 0!==e||(t.renderBefore=i.firstChild),i}update(e){const t=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(e),this._$Do=((e,t,i)=>{var r,s;const o=null!==(r=null==i?void 0:i.renderBefore)&&void 0!==r?r:t;let n=o._$litPart$;if(void 0===n){const e=null!==(s=null==i?void 0:i.renderBefore)&&void 0!==s?s:null;o._$litPart$=n=new q(t.insertBefore(C(),e),e,void 0,null!=i?i:{})}return n._$AI(e),n})(t,this.renderRoot,this.renderOptions)}connectedCallback(){var e;super.connectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!0)}disconnectedCallback(){var e;super.disconnectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!1)}render(){return U}}re.finalized=!0,re._$litElement$=!0,null===(te=globalThis.litElementHydrateSupport)||void 0===te||te.call(globalThis,{LitElement:re});const se=globalThis.litElementPolyfillSupport;null==se||se({LitElement:re}),(null!==(ie=globalThis.litElementVersions)&&void 0!==ie?ie:globalThis.litElementVersions=[]).push("3.3.3");
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -42,41 +42,60 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var de;function ce(e){const t=(e||"").toLowerCase();return t.includes("city beam")||t.includes("707")?{category:"modern",label:"CITY BEAM"}:t.includes("javelin")||t.includes("395")?{category:"javelin",label:"JAVELIN"}:t.includes("376")?{category:"refurb",label:"REFURB 376"}:t.includes("465")||t.includes("466")||t.includes("networker")?{category:"older",label:"CLASS 465"}:{category:"standard",label:""}}function pe(e){if(!e)return"—";const t=e.trim();if(!t)return"—";const i=t.split(" ");return 2===i.length&&/^\d{2}:\d{2}$/.test(i[1])?i[1]:/^\d{2}:\d{2}$/.test(t)?t:2===i.length?i[1]||i[0]:t}function ue(e,t){if(!/^\d{2}:\d{2}$/.test(e)||!/^\d{2}:\d{2}$/.test(t))return 0;const[i,r]=e.split(":").map(Number),[s,o]=t.split(":").map(Number);let n=60*s+o-(60*i+r);return n<-720&&(n+=1440),n>720&&(n-=1440),n}function he(e,t){var i;if(!e)return null;if(t&&t.has(e))return null!==(i=t.get(e))&&void 0!==i?i:null;const[r,s]=e.split(" ");let o=null;if(r&&s){const e=`${r.split("-").reverse().join("-")}T${s}`,t=new Date(e);o=Number.isNaN(t.getTime())?null:t}else if(/^\d{2}:\d{2}$/.test(e)){const t=`${(new Date).toISOString().split("T")[0]}T${e}`,i=new Date(t);o=Number.isNaN(i.getTime())?null:i}return t&&t.set(e,o),o}function fe(e){var t,i;const r=e.scheduled||"",s=e.estimated||"",o=pe(r),n=pe(s);if(e.is_cancelled||(null===(t=e.status)||void 0===t?void 0:t.toLowerCase().includes("cancel"))||(null===(i=e.etd)||void 0===i?void 0:i.toLowerCase().includes("cancel"))||e.planned_cancel||e.cancel_reason||s.toLowerCase().includes("cancel"))return{statusLabel:"Cancelled",statusClass:"cancelled"};if(!s)return{statusLabel:"Awaiting",statusClass:"delayed"};if("on time"===s.toLowerCase())return{statusLabel:"On Time",statusClass:"on-time"};if(n&&o&&n!==o){const e=ue(o,n);if(Math.abs(e)<=1)return{statusLabel:"On Time",statusClass:"on-time"};let t="delayed",i="Exp",r=`+${e}m`;return e<0&&(t="early",i="Early",r=`${e}m`),/^\d{2}:\d{2}$/.test(n)?{statusLabel:`${i} ${n}`,statusClass:t,offsetStr:r}:{statusLabel:n,statusClass:t,offsetStr:r}}return{statusLabel:"On Time",statusClass:"on-time"}}null===(de=window.HTMLSlotElement)||void 0===de||de.prototype.assignedElements;const me=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"delay_layout",selector:{select:{options:[{value:"inline",label:"Inline (Default)"},{value:"stacked",label:"Stacked"},{value:"status_line",label:"Status Line"}],mode:"dropdown"}}},{name:"row_size",selector:{select:{options:[{value:"compact",label:"Compact"},{value:"normal",label:"Normal (Default)"},{value:"comfortable",label:"Comfortable"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"show_carriages",selector:{boolean:{}}}]},{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}],ge={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier",delay_layout:"Delay Pill Layout",row_size:"Row Size",font_size_time:"Time Font Size",font_size_destination:"Destination Font Size",font_size_status:"Status Pill Font Size",show_carriages:"Show Carriage Count"},ve={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",delay_layout:"Position of the delay/early pill",row_size:"Vertical padding of the departure rows",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)",show_carriages:"Display carriage/length details when available"};let be=class extends re{constructor(){super(...arguments),this._computeLabel=e=>ge[e.name]||e.name,this._computeHelper=e=>ve[e.name]}setConfig(e){this._config=e}render(){return this.hass&&this._config?H`
+ */var de;null===(de=window.HTMLSlotElement)||void 0===de||de.prototype.assignedElements;const ce={category:"standard",label:""},pe={southeastern:[{matches:["city beam","707"],category:"modern",label:"CITY BEAM"},{matches:["javelin","395"],category:"javelin",label:"JAVELIN"},{matches:["376"],category:"refurb",label:"REFURB 376"},{matches:["465","466","networker"],category:"older",label:"CLASS 465"}]};function ue(e,t){for(const i of e)if(i.matches.some(e=>t.includes(e)))return{category:i.category,label:i.label};return null}function he(e,t){const i=(e||"").toLowerCase();if(!i)return ce;const r=(t||"").toLowerCase().trim();if(r){const e=Object.keys(pe).find(e=>r.includes(e));return e&&ue(pe[e],i)||ce}for(const e of Object.values(pe)){const t=ue(e,i);if(t)return t}return ce}function fe(e){if(!e)return"—";const t=e.trim();if(!t)return"—";const i=t.split(" ");return 2===i.length&&/^\d{2}:\d{2}$/.test(i[1])?i[1]:/^\d{2}:\d{2}$/.test(t)?t:2===i.length?i[1]||i[0]:t}function me(e,t){if(!/^\d{2}:\d{2}$/.test(e)||!/^\d{2}:\d{2}$/.test(t))return 0;const[i,r]=e.split(":").map(Number),[s,o]=t.split(":").map(Number);let n=60*s+o-(60*i+r);return n<-720&&(n+=1440),n>720&&(n-=1440),n}function ge(e,t){var i;if(!e)return null;if(t&&t.has(e))return null!==(i=t.get(e))&&void 0!==i?i:null;const[r,s]=e.split(" ");let o=null;if(r&&s){const e=`${r.split("-").reverse().join("-")}T${s}`,t=new Date(e);o=Number.isNaN(t.getTime())?null:t}else if(/^\d{2}:\d{2}$/.test(e)){const t=`${(new Date).toISOString().split("T")[0]}T${e}`,i=new Date(t);o=Number.isNaN(i.getTime())?null:i}return t&&t.set(e,o),o}function ve(e){var t,i;const r=e.scheduled||"",s=e.estimated||"",o=fe(r),n=fe(s);if(e.is_cancelled||(null===(t=e.status)||void 0===t?void 0:t.toLowerCase().includes("cancel"))||(null===(i=e.etd)||void 0===i?void 0:i.toLowerCase().includes("cancel"))||e.planned_cancel||e.cancel_reason||s.toLowerCase().includes("cancel"))return{statusLabel:"Cancelled",statusClass:"cancelled"};if(!s)return{statusLabel:"Awaiting",statusClass:"delayed"};if("on time"===s.toLowerCase())return{statusLabel:"On Time",statusClass:"on-time"};if(n&&o&&n!==o){const e=me(o,n);if(Math.abs(e)<=1)return{statusLabel:"On Time",statusClass:"on-time"};let t="delayed",i="Exp",r=`+${e}m`;return e<0&&(t="early",i="Early",r=`${e}m`),/^\d{2}:\d{2}$/.test(n)?{statusLabel:`${i} ${n}`,statusClass:t,offsetStr:r}:{statusLabel:n,statusClass:t,offsetStr:r}}return{statusLabel:"On Time",statusClass:"on-time"}}const be=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"row_size",selector:{select:{options:[{value:"compact",label:"Compact"},{value:"normal",label:"Normal (Default)"},{value:"comfortable",label:"Comfortable"}],mode:"dropdown"}}},{name:"time_display",selector:{select:{options:[{value:"scheduled",label:"Scheduled time (Default)"},{value:"relative",label:'Countdown ("4 min")'},{value:"both",label:"Scheduled + countdown"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"walk_time_minutes",selector:{number:{min:0,max:120,mode:"box",unit_of_measurement:"min"}}},{name:"show_carriages",selector:{boolean:{}}},{name:"stale_indicator",selector:{boolean:{}}}]},{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}],_e={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier",row_size:"Row Size",time_display:"Time Display",walk_time_minutes:"Walk Time to Station",font_size_time:"Time Font Size",font_size_destination:"Destination Font Size",font_size_status:"Status Pill Font Size",show_carriages:"Show Carriage Count",stale_indicator:"Show Stale-Data Warning"},ye={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",row_size:"Vertical padding of the departure rows",time_display:"Show clock time, a countdown, or both",walk_time_minutes:"Highlight the first train you can still reach; earlier ones are dimmed",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)",show_carriages:"Display carriage/length details when available",stale_indicator:"Warn when the data source is stale or a refresh is overdue"};let xe=class extends re{constructor(){super(...arguments),this._computeLabel=e=>_e[e.name]||e.name,this._computeHelper=e=>ye[e.name]}setConfig(e){this._config=e}render(){return this.hass&&this._config?R`
       <ha-form
         .hass=${this.hass}
         .data=${this._config}
-        .schema=${me}
+        .schema=${be}
         .computeLabel=${this._computeLabel}
         .computeHelper=${this._computeHelper}
         @value-changed=${this._valueChanged}
       ></ha-form>
-    `:R}_valueChanged(e){e.stopPropagation();const t=e.detail.value,i=Object.assign(Object.assign(Object.assign({},this._config),t),{attribute:t.attribute||"next_trains",stops_identifier:t.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:i},bubbles:!0,composed:!0}))}};e([ae({attribute:!1})],be.prototype,"hass",void 0),e([le()],be.prototype,"_config",void 0),be=e([oe("train-departure-board-editor")],be);let _e=class extends re{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this.dateCache=new Map,this.lastEntityId=null,this._handleKeyDown=e=>{"Escape"===e.key&&this._selectedDeparture&&this._closePopup()}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(e){if(!e)throw new Error("Invalid configuration");const t=Object.assign({attribute:"next_trains"},e);"string"==typeof t.attribute?t.attribute=t.attribute.trim()||"next_trains":t.attribute="next_trains",this.config=t}render(){var e,t,i;if(!this.config)return H`<div class="card">No configuration provided</div>`;if(!this.config.entity)return H`<div class="card">Please configure an entity</div>`;const r=null===(t=null===(e=this.hass)||void 0===e?void 0:e.states)||void 0===t?void 0:t[this.config.entity];if(!r)return H`<div class="card">
-        Entity not found: ${this.config.entity}
-      </div>`;this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity);const s=this.config.attribute||"next_trains",o=null===(i=r.attributes)||void 0===i?void 0:i[s],n=Array.isArray(o)?o:[],a=r.last_updated?new Date(r.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";void 0===o&&console.warn(`train-departure-board: attribute "${s}" was not found on entity ${this.config.entity}`),Array.isArray(o)||void 0===o||console.warn(`train-departure-board: attribute "${s}" is not an array, falling back to empty list`);const l=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; ");return H`
-      <ha-card style="${l}">
-        ${this.config.title?H`<div class="card-header">${this.config.title}</div>`:""}
+    `:H}_valueChanged(e){e.stopPropagation();const t=e.detail.value,i=Object.assign(Object.assign(Object.assign({},this._config),t),{attribute:t.attribute||"next_trains",stops_identifier:t.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:i},bubbles:!0,composed:!0}))}};e([ae({attribute:!1})],xe.prototype,"hass",void 0),e([le()],xe.prototype,"_config",void 0),xe=e([oe("train-departure-board-editor")],xe);let $e=class extends re{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this.dateCache=new Map,this.lastEntityId=null,this._returnFocusTo=null,this._handleKeyDown=e=>{"Escape"===e.key&&this._selectedDeparture&&this._closePopup()},this._handlePopupKeyDown=e=>{var t;if("Tab"!==e.key)return;const i=null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelector(".popup-close");i&&(e.preventDefault(),i.focus())}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(e){if(!e)throw new Error("Invalid configuration");const t=Object.assign({attribute:"next_trains"},e);"string"==typeof t.attribute?t.attribute=t.attribute.trim()||"next_trains":t.attribute="next_trains",this.config=t}_renderMessage(e,t,i=!1){var r;return R`
+      <ha-card>
+        ${(null===(r=this.config)||void 0===r?void 0:r.title)?R`<div class="card-header">${this.config.title}</div>`:""}
         <div class="card">
-          ${n.length>0?H`<div
+          <div class="board-message ${i?"error":""}">
+            <span class="message-icon" aria-hidden="true">${e}</span>
+            <span class="message-text">${t}</span>
+          </div>
+        </div>
+      </ha-card>
+    `}_isDataStale(e){var t,i;if(!1===this.config.stale_indicator)return!1;if(!0===(null===(t=e.attributes)||void 0===t?void 0:t.data_stale))return!0;const r=null===(i=e.attributes)||void 0===i?void 0:i.next_update_at;if("string"==typeof r){const e=new Date(r).getTime();if(!Number.isNaN(e)&&Date.now()>e+6e4)return!0}return!1}render(){var e,t,i;if(!this.config)return this._renderMessage("🚆","No configuration provided",!0);if(!this.config.entity)return this._renderMessage("🚆","Please configure an entity");const r=null===(t=null===(e=this.hass)||void 0===e?void 0:e.states)||void 0===t?void 0:t[this.config.entity];if(!r)return this._renderMessage("🚆",`Entity not found: ${this.config.entity}`,!0);this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity);const s=this.config.attribute||"next_trains",o=null===(i=r.attributes)||void 0===i?void 0:i[s],n=Array.isArray(o)?o:[],a=r.last_updated?new Date(r.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";void 0===o&&console.warn(`train-departure-board: attribute "${s}" was not found on entity ${this.config.entity}`),Array.isArray(o)||void 0===o||console.warn(`train-departure-board: attribute "${s}" is not an array, falling back to empty list`);const l=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; "),d=new Date,c=Number(this.config.walk_time_minutes)||0;let p=0;c>0&&(p=n.findIndex(e=>function(e,t,i,r){const s=ge(e.estimated||e.scheduled,r);return!s||s.getTime()-i.getTime()>=6e4*t}(e,c,d,this.dateCache)));const u=this._isDataStale(r);return R`
+      <ha-card style="${l}">
+        ${this.config.title?R`<div class="card-header">${this.config.title}</div>`:""}
+        <div class="card">
+          ${n.length>0?R`<div
                 class="departure-list"
                 role="list"
                 aria-label="Train departures"
               >
-                ${n.map((e,t)=>this.renderDepartureRow(e,t))}
-              </div>`:H`<div class="no-departures">No departures available</div>`}
-          ${a?H`<div class="footer">Last updated: ${a}</div>`:""}
+                ${n.map((e,t)=>this.renderDepartureRow(e,t,p,d))}
+              </div>`:R`<div class="board-message">
+                <span class="message-icon" aria-hidden="true">🚉</span>
+                <span class="message-text">No departures available</span>
+              </div>`}
+          ${a||u?R`<div class="footer">
+                ${u?R`<span class="stale-chip" role="status"
+                      >⚠ Showing last-known data</span
+                    >`:""}
+                ${a?R`Last updated: ${a}`:""}
+              </div>`:""}
         </div>
       </ha-card>
       ${this._renderDetailsPopup()}
-    `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown)}_showDetails(e){this._selectedDeparture=e}_closePopup(){this._selectedDeparture=null}_handleOverlayClick(e){e.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){if(!this._selectedDeparture)return R;const e=this._selectedDeparture,{statusClass:t,statusLabel:i}=fe(e),r=pe(e.scheduled),s=function(e,t="description",i){var r;const s=(e.subsequent_stops||[]).map(e=>{var r;let s="";s="tiploc"===t?(e.stop||"").trim():"crs"===t?(e.name||"").trim():(e.name||e.stop||"").trim();const o=e.scheduled||e.estimated,n=he(o,i),a=null!==(r=null==n?void 0:n.getTime())&&void 0!==r?r:Number.POSITIVE_INFINITY,l=e.estimated,d=e.scheduled;let c="On time",p="on-time";if(l&&d){const e=pe(l),t=pe(d);if("—"!==e&&"—"!==t&&e!==t){const i=ue(t,e);if(Math.abs(i)<=1)p="on-time",c="On time";else{p="delayed";let t="Exp";i<0&&(p="early",t="Early"),c=/^\d{2}:\d{2}$/.test(e)?`${t} ${e}`:e}}}return((null==l?void 0:l.toLowerCase().includes("cancel"))||e.is_cancelled)&&(c="Cancelled",p="cancelled"),{name:s,time:o?(o.split(" ")[1]||"").trim():"",timestamp:a,stopCode:e.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:c,statusClass:p}}).filter(e=>e.name).sort((e,t)=>e.timestamp-t.timestamp);if(!e.last_report_station||!e.last_report_type)return s;const o=e.last_report_station,n=e.last_report_type,a=e.last_report_time?null===(r=he(e.last_report_time,i))||void 0===r?void 0:r.getTime():void 0,l=s.findIndex(e=>e.stopCode===o);if(-1!==l){for(let e=0;e<l;e++)s[e].isPassed=!0;"Arrival"===n?(s[l].isCurrent=!0,s[l].isPassed=!1):(s[l].isPassed=!0,l+1<s.length?s[l+1].isBetweenPrevious=!0:s[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let e=-1;for(let t=0;t<s.length&&s[t].timestamp<=a;t++)s[t].isPassed=!0,e=t;-1!==e&&e+1<s.length?s[e+1].isBetweenPrevious=!0:-1===e&&s.length>0&&(s[0].isBetweenPrevious=!0)}if(s.length>0&&s[0].isBetweenPrevious&&-1===l&&o){const t=e.last_report_time?pe(e.last_report_time):"";s.unshift({name:o,time:t,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return s}(e,this.config.stops_identifier||"description",this.dateCache),o="cancelled"===t,n=ce(e.stock),a="on-time"===t?"status-ok":"cancelled"===t?"status-cancelled":"status-delayed",l=s.some(e=>e.isPassed);return H`
+    `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown)}_handleRowKeyDown(e,t){"Enter"!==e.key&&" "!==e.key||(e.preventDefault(),this._showDetails(t,e))}_showDetails(e,t){var i;this._returnFocusTo=null!==(i=null==t?void 0:t.currentTarget)&&void 0!==i?i:null,this._selectedDeparture=e}_closePopup(){var e;this._selectedDeparture=null,null===(e=this._returnFocusTo)||void 0===e||e.focus(),this._returnFocusTo=null}updated(e){var t;if(super.updated(e),e.has("_selectedDeparture")&&this._selectedDeparture){const e=null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelector(".popup-close");null==e||e.focus()}}_handleOverlayClick(e){e.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){if(!this._selectedDeparture)return H;const e=this._selectedDeparture,{statusClass:t,statusLabel:i}=ve(e),r=fe(e.scheduled),s=function(e,t="description",i){var r;const s=(e.subsequent_stops||[]).map(e=>{var r;let s="";s="tiploc"===t?(e.stop||"").trim():"crs"===t?(e.name||"").trim():(e.name||e.stop||"").trim();const o=e.scheduled||e.estimated,n=ge(o,i),a=null!==(r=null==n?void 0:n.getTime())&&void 0!==r?r:Number.POSITIVE_INFINITY,l=e.estimated,d=e.scheduled;let c="On time",p="on-time";if(l&&d){const e=fe(l),t=fe(d);if("—"!==e&&"—"!==t&&e!==t){const i=me(t,e);if(Math.abs(i)<=1)p="on-time",c="On time";else{p="delayed";let t="Exp";i<0&&(p="early",t="Early"),c=/^\d{2}:\d{2}$/.test(e)?`${t} ${e}`:e}}}return((null==l?void 0:l.toLowerCase().includes("cancel"))||e.is_cancelled)&&(c="Cancelled",p="cancelled"),{name:s,time:o?(o.split(" ")[1]||"").trim():"",timestamp:a,stopCode:e.stop||"",isPassed:!1,isCurrent:!1,isBetweenPrevious:!1,statusLabel:c,statusClass:p}}).filter(e=>e.name).sort((e,t)=>e.timestamp-t.timestamp);if(!e.last_report_station||!e.last_report_type)return s;const o=e.last_report_station,n=e.last_report_type,a=e.last_report_time?null===(r=ge(e.last_report_time,i))||void 0===r?void 0:r.getTime():void 0,l=s.findIndex(e=>e.stopCode===o);if(-1!==l){for(let e=0;e<l;e++)s[e].isPassed=!0;"Arrival"===n?(s[l].isCurrent=!0,s[l].isPassed=!1):(s[l].isPassed=!0,l+1<s.length?s[l+1].isBetweenPrevious=!0:s[l].isPassed=!0)}else if(void 0!==a&&!Number.isNaN(a)){let e=-1;for(let t=0;t<s.length&&s[t].timestamp<=a;t++)s[t].isPassed=!0,e=t;-1!==e&&e+1<s.length?s[e+1].isBetweenPrevious=!0:-1===e&&s.length>0&&(s[0].isBetweenPrevious=!0)}if(s.length>0&&s[0].isBetweenPrevious&&-1===l&&o){const t=e.last_report_time?fe(e.last_report_time):"";s.unshift({name:o,time:t,timestamp:a||0,stopCode:o,isPassed:!0,isCurrent:!1,isBetweenPrevious:!1,statusLabel:"",statusClass:""})}return s}(e,this.config.stops_identifier||"description",this.dateCache),o="cancelled"===t,n=he(e.stock,e.operator_name),a="on-time"===t?"status-ok":"cancelled"===t?"status-cancelled":"status-delayed",l=s.some(e=>e.isPassed);return R`
       <div
         class="popup-overlay"
         @click=${this._handleOverlayClick}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Train details"
+        @keydown=${this._handlePopupKeyDown}
       >
-        <div class="popup-card">
+        <div
+          class="popup-card"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Details for the ${r} to ${e.destination_name}"
+        >
           <div class="modern-header">
             <div class="modern-header-top">
               <div class="modern-dest-group">
@@ -85,7 +104,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
                     class="modern-scheduled ${o?"time-cancelled":""}"
                     >${r}</span
                   >
-                  ${e.operator_name?H`<span class="modern-operator"
+                  ${e.operator_name?R`<span class="modern-operator"
                         >${e.operator_name}</span
                       >`:""}
                 </div>
@@ -104,27 +123,30 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
                 <span style="font-size: 1.2em; line-height: 1;">●</span>
                 ${i}
               </div>
-              ${e.platform?H` <div class="modern-badge platform">
+              ${e.platform?R` <div class="modern-badge platform">
                     Platform ${e.platform}
                   </div>`:""}
-              ${e.length?H` <div class="modern-badge carriages">
+              ${e.length?R` <div class="modern-badge carriages">
                     ${e.length} carriages
                   </div>`:""}
-              ${"standard"!==n.category?H` <div
+              ${"standard"!==n.category?R` <div
                     class="modern-badge stock-badge stock-${n.category}"
                   >
                     ${n.label}
                   </div>`:""}
             </div>
+            ${e.last_report_station?R`<div class="last-seen">
+                  Last seen at ${e.last_report_station}${e.last_report_time?` (${fe(e.last_report_time)})`:""}
+                </div>`:""}
           </div>
 
           <div class="modern-content">
-            ${s.length>0?H` <div class="timeline-container">
+            ${s.length>0?R` <div class="timeline-container">
                   <div
                     class="modern-stops-list ${l?"has-passed":""}"
                   >
-                    ${s.map(e=>H`
-                        ${e.isBetweenPrevious?H`
+                    ${s.map(e=>R`
+                        ${e.isBetweenPrevious?R`
                               <div
                                 class="modern-train-pos-wrapper"
                                 aria-hidden="true"
@@ -145,7 +167,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
                             <span class="modern-stop-time">${e.time}</span>
                             <div class="modern-stop-info">
                               <span class="modern-stop-name">${e.name}</span>
-                              ${!e.isPassed&&e.statusLabel?H`<span
+                              ${!e.isPassed&&e.statusLabel?R`<span
                                     class="modern-stop-status ${e.statusClass}"
                                     >${e.statusLabel}</span
                                   >`:""}
@@ -158,36 +180,42 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           </div>
         </div>
       </div>
-    `}renderDepartureRow(e,t){const i=pe(e.scheduled),{statusClass:r,statusLabel:s,offsetStr:o}=fe(e),n=e.platform?e.platform:null,a=0===t,l="cancelled"===r,d=ce(e.stock),c=l?"time-cancelled":"",p=`row-size-${this.config.row_size||"normal"}`,u=!1!==this.config.show_carriages,h=["modern","javelin","refurb"].includes(d.category)?`stock-row-${d.category}`:"";let f=H``;if(l)f=H`<span class="status-pill cancelled">Cancelled</span>`;else if(o){const e="early"===r;f=H`<span class="status-pill ${e?"early":"delayed"}"
-        >${e?"Early ":""}${o}</span
-      >`}return H`
+    `}renderDepartureRow(e,t,i=0,r=new Date){const s=fe(e.scheduled),{statusClass:o,statusLabel:n,offsetStr:a}=ve(e),l=e.platform?e.platform:null,d=t===i,c=i>0&&t<i,p="cancelled"===o,u=he(e.stock,e.operator_name),h=p?"time-cancelled":"",f=`row-size-${this.config.row_size||"normal"}`,m=!1!==this.config.show_carriages,g=["modern","javelin","refurb"].includes(u.category)?`stock-row-${u.category}`:"",v=this.config.time_display||"scheduled",b="relative"===v||"both"===v?function(e,t,i){const r=ge(e.estimated||e.scheduled,i);if(!r)return null;const s=Math.floor((r.getTime()-t.getTime())/6e4);return s<=0?"Due":`${s} min`}(e,r,this.dateCache):null,_="relative"===v&&b?b:s;let y=R``;if(p)y=R`<span class="status-pill cancelled">Cancelled</span>`;else if(a){const e="early"===o;y=R`<span class="status-pill ${e?"early":"delayed"}"
+        >${e?"Early ":""}${a}</span
+      >`}return R`
       <div
-        class="train ${a?"next-train":""} ${l?"cancelled-row":""} ${h} ${p}"
+        class="train ${d?"next-train":""} ${p?"cancelled-row":""} ${c?"unreachable":""} ${g} ${f}"
         role="listitem"
-        aria-label="${e.destination_name} at ${i}, ${s}${n?`, Platform ${n}`:""}"
-        @click=${()=>this._showDetails(e)}
+        tabindex="0"
+        aria-haspopup="dialog"
+        aria-label="${e.destination_name} at ${s}, ${n}${l?`, Platform ${l}`:""}${c?", likely out of reach":""}"
+        @click=${t=>this._showDetails(e,t)}
+        @keydown=${t=>this._handleRowKeyDown(t,e)}
       >
-        <div class="time-wrapper ${c}">
+        <div class="time-wrapper ${h}">
           <span class="scheduled" aria-label="Scheduled time"
-            >${i}</span
+            >${_}</span
           >
+          ${"both"===v&&b?R`<span class="relative-time"
+                >${"Due"===b?b:`in ${b}`}</span
+              >`:""}
         </div>
         <div class="info-box">
           <div class="destination-col">
             <div class="destination-row">
               <h3 class="terminus">${e.destination_name}</h3>
-              ${f}
-              ${u&&e.length?H`<span class="carriages-badge">${e.length}-car</span>`:""}
-              ${n?H`<span
+              ${y}
+              ${m&&e.length?R`<span class="carriages-badge">${e.length}-car</span>`:""}
+              ${l?R`<span
                     class="platform-badge"
-                    aria-label="Platform ${n}"
-                    >${n}</span
+                    aria-label="Platform ${l}"
+                    >${l}</span
                   >`:""}
             </div>
           </div>
         </div>
       </div>
-    `}};_e.styles=((e,...t)=>{const i=1===e.length?e[0]:t.reduce((t,i,r)=>t+(e=>{if(!0===e._$cssResult$)return e.cssText;if("number"==typeof e)return e;throw Error("Value passed to 'css' function must be a 'css' function result: "+e+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+e[r+1],e[0]);return new o(i,e,r)})`
+    `}};$e.styles=((e,...t)=>{const i=1===e.length?e[0]:t.reduce((t,i,r)=>t+(e=>{if(!0===e._$cssResult$)return e.cssText;if("number"==typeof e)return e;throw Error("Value passed to 'css' function must be a 'css' function result: "+e+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+e[r+1],e[0]);return new o(i,e,r)})`
     ha-card {
       height: 100%;
       background: var(--ha-card-background, var(--card-background-color, #fff));
@@ -230,8 +258,26 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
     .train:hover {
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
     }
+    .train:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: -2px;
+    }
     .train:last-child {
       border-bottom: none;
+    }
+    /* Row density */
+    .train.row-size-compact {
+      padding-top: 3px;
+      padding-bottom: 3px;
+      gap: 10px;
+    }
+    .train.row-size-comfortable {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+    /* Departures the viewer can no longer reach given walk_time_minutes */
+    .train.unreachable {
+      opacity: 0.55;
     }
     .train.next-train {
       background: var(--secondary-background-color, rgba(255, 193, 7, 0.1));
@@ -264,19 +310,10 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
     }
     .time-wrapper {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 0 0 auto;
-      min-width: auto;
-    }
-    .layout-stacked .time-wrapper {
       flex-direction: column;
       align-items: flex-start;
-      gap: 4px;
-      flex: 0 0 auto;
-      min-width: auto;
-    }
-    .layout-status_line .time-wrapper {
+      justify-content: center;
+      gap: 2px;
       flex: 0 0 auto;
       min-width: auto;
     }
@@ -291,6 +328,16 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
     .time-cancelled .scheduled {
       color: var(--error-color, #f44336);
       text-decoration: line-through;
+    }
+    .relative-time {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--secondary-text-color, #666);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .scheduled.relative-primary {
+      font-size: var(--train-board-time-size, 1.25rem);
     }
     .offset-pill {
       font-size: 0.85rem;
@@ -692,14 +739,83 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       border-top: 1px solid var(--divider-color, #e0e0e0);
       font-size: 0.85em;
       color: var(--secondary-text-color, #666);
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
       background: var(--card-background-color, #fff);
       border-radius: 0 0 8px 8px;
     }
-    .no-departures {
-      padding: 24px 0;
+    .stale-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.85em;
+      font-weight: 600;
+      background: rgba(230, 81, 0, 0.12);
+      color: var(--warning-color, #e65100);
+      border: 1px solid rgba(230, 81, 0, 0.3);
+      margin-right: auto;
+    }
+    .board-message {
+      padding: 32px 16px;
       text-align: center;
       color: var(--secondary-text-color, #999);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .board-message .message-icon {
+      font-size: 1.8em;
+      line-height: 1;
+      opacity: 0.7;
+    }
+    .board-message .message-text {
+      font-size: 0.95em;
+    }
+    .board-message.error .message-text {
+      color: var(--error-color, #d32f2f);
+    }
+    .popup-close {
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.05));
+      color: var(--primary-text-color, #111);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2em;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .popup-close:hover {
+      background: var(--divider-color, rgba(0, 0, 0, 0.12));
+    }
+    .popup-close:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: 2px;
+    }
+    .last-seen {
+      margin-top: 8px;
+      font-size: 0.8em;
+      color: var(--secondary-text-color, #666);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .modern-train-pos {
+        animation: none;
+      }
+      .train {
+        transition: none;
+      }
+      .modern-stop-circle {
+        transition: none;
+      }
     }
     .stock-badge {
       padding: 2px 8px;
@@ -727,5 +843,5 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       color: var(--secondary-text-color);
       font-weight: 600;
     }
-  `,e([ae({type:Object})],_e.prototype,"hass",void 0),e([ae({type:Object})],_e.prototype,"config",void 0),e([ae({type:Array})],_e.prototype,"nextTrains",void 0),e([le()],_e.prototype,"_selectedDeparture",void 0),_e=e([oe("train-departure-board")],_e),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-board",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{_e as TrainDepartureBoard};
+  `,e([ae({type:Object})],$e.prototype,"hass",void 0),e([ae({type:Object})],$e.prototype,"config",void 0),e([ae({type:Array})],$e.prototype,"nextTrains",void 0),e([le()],$e.prototype,"_selectedDeparture",void 0),$e=e([oe("train-departure-board")],$e),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-board",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{$e as TrainDepartureBoard};
 //# sourceMappingURL=ha-train-departure-board.js.map

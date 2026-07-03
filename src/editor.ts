@@ -55,19 +55,6 @@ const SCHEMA: HaFormSchema[] = [
     name: '',
     schema: [
       {
-        name: 'delay_layout',
-        selector: {
-          select: {
-            options: [
-              { value: 'inline', label: 'Inline (Default)' },
-              { value: 'stacked', label: 'Stacked' },
-              { value: 'status_line', label: 'Status Line' },
-            ],
-            mode: 'dropdown',
-          },
-        },
-      },
-      {
         name: 'row_size',
         selector: {
           select: {
@@ -80,6 +67,19 @@ const SCHEMA: HaFormSchema[] = [
           },
         },
       },
+      {
+        name: 'time_display',
+        selector: {
+          select: {
+            options: [
+              { value: 'scheduled', label: 'Scheduled time (Default)' },
+              { value: 'relative', label: 'Countdown ("4 min")' },
+              { value: 'both', label: 'Scheduled + countdown' },
+            ],
+            mode: 'dropdown',
+          },
+        },
+      },
     ],
   },
   {
@@ -87,7 +87,17 @@ const SCHEMA: HaFormSchema[] = [
     name: '',
     schema: [
       {
+        name: 'walk_time_minutes',
+        selector: {
+          number: { min: 0, max: 120, mode: 'box', unit_of_measurement: 'min' },
+        },
+      },
+      {
         name: 'show_carriages',
+        selector: { boolean: {} },
+      },
+      {
+        name: 'stale_indicator',
         selector: { boolean: {} },
       },
     ],
@@ -118,12 +128,14 @@ const LABELS: Record<string, string> = {
   title: 'Card Title',
   attribute: 'Data Attribute',
   stops_identifier: 'Station Identifier',
-  delay_layout: 'Delay Pill Layout',
   row_size: 'Row Size',
+  time_display: 'Time Display',
+  walk_time_minutes: 'Walk Time to Station',
   font_size_time: 'Time Font Size',
   font_size_destination: 'Destination Font Size',
   font_size_status: 'Status Pill Font Size',
   show_carriages: 'Show Carriage Count',
+  stale_indicator: 'Show Stale-Data Warning',
 };
 
 // Helper text for fields
@@ -131,12 +143,15 @@ const HELPERS: Record<string, string> = {
   entity: 'Select a realtime trains sensor',
   attribute: 'Attribute with departure data (default: next_trains)',
   stops_identifier: 'How stations are identified in the data',
-  delay_layout: 'Position of the delay/early pill',
   row_size: 'Vertical padding of the departure rows',
+  time_display: 'Show clock time, a countdown, or both',
+  walk_time_minutes:
+    'Highlight the first train you can still reach; earlier ones are dimmed',
   font_size_time: 'e.g. 1.5rem (default: 1.25rem)',
   font_size_destination: 'e.g. 1.2rem (default: 1rem)',
   font_size_status: 'e.g. 0.85rem (default: 0.75rem)',
   show_carriages: 'Display carriage/length details when available',
+  stale_indicator: 'Warn when the data source is stale or a refresh is overdue',
 };
 
 declare global {

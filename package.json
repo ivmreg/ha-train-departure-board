@@ -46,6 +46,7 @@
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^7.0.0",
     "eslint-config-prettier": "^10.1.8",
+    "happy-dom": "^20.10.6",
     "postcss": "^8.5.9",
     "postcss-import": "^16.1.1",
     "postcss-nested": "^7.0.2",

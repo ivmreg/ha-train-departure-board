@@ -70,7 +70,14 @@ export interface TrainDepartureBoardConfig {
   font_size_time?: string;
   font_size_destination?: string;
   font_size_status?: string;
-  delay_layout?: 'inline' | 'stacked' | 'status_line';
   row_size?: 'compact' | 'normal' | 'comfortable';
   show_carriages?: boolean;
+  // Scheduled clock time, relative countdown, or both
+  time_display?: 'scheduled' | 'relative' | 'both';
+  // Minutes needed to reach the platform; shifts the "next train you can
+  // actually catch" highlight and dims unreachable departures
+  walk_time_minutes?: number;
+  // Show a warning chip when the data source reports stale data or a
+  // refresh is overdue (default: true)
+  stale_indicator?: boolean;
 }

@@ -1,26 +1,101 @@
 // src/utils.ts
 import { TrainDeparture } from './types';
 
+export type StockCategory = 'modern' | 'javelin' | 'refurb' | 'older' | 'standard';
+
 export interface StockInfo {
-  category: 'modern' | 'javelin' | 'refurb' | 'older' | 'standard';
+  category: StockCategory;
   label: string;
 }
 
-export function getStockCategory(stock: string | null): StockInfo {
+interface StockRule {
+  matches: string[]; // lowercase substrings matched against the stock string
+  category: StockCategory;
+  label: string;
+}
+
+const STANDARD_STOCK: StockInfo = { category: 'standard', label: '' };
+
+// Per-operator rolling-stock tables, keyed by a lowercase substring of the
+// operator name. Extend with additional operators by adding an entry here;
+// unknown operators simply get no stock styling.
+const STOCK_TABLES: Record<string, StockRule[]> = {
+  southeastern: [
+    { matches: ['city beam', '707'], category: 'modern', label: 'CITY BEAM' },
+    { matches: ['javelin', '395'], category: 'javelin', label: 'JAVELIN' },
+    { matches: ['376'], category: 'refurb', label: 'REFURB 376' },
+    { matches: ['465', '466', 'networker'], category: 'older', label: 'CLASS 465' },
+  ],
+};
+
+function matchStockRules(rules: StockRule[], stock: string): StockInfo | null {
+  for (const rule of rules) {
+    if (rule.matches.some(fragment => stock.includes(fragment))) {
+      return { category: rule.category, label: rule.label };
+    }
+  }
+  return null;
+}
+
+export function getStockCategory(
+  stock: string | null,
+  operatorName?: string | null
+): StockInfo {
   const s = (stock || '').toLowerCase();
-  if (s.includes('city beam') || s.includes('707')) {
-    return { category: 'modern', label: 'CITY BEAM' };
+  if (!s) {
+    return STANDARD_STOCK;
   }
-  if (s.includes('javelin') || s.includes('395')) {
-    return { category: 'javelin', label: 'JAVELIN' };
+
+  const operator = (operatorName || '').toLowerCase().trim();
+  if (operator) {
+    // Known operator: use its table; unknown operator: no styling, so we
+    // never render another operator's accent colours from a bad heuristic.
+    const tableKey = Object.keys(STOCK_TABLES).find(key => operator.includes(key));
+    if (!tableKey) {
+      return STANDARD_STOCK;
+    }
+    return matchStockRules(STOCK_TABLES[tableKey], s) || STANDARD_STOCK;
   }
-  if (s.includes('376')) {
-    return { category: 'refurb', label: 'REFURB 376' };
+
+  // No operator info (e.g. custom data sources): try every table, matching
+  // the pre-operator-aware behaviour.
+  for (const rules of Object.values(STOCK_TABLES)) {
+    const match = matchStockRules(rules, s);
+    if (match) {
+      return match;
+    }
   }
-  if (s.includes('465') || s.includes('466') || s.includes('networker')) {
-    return { category: 'older', label: 'CLASS 465' };
+  return STANDARD_STOCK;
+}
+
+export function formatRelativeMinutes(
+  departure: TrainDeparture,
+  now: Date,
+  dateCache?: Map<string, Date | null>
+): string | null {
+  const when = parseDateTime(departure.estimated || departure.scheduled, dateCache);
+  if (!when) {
+    return null;
   }
-  return { category: 'standard', label: '' };
+  const diffMins = Math.floor((when.getTime() - now.getTime()) / 60000);
+  if (diffMins <= 0) {
+    return 'Due';
+  }
+  return `${diffMins} min`;
+}
+
+export function isCatchable(
+  departure: TrainDeparture,
+  walkTimeMinutes: number,
+  now: Date,
+  dateCache?: Map<string, Date | null>
+): boolean {
+  const when = parseDateTime(departure.estimated || departure.scheduled, dateCache);
+  if (!when) {
+    // Without a parseable time we can't rule the train out
+    return true;
+  }
+  return when.getTime() - now.getTime() >= walkTimeMinutes * 60000;
 }
 
 export function extractTimeLabel(datetime?: string): string {

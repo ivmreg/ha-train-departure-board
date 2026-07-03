@@ -8,8 +8,10 @@ import {
 import {
   getStockCategory,
   extractTimeLabel,
+  formatRelativeMinutes,
   getStatusMeta,
   getStopsForPopup,
+  isCatchable,
 } from './utils';
 import './editor'; // Import the editor to ensure it's registered
 
@@ -21,6 +23,7 @@ export class TrainDepartureBoard extends LitElement {
   @state() private _selectedDeparture: TrainDeparture | null = null;
   private dateCache = new Map<string, Date | null>();
   private lastEntityId: string | null = null;
+  private _returnFocusTo: HTMLElement | null = null;
 
   static getConfigElement() {
     return document.createElement('train-departure-board-editor');
@@ -96,8 +99,26 @@ export class TrainDepartureBoard extends LitElement {
     .train:hover {
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
     }
+    .train:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: -2px;
+    }
     .train:last-child {
       border-bottom: none;
+    }
+    /* Row density */
+    .train.row-size-compact {
+      padding-top: 3px;
+      padding-bottom: 3px;
+      gap: 10px;
+    }
+    .train.row-size-comfortable {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+    /* Departures the viewer can no longer reach given walk_time_minutes */
+    .train.unreachable {
+      opacity: 0.55;
     }
     .train.next-train {
       background: var(--secondary-background-color, rgba(255, 193, 7, 0.1));
@@ -130,19 +151,10 @@ export class TrainDepartureBoard extends LitElement {
     }
     .time-wrapper {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 0 0 auto;
-      min-width: auto;
-    }
-    .layout-stacked .time-wrapper {
       flex-direction: column;
       align-items: flex-start;
-      gap: 4px;
-      flex: 0 0 auto;
-      min-width: auto;
-    }
-    .layout-status_line .time-wrapper {
+      justify-content: center;
+      gap: 2px;
       flex: 0 0 auto;
       min-width: auto;
     }
@@ -157,6 +169,16 @@ export class TrainDepartureBoard extends LitElement {
     .time-cancelled .scheduled {
       color: var(--error-color, #f44336);
       text-decoration: line-through;
+    }
+    .relative-time {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--secondary-text-color, #666);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .scheduled.relative-primary {
+      font-size: var(--train-board-time-size, 1.25rem);
     }
     .offset-pill {
       font-size: 0.85rem;
@@ -558,14 +580,83 @@ export class TrainDepartureBoard extends LitElement {
       border-top: 1px solid var(--divider-color, #e0e0e0);
       font-size: 0.85em;
       color: var(--secondary-text-color, #666);
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
       background: var(--card-background-color, #fff);
       border-radius: 0 0 8px 8px;
     }
-    .no-departures {
-      padding: 24px 0;
+    .stale-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.85em;
+      font-weight: 600;
+      background: rgba(230, 81, 0, 0.12);
+      color: var(--warning-color, #e65100);
+      border: 1px solid rgba(230, 81, 0, 0.3);
+      margin-right: auto;
+    }
+    .board-message {
+      padding: 32px 16px;
       text-align: center;
       color: var(--secondary-text-color, #999);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .board-message .message-icon {
+      font-size: 1.8em;
+      line-height: 1;
+      opacity: 0.7;
+    }
+    .board-message .message-text {
+      font-size: 0.95em;
+    }
+    .board-message.error .message-text {
+      color: var(--error-color, #d32f2f);
+    }
+    .popup-close {
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.05));
+      color: var(--primary-text-color, #111);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2em;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .popup-close:hover {
+      background: var(--divider-color, rgba(0, 0, 0, 0.12));
+    }
+    .popup-close:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: 2px;
+    }
+    .last-seen {
+      margin-top: 8px;
+      font-size: 0.8em;
+      color: var(--secondary-text-color, #666);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .modern-train-pos {
+        animation: none;
+      }
+      .train {
+        transition: none;
+      }
+      .modern-stop-circle {
+        transition: none;
+      }
     }
     .stock-badge {
       padding: 2px 8px;
@@ -595,20 +686,59 @@ export class TrainDepartureBoard extends LitElement {
     }
   `;
 
+  private _renderMessage(icon: string, message: string, isError = false) {
+    return html`
+      <ha-card>
+        ${this.config?.title
+          ? html`<div class="card-header">${this.config.title}</div>`
+          : ''}
+        <div class="card">
+          <div class="board-message ${isError ? 'error' : ''}">
+            <span class="message-icon" aria-hidden="true">${icon}</span>
+            <span class="message-text">${message}</span>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private _isDataStale(entity: {
+    attributes: Record<string, unknown>;
+  }): boolean {
+    if (this.config.stale_indicator === false) {
+      return false;
+    }
+    if (entity.attributes?.data_stale === true) {
+      return true;
+    }
+    // Fall back to the sensor's own forecast of its next refresh: if it is
+    // more than a minute overdue, treat the data as stale.
+    const nextUpdateAt = entity.attributes?.next_update_at;
+    if (typeof nextUpdateAt === 'string') {
+      const due = new Date(nextUpdateAt).getTime();
+      if (!Number.isNaN(due) && Date.now() > due + 60_000) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   render() {
     if (!this.config) {
-      return html`<div class="card">No configuration provided</div>`;
+      return this._renderMessage('🚆', 'No configuration provided', true);
     }
 
     if (!this.config.entity) {
-      return html`<div class="card">Please configure an entity</div>`;
+      return this._renderMessage('🚆', 'Please configure an entity');
     }
 
     const entity = this.hass?.states?.[this.config.entity];
     if (!entity) {
-      return html`<div class="card">
-        Entity not found: ${this.config.entity}
-      </div>`;
+      return this._renderMessage(
+        '🚆',
+        `Entity not found: ${this.config.entity}`,
+        true
+      );
     }
 
     // Clear date cache only when entity changes
@@ -655,6 +785,19 @@ export class TrainDepartureBoard extends LitElement {
       .filter(Boolean)
       .join('; ');
 
+    const now = new Date();
+    const walkTime = Number(this.config.walk_time_minutes) || 0;
+    // Which departure is "yours": the first one, unless a walk time is
+    // configured, in which case the first one you can still reach.
+    let highlightIndex = 0;
+    if (walkTime > 0) {
+      highlightIndex = departures.findIndex((departure: TrainDeparture) =>
+        isCatchable(departure, walkTime, now, this.dateCache)
+      );
+    }
+
+    const isStale = this._isDataStale(entity);
+
     return html`
       <ha-card style="${customStyles}">
         ${this.config.title
@@ -668,12 +811,22 @@ export class TrainDepartureBoard extends LitElement {
                 aria-label="Train departures"
               >
                 ${departures.map((departure: TrainDeparture, index: number) =>
-                  this.renderDepartureRow(departure, index)
+                  this.renderDepartureRow(departure, index, highlightIndex, now)
                 )}
               </div>`
-            : html`<div class="no-departures">No departures available</div>`}
-          ${lastUpdated
-            ? html`<div class="footer">Last updated: ${lastUpdated}</div>`
+            : html`<div class="board-message">
+                <span class="message-icon" aria-hidden="true">🚉</span>
+                <span class="message-text">No departures available</span>
+              </div>`}
+          ${lastUpdated || isStale
+            ? html`<div class="footer">
+                ${isStale
+                  ? html`<span class="stale-chip" role="status"
+                      >⚠ Showing last-known data</span
+                    >`
+                  : ''}
+                ${lastUpdated ? html`Last updated: ${lastUpdated}` : ''}
+              </div>`
             : ''}
         </div>
       </ha-card>
@@ -697,12 +850,32 @@ export class TrainDepartureBoard extends LitElement {
     }
   };
 
-  private _showDetails(departure: TrainDeparture) {
+  private _handleRowKeyDown(e: KeyboardEvent, departure: TrainDeparture) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._showDetails(departure, e);
+    }
+  }
+
+  private _showDetails(departure: TrainDeparture, e?: Event) {
+    this._returnFocusTo = (e?.currentTarget as HTMLElement) ?? null;
     this._selectedDeparture = departure;
   }
 
   private _closePopup() {
     this._selectedDeparture = null;
+    this._returnFocusTo?.focus();
+    this._returnFocusTo = null;
+  }
+
+  protected updated(changedProps: Map<PropertyKey, unknown>) {
+    super.updated(changedProps);
+    // Move focus into the dialog when it opens
+    if (changedProps.has('_selectedDeparture') && this._selectedDeparture) {
+      const closeButton =
+        this.shadowRoot?.querySelector<HTMLButtonElement>('.popup-close');
+      closeButton?.focus();
+    }
   }
 
   private _handleOverlayClick(e: MouseEvent) {
@@ -711,6 +884,20 @@ export class TrainDepartureBoard extends LitElement {
       this._closePopup();
     }
   }
+
+  private _handlePopupKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Tab') {
+      return;
+    }
+    // Trap focus inside the dialog. The close button is the only focusable
+    // element, so keep focus pinned to it while the popup is open.
+    const closeButton =
+      this.shadowRoot?.querySelector<HTMLButtonElement>('.popup-close');
+    if (closeButton) {
+      e.preventDefault();
+      closeButton.focus();
+    }
+  };
 
   private _renderDetailsPopup() {
     if (!this._selectedDeparture) return nothing;
@@ -724,7 +911,7 @@ export class TrainDepartureBoard extends LitElement {
       this.dateCache
     );
     const isCancelled = statusClass === 'cancelled';
-    const stockInfo = getStockCategory(departure.stock);
+    const stockInfo = getStockCategory(departure.stock, departure.operator_name);
 
     const statusBadgeClass =
       statusClass === 'on-time'
@@ -740,11 +927,14 @@ export class TrainDepartureBoard extends LitElement {
       <div
         class="popup-overlay"
         @click=${this._handleOverlayClick}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Train details"
+        @keydown=${this._handlePopupKeyDown}
       >
-        <div class="popup-card">
+        <div
+          class="popup-card"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Details for the ${scheduledTime} to ${departure.destination_name}"
+        >
           <div class="modern-header">
             <div class="modern-header-top">
               <div class="modern-dest-group">
@@ -794,6 +984,13 @@ export class TrainDepartureBoard extends LitElement {
                   </div>`
                 : ''}
             </div>
+            ${departure.last_report_station
+              ? html`<div class="last-seen">
+                  Last seen at ${departure.last_report_station}${departure.last_report_time
+                    ? ` (${extractTimeLabel(departure.last_report_time)})`
+                    : ''}
+                </div>`
+              : ''}
           </div>
 
           <div class="modern-content">
@@ -851,13 +1048,19 @@ export class TrainDepartureBoard extends LitElement {
     `;
   }
 
-  private renderDepartureRow(departure: TrainDeparture, index: number) {
+  private renderDepartureRow(
+    departure: TrainDeparture,
+    index: number,
+    highlightIndex = 0,
+    now: Date = new Date()
+  ) {
     const scheduledTime = extractTimeLabel(departure.scheduled);
     const { statusClass, statusLabel, offsetStr } = getStatusMeta(departure);
     const platform = departure.platform ? departure.platform : null;
-    const isNextTrain = index === 0;
+    const isNextTrain = index === highlightIndex;
+    const isUnreachable = highlightIndex > 0 && index < highlightIndex;
     const isCancelled = statusClass === 'cancelled';
-    const stockInfo = getStockCategory(departure.stock);
+    const stockInfo = getStockCategory(departure.stock, departure.operator_name);
     const timeClass = isCancelled ? 'time-cancelled' : '';
     const rowSizeClass = `row-size-${this.config.row_size || 'normal'}`;
     const showCarriages = this.config.show_carriages !== false;
@@ -865,6 +1068,14 @@ export class TrainDepartureBoard extends LitElement {
     const stockRowClass = styledStockCategories.includes(stockInfo.category)
       ? `stock-row-${stockInfo.category}`
       : '';
+
+    const timeDisplay = this.config.time_display || 'scheduled';
+    const relativeTime =
+      timeDisplay === 'relative' || timeDisplay === 'both'
+        ? formatRelativeMinutes(departure, now, this.dateCache)
+        : null;
+    const primaryTimeLabel =
+      timeDisplay === 'relative' && relativeTime ? relativeTime : scheduledTime;
 
     let pillHtml = html``;
     if (isCancelled) {
@@ -880,17 +1091,27 @@ export class TrainDepartureBoard extends LitElement {
       <div
         class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled
           ? 'cancelled-row'
+          : ''} ${isUnreachable
+          ? 'unreachable'
           : ''} ${stockRowClass} ${rowSizeClass}"
         role="listitem"
+        tabindex="0"
+        aria-haspopup="dialog"
         aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform
           ? `, Platform ${platform}`
-          : ''}"
-        @click=${() => this._showDetails(departure)}
+          : ''}${isUnreachable ? ', likely out of reach' : ''}"
+        @click=${(e: Event) => this._showDetails(departure, e)}
+        @keydown=${(e: KeyboardEvent) => this._handleRowKeyDown(e, departure)}
       >
         <div class="time-wrapper ${timeClass}">
           <span class="scheduled" aria-label="Scheduled time"
-            >${scheduledTime}</span
+            >${primaryTimeLabel}</span
           >
+          ${timeDisplay === 'both' && relativeTime
+            ? html`<span class="relative-time"
+                >${relativeTime === 'Due' ? relativeTime : `in ${relativeTime}`}</span
+              >`
+            : ''}
         </div>
         <div class="info-box">
           <div class="destination-col">
