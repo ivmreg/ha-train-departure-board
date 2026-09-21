@@ -106,7 +106,7 @@ describe('train-departure-board component', () => {
   it('renders a styled empty state when there are no departures', async () => {
     const card = await mountCard({ entity: 'sensor.trains' }, []);
     const message = card.shadowRoot!.querySelector('.board-message');
-    expect(message!.textContent).toContain('No departures available');
+    expect(message!.textContent).toContain('No departures in the current window');
   });
 
   it('opens the details popup with Enter and returns focus on close', async () => {
@@ -283,5 +283,125 @@ describe('new card behaviours', () => {
     expect(
       card.shadowRoot!.querySelector('.platform-badge')!.className
     ).toContain('flap-b');
+  });
+
+  it('renders a styled message when the entity state is unavailable or unknown', async () => {
+    const card = document.createElement('train-departure-board') as TrainDepartureBoard;
+    card.setConfig({ type: 'custom:train-departure-board', entity: 'sensor.trains' } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state: 'unavailable',
+          attributes: { next_trains: [] },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    await card.updateComplete;
+    const message = card.shadowRoot!.querySelector('.board-message');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Entity sensor.trains is currently unavailable');
+  });
+
+  it('renders an error when configured attribute is missing', async () => {
+    const card = await mountCard({ entity: 'sensor.trains', attribute: 'missing_attr' }, []);
+    const message = card.shadowRoot!.querySelector('.board-message.error');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Attribute "missing_attr" not found on entity sensor.trains');
+  });
+
+  it('renders an error when configured attribute is not an array', async () => {
+    const card = document.createElement('train-departure-board') as TrainDepartureBoard;
+    card.setConfig({ type: 'custom:train-departure-board', entity: 'sensor.trains' } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state: '10',
+          attributes: { next_trains: 'invalid-string' },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    await card.updateComplete;
+    const message = card.shadowRoot!.querySelector('.board-message.error');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Attribute "next_trains" on entity sensor.trains is not an array');
+  });
+
+  it('renders a notice when walk_time_minutes is set and no departures are reachable', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains', walk_time_minutes: 30 },
+      [
+        makeDeparture({ scheduled: inMinutes(5), estimated: inMinutes(5) }),
+        makeDeparture({ scheduled: inMinutes(10), estimated: inMinutes(10) }),
+      ]
+    );
+    const notice = card.shadowRoot!.querySelector('.walk-time-notice');
+    expect(notice).not.toBeNull();
+    expect(notice!.textContent).toContain('No listed departures reachable within 30 min walk');
+    const rows = card.shadowRoot!.querySelectorAll('.train');
+    expect(rows[0].classList.contains('unreachable')).toBe(true);
+    expect(rows[1].classList.contains('unreachable')).toBe(true);
+    expect(rows[0].classList.contains('next-train')).toBe(false);
+    expect(rows[1].classList.contains('next-train')).toBe(false);
+  });
+
+  it('includes carriage information and rolling-stock label in row accessible text and title', async () => {
+    const card = await mountCard({ entity: 'sensor.trains' }, [
+      makeDeparture({
+        destination_name: 'London Cannon Street',
+        length: 8,
+        stock: 'City Beam',
+        operator_name: 'Southeastern',
+      }),
+    ]);
+    const row = card.shadowRoot!.querySelector('.train');
+    const label = row!.getAttribute('aria-label');
+    const title = row!.getAttribute('title');
+    expect(label).toContain('8 carriages');
+    expect(label).toContain('CITY BEAM');
+    expect(title).toBe(label);
+  });
+
+  it('renders limited journey details chip in footer when entity has error attribute', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      { error: 'Limited enrichment' }
+    );
+    const chip = card.shadowRoot!.querySelector('.enrichment-error-chip');
+    expect(chip).not.toBeNull();
+    expect(chip!.textContent).toContain('Limited journey details');
+  });
+
+  it('renders limited journey details notice in popup when entity has error attribute', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      { error: 'Limited enrichment' }
+    );
+    (card.shadowRoot!.querySelector('.train') as HTMLElement).click();
+    await card.updateComplete;
+
+    const notice = card.shadowRoot!.querySelector('.enrichment-popup-notice');
+    expect(notice).not.toBeNull();
+    expect(notice!.textContent).toContain('Limited journey details');
+  });
+
+  it('groups status pill, carriages badge, and platform badge in row-meta container', async () => {
+    const card = await mountCard({ entity: 'sensor.trains' }, [
+      makeDeparture({
+        platform: '1',
+        length: 10,
+        estimated: inMinutes(15),
+      }),
+    ]);
+    const rowMeta = card.shadowRoot!.querySelector('.row-meta');
+    expect(rowMeta).not.toBeNull();
+    expect(rowMeta!.querySelector('.status-pill')).not.toBeNull();
+    expect(rowMeta!.querySelector('.carriages-badge')).not.toBeNull();
+    expect(rowMeta!.querySelector('.platform-badge')).not.toBeNull();
   });
 });

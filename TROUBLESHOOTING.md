@@ -41,7 +41,7 @@ If the Train Departure Board card doesn't appear in the card picker after instal
    ```javascript
    [
      {
-       type: "train-departure-board",
+       type: "custom:train-departure-board",
        name: "Train Departure Board",
        description: "...",
        ...
@@ -115,7 +115,7 @@ If the Train Departure Board card doesn't appear in the card picker after instal
 **Solution**:
 1. Edit the card
 2. Select an entity from the dropdown
-3. Make sure the entity has `departures` attribute
+3. Make sure the entity has `next_trains` attribute (or configure `attribute:` if using another attribute)
 4. Check entity in Developer Tools → States
 
 ## Console Commands for Debugging

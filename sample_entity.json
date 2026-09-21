@@ -17,6 +17,8 @@
                 "operator_name": "Southeastern",
                 "scheduled": "15-11-2025 21:51",
                 "estimated": "15-11-2025 21:53",
+                "scheduled_iso": "2025-11-15T21:51:00+00:00",
+                "estimated_iso": "2025-11-15T21:53:00+00:00",
                 "minutes": 11,
                 "lateness": 2,
                 "is_cancelled": false,
@@ -25,6 +27,8 @@
                 "stock": "Networker",
                 "scheduled_arrival": "15-11-2025 22:08",
                 "estimate_arrival": "15-11-2025 22:10",
+                "scheduled_arrival_iso": "2025-11-15T22:08:00+00:00",
+                "estimate_arrival_iso": "2025-11-15T22:10:00+00:00",
                 "journey_time_mins": 17,
                 "stops": 10,
                 "status": "Delayed",
@@ -33,24 +37,31 @@
                         "stop": "LEW",
                         "name": "Lewisham",
                         "scheduled": "15-11-2025 21:55",
-                        "estimated": "15-11-2025 21:57"
+                        "estimated": "15-11-2025 21:57",
+                        "scheduled_iso": "2025-11-15T21:55:00+00:00",
+                        "estimated_iso": "2025-11-15T21:57:00+00:00"
                     },
                     {
                         "stop": "LBG",
                         "name": "London Bridge",
                         "scheduled": "15-11-2025 22:03",
-                        "estimated": "15-11-2025 22:05"
+                        "estimated": "15-11-2025 22:05",
+                        "scheduled_iso": "2025-11-15T22:03:00+00:00",
+                        "estimated_iso": "2025-11-15T22:05:00+00:00"
                     },
                     {
                         "stop": "CHX",
                         "name": "London Charing Cross",
                         "scheduled": "15-11-2025 22:08",
-                        "estimated": "15-11-2025 22:10"
+                        "estimated": "15-11-2025 22:10",
+                        "scheduled_iso": "2025-11-15T22:08:00+00:00",
+                        "estimated_iso": "2025-11-15T22:10:00+00:00"
                     }
                 ],
                 "last_report_station": "KDB",
                 "last_report_type": "Departure",
                 "last_report_time": "15-11-2025 21:48",
+                "last_report_time_iso": "2025-11-15T21:48:00+00:00",
                 "is_pinned": true
             },
             {
@@ -62,6 +73,8 @@
                 "operator_name": "Southeastern",
                 "scheduled": "15-11-2025 21:58",
                 "estimated": "15-11-2025 21:58",
+                "scheduled_iso": "2025-11-15T21:58:00+00:00",
+                "estimated_iso": "2025-11-15T21:58:00+00:00",
                 "minutes": 18,
                 "lateness": null,
                 "is_cancelled": false,
@@ -78,6 +91,8 @@
                 "operator_name": "Southeastern",
                 "scheduled": "15-11-2025 22:05",
                 "estimated": "15-11-2025 22:05",
+                "scheduled_iso": "2025-11-15T22:05:00+00:00",
+                "estimated_iso": "2025-11-15T22:05:00+00:00",
                 "minutes": 25,
                 "lateness": null,
                 "is_cancelled": true,

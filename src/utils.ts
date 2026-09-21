@@ -73,7 +73,12 @@ export function formatRelativeMinutes(
   now: Date,
   dateCache?: Map<string, Date | null>
 ): string | null {
-  const when = parseDateTime(departure.estimated || departure.scheduled, dateCache);
+  const timeStr =
+    departure.estimated_iso ||
+    departure.scheduled_iso ||
+    departure.estimated ||
+    departure.scheduled;
+  const when = parseDateTime(timeStr, dateCache);
   if (!when) {
     return null;
   }
@@ -90,7 +95,12 @@ export function isCatchable(
   now: Date,
   dateCache?: Map<string, Date | null>
 ): boolean {
-  const when = parseDateTime(departure.estimated || departure.scheduled, dateCache);
+  const timeStr =
+    departure.estimated_iso ||
+    departure.scheduled_iso ||
+    departure.estimated ||
+    departure.scheduled;
+  const when = parseDateTime(timeStr, dateCache);
   if (!when) {
     // Without a parseable time we can't rule the train out
     return true;
@@ -105,6 +115,12 @@ export function extractTimeLabel(datetime?: string): string {
   const trimmed = datetime.trim();
   if (!trimmed) {
     return '—';
+  }
+  if (trimmed.includes('T')) {
+    const timeMatch = trimmed.match(/T(\d{2}:\d{2})/);
+    if (timeMatch) {
+      return timeMatch[1];
+    }
   }
   const parts = trimmed.split(' ');
   if (parts.length === 2 && /^\d{2}:\d{2}$/.test(parts[1])) {
@@ -144,17 +160,22 @@ export function parseDateTime(
   if (dateCache && dateCache.has(datetime)) {
     return dateCache.get(datetime) ?? null;
   }
-  const [datePart, timePart] = datetime.split(' ');
   let parsed: Date | null = null;
-  if (datePart && timePart) {
-    const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
-    const candidate = new Date(isoDate);
+  if (datetime.includes('T')) {
+    const candidate = new Date(datetime);
     parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
-  } else if (/^\d{2}:\d{2}$/.test(datetime)) {
-    const today = new Date();
-    const iso = `${today.toISOString().split('T')[0]}T${datetime}`;
-    const candidate = new Date(iso);
-    parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
+  } else {
+    const [datePart, timePart] = datetime.split(' ');
+    if (datePart && timePart) {
+      const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
+      const candidate = new Date(isoDate);
+      parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
+    } else if (/^\d{2}:\d{2}$/.test(datetime)) {
+      const today = new Date();
+      const iso = `${today.toISOString().split('T')[0]}T${datetime}`;
+      const candidate = new Date(iso);
+      parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
+    }
   }
   if (dateCache) {
     dateCache.set(datetime, parsed);
@@ -167,33 +188,49 @@ export function getStatusMeta(departure: TrainDeparture): {
   statusClass: string;
   offsetStr?: string;
 } {
-  const scheduledRaw = departure.scheduled || '';
-  const estimatedRaw = departure.estimated || '';
+  const scheduledRaw = departure.scheduled_iso || departure.scheduled || '';
+  const estimatedRaw = departure.estimated_iso || departure.estimated || '';
   const scheduledTime = extractTimeLabel(scheduledRaw);
   const estimatedTime = extractTimeLabel(estimatedRaw);
 
+  const rawEstimateText = (departure.estimated || '').toLowerCase();
   if (
     departure.is_cancelled ||
     departure.status?.toLowerCase().includes('cancel') ||
     departure.etd?.toLowerCase().includes('cancel') ||
     departure.planned_cancel ||
     departure.cancel_reason ||
+    rawEstimateText.includes('cancel') ||
     estimatedRaw.toLowerCase().includes('cancel')
   ) {
     return { statusLabel: 'Cancelled', statusClass: 'cancelled' };
   }
 
-  if (!estimatedRaw) {
+  if (!departure.estimated && !departure.estimated_iso) {
     return { statusLabel: 'Awaiting', statusClass: 'delayed' };
   }
 
-  const normalizedEstimate = estimatedRaw.toLowerCase();
-  if (normalizedEstimate === 'on time') {
+  if (rawEstimateText === 'on time') {
     return { statusLabel: 'On Time', statusClass: 'on-time' };
   }
 
-  if (estimatedTime && scheduledTime && estimatedTime !== scheduledTime) {
-    const delayMins = calculateDelayMins(scheduledTime, estimatedTime);
+  let delayMins: number | null = null;
+  if (departure.scheduled_iso && departure.estimated_iso) {
+    const sDate = parseDateTime(departure.scheduled_iso);
+    const eDate = parseDateTime(departure.estimated_iso);
+    if (sDate && eDate) {
+      delayMins = Math.round((eDate.getTime() - sDate.getTime()) / 60000);
+    }
+  }
+
+  if (
+    estimatedTime &&
+    scheduledTime &&
+    (delayMins !== null ? delayMins !== 0 : estimatedTime !== scheduledTime)
+  ) {
+    if (delayMins === null) {
+      delayMins = calculateDelayMins(scheduledTime, estimatedTime);
+    }
     if (Math.abs(delayMins) <= 1) {
       return { statusLabel: 'On Time', statusClass: 'on-time' };
     }
@@ -250,36 +287,49 @@ export function getStopsForPopup(
         name = (stop.name || stop.stop || '').trim();
       }
 
-      const datetime = stop.scheduled || stop.estimated;
+      const datetime =
+        stop.scheduled_iso ||
+        stop.estimated_iso ||
+        stop.scheduled ||
+        stop.estimated;
       const parsedDate = parseDateTime(datetime, dateCache);
       const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
 
-      const estimatedStr = stop.estimated;
-      const scheduledStr = stop.scheduled;
+      const estimatedStr = stop.estimated_iso || stop.estimated;
+      const scheduledStr = stop.scheduled_iso || stop.scheduled;
       let stopStatusLabel = 'On time';
       let stopStatusClass = 'on-time';
 
-      if (estimatedStr && scheduledStr) {
-        const estTime = extractTimeLabel(estimatedStr);
-        const schedTime = extractTimeLabel(scheduledStr);
+      const estTime = extractTimeLabel(estimatedStr);
+      const schedTime = extractTimeLabel(scheduledStr);
 
-        if (estTime !== '—' && schedTime !== '—' && estTime !== schedTime) {
-          const delayMins = calculateDelayMins(schedTime, estTime);
-          if (Math.abs(delayMins) <= 1) {
-            stopStatusClass = 'on-time';
-            stopStatusLabel = 'On time';
+      let delayMins: number | null = null;
+      if (stop.scheduled_iso && stop.estimated_iso) {
+        const sDate = parseDateTime(stop.scheduled_iso, dateCache);
+        const eDate = parseDateTime(stop.estimated_iso, dateCache);
+        if (sDate && eDate) {
+          delayMins = Math.round((eDate.getTime() - sDate.getTime()) / 60000);
+        }
+      }
+      if (delayMins === null && estTime !== '—' && schedTime !== '—') {
+        delayMins = calculateDelayMins(schedTime, estTime);
+      }
+
+      if (delayMins !== null && (estTime !== schedTime || delayMins !== 0)) {
+        if (Math.abs(delayMins) <= 1) {
+          stopStatusClass = 'on-time';
+          stopStatusLabel = 'On time';
+        } else {
+          stopStatusClass = 'delayed';
+          let labelPrefix = 'Exp';
+          if (delayMins < 0) {
+            stopStatusClass = 'early';
+            labelPrefix = 'Early';
+          }
+          if (/^\d{2}:\d{2}$/.test(estTime)) {
+            stopStatusLabel = `${labelPrefix} ${estTime}`;
           } else {
-            stopStatusClass = 'delayed';
-            let labelPrefix = 'Exp';
-            if (delayMins < 0) {
-              stopStatusClass = 'early';
-              labelPrefix = 'Early';
-            }
-            if (/^\d{2}:\d{2}$/.test(estTime)) {
-              stopStatusLabel = `${labelPrefix} ${estTime}`;
-            } else {
-              stopStatusLabel = estTime;
-            }
+            stopStatusLabel = estTime;
           }
         }
       }
@@ -293,7 +343,7 @@ export function getStopsForPopup(
 
       return {
         name,
-        time: datetime ? (datetime.split(' ')[1] || '').trim() : '',
+        time: extractTimeLabel(datetime),
         timestamp,
         stopCode: stop.stop || '',
         isPassed: false,
@@ -313,8 +363,10 @@ export function getStopsForPopup(
 
   const reportStation = departure.last_report_station;
   const reportType = departure.last_report_type; // 'Arrival', 'Departure', 'Pass'
-  const reportTimeMs = departure.last_report_time
-    ? parseDateTime(departure.last_report_time, dateCache)?.getTime()
+  const lastReportTimeStr =
+    departure.last_report_time_iso || departure.last_report_time;
+  const reportTimeMs = lastReportTimeStr
+    ? parseDateTime(lastReportTimeStr, dateCache)?.getTime()
     : undefined;
 
   // Try to find the exact reported station
@@ -366,8 +418,8 @@ export function getStopsForPopup(
     reportStation
   ) {
     // Train has departed an unknown/unlisted station and is headed to our first listed stop.
-    const timeLabel = departure.last_report_time
-      ? extractTimeLabel(departure.last_report_time)
+    const timeLabel = lastReportTimeStr
+      ? extractTimeLabel(lastReportTimeStr)
       : '';
     stopsProcessed.unshift({
       name: reportStation,

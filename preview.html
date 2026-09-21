@@ -41,143 +41,6 @@
             font-size: 1.1em;
             opacity: 0.9;
         }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: #f5f5f5;
-            padding: 20px 24px;
-            border-bottom: 2px solid #e0e0e0;
-            font-size: 1.5em;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .departure-row {
-            display: grid;
-            grid-template-columns: 80px 1fr 80px 110px 120px;
-            gap: 16px;
-            align-items: center;
-            padding: 16px 24px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-
-        .departure-row:last-child {
-            border-bottom: none;
-        }
-
-        .departure-row:hover {
-            background: #fafafa;
-            transition: background 0.2s ease;
-        }
-
-        .time {
-            font-weight: 700;
-            font-size: 1.3em;
-            color: #000;
-            font-family: 'Monaco', 'Courier New', monospace;
-            letter-spacing: 1px;
-        }
-
-        .minutes {
-            text-align: center;
-            color: #666;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .destination {
-            font-weight: 500;
-            color: #333;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .platform {
-            text-align: center;
-            font-weight: 600;
-            background: #f0f0f0;
-            padding: 8px 12px;
-            border-radius: 4px;
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .status {
-            text-align: right;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .status.on-time {
-            color: #4caf50;
-        }
-
-        .status.delayed {
-            color: #ff9800;
-        }
-
-        .status.cancelled {
-            color: #f44336;
-        }
-
-        .no-departures {
-            padding: 40px 24px;
-            text-align: center;
-            color: #999;
-        }
-
-        .info-box {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            color: white;
-            margin-top: 20px;
-            font-size: 0.95em;
-            line-height: 1.6;
-        }
-
-        .info-box code {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-
-        /* small responsive tweaks for via lines in the preview */
-        .destination .via { display:block; }
-
-        @media (max-width: 768px) {
-            .departure-row {
-                grid-template-columns: 60px 1fr 100px;
-                gap: 8px;
-                padding: 12px 16px;
-                font-size: 13px;
-            }
-
-            .status {
-                grid-column: 2 / 4;
-                text-align: left;
-                margin-top: 4px;
-            }
-
-            .card-header {
-                font-size: 1.2em;
-                padding: 16px;
-            }
-
-            .time {
-                font-size: 1.1em;
-            }
-        }
     </style>
 </head>
 <body>
@@ -195,74 +58,115 @@
         // @ts-ignore
         import './ha-train-departure-board.js';
 
-        // Sample sensor object (from the data you provided). This mirrors the actual HA sensor payload
+        // Sample sensor object. This mirrors the actual HA sensor payload
         const sampleHass = {
             states: {
                 'sensor.train_deps': {
                     entity_id: 'sensor.train_deps',
+                    state: '12',
                     attributes: {
-                        departures: [
+                        journey_start: 'BKH',
+                        journey_end: 'CHX',
+                        next_trains: [
                             {
-                                origin_name: 'Dartford',
-                                destination_name: 'London Cannon Street',
-                                service_uid: 'P15519',
+                                origin_name: 'Barnehurst',
+                                destination_name: 'London Charing Cross',
+                                service_uid: 'P16684',
+                                headcode: '2A69',
+                                type: 'TRAIN',
+                                operator_name: 'Southeastern',
                                 scheduled: '15-11-2025 18:13',
                                 estimated: '15-11-2025 18:13',
+                                scheduled_iso: '2025-11-15T18:13:00+00:00',
+                                estimated_iso: '2025-11-15T18:13:00+00:00',
                                 minutes: 12,
+                                lateness: 0,
+                                is_cancelled: false,
                                 platform: '1',
-                                operator_name: 'Southeastern',
                                 length: 10,
                                 stock: 'City Beam',
-                                stops_of_interest: [
+                                scheduled_arrival: '15-11-2025 18:30',
+                                estimate_arrival: '15-11-2025 18:30',
+                                scheduled_arrival_iso: '2025-11-15T18:30:00+00:00',
+                                estimate_arrival_iso: '2025-11-15T18:30:00+00:00',
+                                journey_time_mins: 17,
+                                stops: 8,
+                                subsequent_stops: [
+                                    {
+                                        stop: 'LEW',
+                                        name: 'Lewisham',
+                                        scheduled: '15-11-2025 18:18',
+                                        estimated: '15-11-2025 18:18',
+                                        scheduled_iso: '2025-11-15T18:18:00+00:00',
+                                        estimated_iso: '2025-11-15T18:18:00+00:00'
+                                    },
                                     {
                                         stop: 'LBG',
                                         name: 'London Bridge',
-                                        scheduled_stop: '15-11-2025 18:30',
-                                        estimate_stop: '15-11-2025 18:30',
-                                        journey_time_mins: 17,
-                                        stops: 8,
+                                        scheduled: '15-11-2025 18:25',
+                                        estimated: '15-11-2025 18:25',
+                                        scheduled_iso: '2025-11-15T18:25:00+00:00',
+                                        estimated_iso: '2025-11-15T18:25:00+00:00'
                                     }
                                 ],
-                                stops: 14
+                                is_pinned: true
                             },
                             {
                                 origin_name: 'Dartford',
                                 destination_name: 'London Charing Cross',
                                 service_uid: 'P16688',
+                                headcode: '2A71',
+                                type: 'TRAIN',
+                                operator_name: 'Southeastern',
                                 scheduled: '15-11-2025 18:21',
                                 estimated: '15-11-2025 18:24',
-                                minutes: 23,
+                                scheduled_iso: '2025-11-15T18:21:00+00:00',
+                                estimated_iso: '2025-11-15T18:24:00+00:00',
+                                minutes: 20,
+                                lateness: 3,
+                                is_cancelled: false,
                                 platform: '1',
-                                operator_name: 'Southeastern',
                                 length: 8,
                                 stock: 'Javelin',
-                                stops_of_interest: [
+                                scheduled_arrival: '15-11-2025 18:36',
+                                estimate_arrival: '15-11-2025 18:39',
+                                scheduled_arrival_iso: '2025-11-15T18:36:00+00:00',
+                                estimate_arrival_iso: '2025-11-15T18:39:00+00:00',
+                                journey_time_mins: 15,
+                                stops: 6,
+                                subsequent_stops: [
                                     {
                                         stop: 'LBG',
                                         name: 'London Bridge',
-                                        scheduled_stop: '15-11-2025 18:33',
-                                        estimate_stop: '15-11-2025 18:36',
-                                        journey_time_mins: 12,
-                                        stops: 8,
+                                        scheduled: '15-11-2025 18:33',
+                                        estimated: '15-11-2025 18:36',
+                                        scheduled_iso: '2025-11-15T18:33:00+00:00',
+                                        estimated_iso: '2025-11-15T18:36:00+00:00'
                                     }
-                                ],
-                                stops: 11
+                                ]
                             },
                             {
                                 origin_name: 'Gravesend',
                                 destination_name: 'London Victoria',
                                 service_uid: 'P15912',
+                                headcode: '2V56',
+                                type: 'TRAIN',
+                                operator_name: 'Southeastern',
                                 scheduled: '15-11-2025 18:28',
                                 estimated: '15-11-2025 18:33',
-                                minutes: 28,
-                                platform: '1',
-                                operator_name: 'Southeastern',
+                                scheduled_iso: '2025-11-15T18:28:00+00:00',
+                                estimated_iso: '2025-11-15T18:33:00+00:00',
+                                minutes: 27,
+                                lateness: 5,
+                                is_cancelled: false,
+                                platform: '2',
                                 length: 12,
                                 stock: 'Networker',
-                                stops_of_interest: [],
-                                stops: 14
+                                subsequent_stops: []
                             }
-                        ]
+                        ],
+                        data_stale: false,
+                        next_update_at: '2025-11-15T18:14:00+00:00'
                     }
                 }
             }
@@ -270,12 +174,11 @@
 
         // Create a card and append it to the preview
         const card = document.createElement('train-departure-board');
-        card.config = {
+        card.setConfig({
             type: 'custom:train-departure-board',
             title: 'Train Departures',
-            entity: 'sensor.train_deps',
-            attribute: 'departures'
-        };
+            entity: 'sensor.train_deps'
+        });
         // Provide Home Assistant-like object
         card.hass = sampleHass;
 

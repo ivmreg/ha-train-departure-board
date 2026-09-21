@@ -122,6 +122,15 @@ describe('formatRelativeMinutes', () => {
       )
     ).toBeNull();
   });
+
+  it('prefers estimated_iso and scheduled_iso when present', () => {
+    const departure = makeDeparture({
+      estimated: '10-06-2026 12:15',
+      estimated_iso: '2026-06-10T12:05:00+01:00',
+    });
+    // now is 2026-06-10T12:00:00 (local). With estimated_iso:
+    expect(formatRelativeMinutes(departure, new Date('2026-06-10T12:00:00+01:00'))).toBe('5 min');
+  });
 });
 
 describe('isCatchable', () => {
@@ -131,6 +140,16 @@ describe('isCatchable', () => {
     const departure = makeDeparture({ estimated: '10-06-2026 12:10' });
     expect(isCatchable(departure, 10, now)).toBe(true);
     expect(isCatchable(departure, 11, now)).toBe(false);
+  });
+
+  it('prefers ISO timestamps for catchability checks', () => {
+    const departure = makeDeparture({
+      estimated: '10-06-2026 12:05',
+      estimated_iso: '2026-06-10T12:10:00+01:00',
+    });
+    const refNow = new Date('2026-06-10T12:00:00+01:00');
+    expect(isCatchable(departure, 10, refNow)).toBe(true);
+    expect(isCatchable(departure, 11, refNow)).toBe(false);
   });
 
   it('does not rule out departures without a parseable time', () => {
@@ -148,6 +167,11 @@ describe('extractTimeLabel', () => {
 
   it('extracts time from a DD-MM-YYYY HH:MM string', () => {
     expect(extractTimeLabel('10-06-2026 20:15')).toBe('20:15');
+  });
+
+  it('extracts time from an ISO-8601 string', () => {
+    expect(extractTimeLabel('2026-06-10T20:15:00+01:00')).toBe('20:15');
+    expect(extractTimeLabel('2026-11-15T09:05:00Z')).toBe('09:05');
   });
 
   it('passes through HH:MM directly', () => {
@@ -187,6 +211,18 @@ describe('parseDateTime', () => {
     expect(parsed).not.toBeNull();
     expect(parsed!.getHours()).toBe(14);
     expect(parsed!.getMinutes()).toBe(45);
+  });
+
+  it('parses ISO-8601 datetime strings', () => {
+    const parsed = parseDateTime('2026-06-10T20:15:00+01:00');
+    expect(parsed).not.toBeNull();
+    expect(parsed!.getTime()).toBe(new Date('2026-06-10T20:15:00+01:00').getTime());
+  });
+
+  it('parses UTC ISO-8601 datetime strings', () => {
+    const parsed = parseDateTime('2026-11-15T21:51:00Z');
+    expect(parsed).not.toBeNull();
+    expect(parsed!.getTime()).toBe(new Date('2026-11-15T21:51:00Z').getTime());
   });
 
   it('returns null for garbage and undefined', () => {

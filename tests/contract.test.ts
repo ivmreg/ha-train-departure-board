@@ -12,6 +12,7 @@ import type { TrainDepartureBoard } from '../src/train-departure-board';
 const departures = sample.attributes.next_trains as unknown as TrainDeparture[];
 
 const DATETIME = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}$/;
+const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
 
 describe('sample_entity.json matches the next_trains contract', () => {
   it('has at least one departure', () => {
@@ -27,6 +28,12 @@ describe('sample_entity.json matches the next_trains contract', () => {
       expect(typeof train.operator_name).toBe('string');
       expect(train.scheduled).toMatch(DATETIME);
       expect(train.estimated).toMatch(DATETIME);
+      if (train.scheduled_iso) {
+        expect(train.scheduled_iso).toMatch(ISO_DATETIME);
+      }
+      if (train.estimated_iso) {
+        expect(train.estimated_iso).toMatch(ISO_DATETIME);
+      }
       expect(typeof train.minutes).toBe('number');
       expect(typeof train.is_cancelled).toBe('boolean');
       // platform / length / stock are nullable but must be present
@@ -36,11 +43,27 @@ describe('sample_entity.json matches the next_trains contract', () => {
     }
   });
 
+  it('sample departures include additive ISO-8601 timestamps', () => {
+    for (const train of departures) {
+      expect(train.scheduled_iso).toMatch(ISO_DATETIME);
+      expect(train.estimated_iso).toMatch(ISO_DATETIME);
+    }
+  });
+
   it('journey-enriched departures carry the enrichment fields consistently', () => {
     const enriched = departures.filter(t => t.subsequent_stops !== undefined);
     expect(enriched.length).toBeGreaterThan(0);
     for (const train of enriched) {
       expect(train.scheduled_arrival).toMatch(DATETIME);
+      if (train.scheduled_arrival_iso) {
+        expect(train.scheduled_arrival_iso).toMatch(ISO_DATETIME);
+      }
+      if (train.estimate_arrival_iso) {
+        expect(train.estimate_arrival_iso).toMatch(ISO_DATETIME);
+      }
+      if (train.last_report_time_iso) {
+        expect(train.last_report_time_iso).toMatch(ISO_DATETIME);
+      }
       expect(typeof train.journey_time_mins).toBe('number');
       expect(typeof train.stops).toBe('number');
       for (const stop of train.subsequent_stops) {
@@ -48,6 +71,12 @@ describe('sample_entity.json matches the next_trains contract', () => {
         expect(typeof stop.name).toBe('string');
         expect(stop.scheduled).toMatch(DATETIME);
         expect(stop.estimated).toMatch(DATETIME);
+        if (stop.scheduled_iso) {
+          expect(stop.scheduled_iso).toMatch(ISO_DATETIME);
+        }
+        if (stop.estimated_iso) {
+          expect(stop.estimated_iso).toMatch(ISO_DATETIME);
+        }
       }
     }
   });

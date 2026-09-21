@@ -72,17 +72,17 @@
 
 1. **Verify entity configuration:**
    - Make sure you've selected a valid entity in the card config
-   - Check that the entity provides `departures` attribute
+   - Check that the entity provides `next_trains` attribute (or configure `attribute:` if using a different attribute name)
 
 2. **Check entity data format:**
    - Go to Settings → Developer Tools → States
    - Find your sensor
-   - Verify it has an `attributes.departures` array
+   - Verify it has an `attributes.next_trains` array
 
 3. **Expected data structure:**
    ```yaml
    attributes:
-     departures:
+     next_trains:
        - origin_name: "Dartford"
          destination_name: "London Charing Cross"
          scheduled: "13-11-2025 22:51"
@@ -100,7 +100,7 @@ If the card still doesn't appear, check the browser console:
 console.log(window.customCards);
 
 // Should show:
-// [{type: "train-departure-board", name: "Train Departure Board", ...}]
+// [{type: "custom:train-departure-board", name: "Train Departure Board", ...}]
 ```
 
 ## Support

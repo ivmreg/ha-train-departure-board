@@ -35,6 +35,8 @@ export interface TrainDeparture {
   type: string;
   scheduled: string;
   estimated: string;
+  scheduled_iso?: string;
+  estimated_iso?: string;
   minutes: number;
   lateness: number | null;
   is_cancelled: boolean;
@@ -47,6 +49,7 @@ export interface TrainDeparture {
   last_report_station?: string;
   last_report_type?: string;
   last_report_time?: string;
+  last_report_time_iso?: string;
   status?: string;
   etd?: string;
   planned_cancel?: boolean;
@@ -55,6 +58,8 @@ export interface TrainDeparture {
   // journey_data_for_next_X_trains covers this train)
   scheduled_arrival?: string;
   estimate_arrival?: string;
+  scheduled_arrival_iso?: string;
+  estimate_arrival_iso?: string;
   journey_time_mins?: number;
   reason?: string;
   // Set when this is the query's pinned recurring train
@@ -66,6 +71,8 @@ export interface SubsequentStop {
   name: string;
   scheduled: string;
   estimated: string;
+  scheduled_iso?: string;
+  estimated_iso?: string;
 }
 
 export interface TrainDepartureBoardConfig {

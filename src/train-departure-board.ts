@@ -71,6 +71,7 @@ export class TrainDepartureBoard extends LitElement {
       color: var(--primary-text-color, #111);
       display: flex;
       flex-direction: column;
+      container-type: inline-size;
     }
     .card-header {
       padding: 12px 16px;
@@ -163,8 +164,10 @@ export class TrainDepartureBoard extends LitElement {
       align-items: flex-start;
       justify-content: center;
       gap: 2px;
-      flex: 0 0 auto;
-      min-width: auto;
+      flex: 0 0 4.25rem;
+      width: 4.25rem;
+      min-width: 4.25rem;
+      font-variant-numeric: tabular-nums;
     }
     .scheduled {
       display: inline-block; /* transformable for the flap animation */
@@ -186,38 +189,23 @@ export class TrainDepartureBoard extends LitElement {
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
-    .scheduled.relative-primary {
-      font-size: var(--train-board-time-size, 1.25rem);
-    }
-    .offset-pill {
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    .offset-pill.late {
-      background: var(--warning-color, #ffe0b2);
-      color: #d32f2f;
-    }
-    .offset-pill.early {
-      background: var(--success-color, #c8e6c9);
-      color: #2e7d32;
-    }
     .platform-badge {
       font-size: 0.75em;
       font-weight: 700;
       padding: 2px 6px;
-      min-width: 26px;
+      min-width: 28px;
       height: 22px;
       border-radius: 4px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
       color: var(--secondary-text-color, #666);
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
       flex-shrink: 0;
       box-sizing: border-box;
+      font-variant-numeric: tabular-nums;
     }
     .info-box {
       flex: 1;
@@ -232,6 +220,13 @@ export class TrainDepartureBoard extends LitElement {
       justify-content: space-between;
       gap: 8px;
       width: 100%;
+    }
+    .row-meta {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
     }
     .terminus {
       margin: 0;
@@ -249,6 +244,7 @@ export class TrainDepartureBoard extends LitElement {
       font-weight: 700;
       padding: 2px 4px;
       width: 44px;
+      min-width: 44px;
       height: 22px;
       border-radius: 4px;
       background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
@@ -259,7 +255,9 @@ export class TrainDepartureBoard extends LitElement {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
       box-sizing: border-box;
+      font-variant-numeric: tabular-nums;
     }
     .status-pill {
       font-size: var(--train-board-status-size, 0.75rem);
@@ -293,6 +291,53 @@ export class TrainDepartureBoard extends LitElement {
       background: rgba(211, 47, 47, 0.1);
       color: var(--error-color, #d32f2f);
       border: 1px solid rgba(211, 47, 47, 0.25);
+    }
+    .walk-time-notice {
+      padding: 6px 12px;
+      margin: 8px 8px 0 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+      color: var(--secondary-text-color, #666);
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .enrichment-error-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: var(--secondary-text-color, #666);
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+    }
+    .enrichment-popup-notice {
+      font-size: 0.8rem;
+      color: var(--secondary-text-color, #666);
+      padding: 4px 8px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+    }
+    @container (max-width: 380px) {
+      .carriages-badge {
+        display: none;
+      }
+      .relative-time {
+        display: none;
+      }
+    }
+    @media (max-width: 380px) {
+      .carriages-badge {
+        display: none;
+      }
+      .relative-time {
+        display: none;
+      }
     }
     /* Popup overlay styles */
     .popup-overlay {
@@ -796,6 +841,13 @@ export class TrainDepartureBoard extends LitElement {
       );
     }
 
+    if (entity.state === 'unavailable' || entity.state === 'unknown') {
+      return this._renderMessage(
+        '🚆',
+        `Entity ${this.config.entity} is currently ${entity.state}`
+      );
+    }
+
     // Clear date cache only when entity changes
     if (this.lastEntityId !== this.config.entity) {
       this.dateCache.clear();
@@ -808,26 +860,28 @@ export class TrainDepartureBoard extends LitElement {
 
     const attributeName = this.config.attribute || 'next_trains';
     const attributeValue = entity.attributes?.[attributeName];
-    const departures = Array.isArray(attributeValue) ? attributeValue : [];
+    if (attributeValue === undefined) {
+      return this._renderMessage(
+        '⚠',
+        `Attribute "${attributeName}" not found on entity ${this.config.entity}`,
+        true
+      );
+    }
+    if (!Array.isArray(attributeValue)) {
+      return this._renderMessage(
+        '⚠',
+        `Attribute "${attributeName}" on entity ${this.config.entity} is not an array`,
+        true
+      );
+    }
+
+    const departures = attributeValue;
     const lastUpdated = entity.last_updated
       ? new Date(entity.last_updated).toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
         })
       : '';
-
-    if (attributeValue === undefined) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `train-departure-board: attribute "${attributeName}" was not found on entity ${this.config.entity}`
-      );
-    }
-    if (!Array.isArray(attributeValue) && attributeValue !== undefined) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `train-departure-board: attribute "${attributeName}" is not an array, falling back to empty list`
-      );
-    }
 
     // Build custom property styles from config
     const customStyles = [
@@ -864,6 +918,11 @@ export class TrainDepartureBoard extends LitElement {
           ? html`<div class="card-header">${this.config.title}</div>`
           : ''}
         <div class="card">
+          ${walkTime > 0 && highlightIndex === -1 && departures.length > 0
+            ? html`<div class="walk-time-notice">
+                No listed departures reachable within ${walkTime} min walk
+              </div>`
+            : ''}
           ${departures.length > 0
             ? html`<div
                 class="departure-list"
@@ -876,13 +935,18 @@ export class TrainDepartureBoard extends LitElement {
               </div>`
             : html`<div class="board-message">
                 <span class="message-icon" aria-hidden="true">🚉</span>
-                <span class="message-text">No departures available</span>
+                <span class="message-text">No departures in the current window</span>
               </div>`}
-          ${lastUpdated || isStale
+          ${lastUpdated || isStale || entity.attributes?.error
             ? html`<div class="footer">
                 ${isStale
                   ? html`<span class="stale-chip" role="status"
                       >⚠ Showing last-known data</span
+                    >`
+                  : ''}
+                ${entity.attributes?.error
+                  ? html`<span class="enrichment-error-chip" role="status"
+                      >ℹ Limited journey details</span
                     >`
                   : ''}
                 ${lastUpdated ? html`Last updated: ${lastUpdated}` : ''}
@@ -1022,7 +1086,9 @@ export class TrainDepartureBoard extends LitElement {
 
     const departure = this._selectedDeparture;
     const { statusClass, statusLabel } = getStatusMeta(departure);
-    const scheduledTime = extractTimeLabel(departure.scheduled);
+    const scheduledTime = extractTimeLabel(
+      departure.scheduled_iso || departure.scheduled
+    );
     const stops = getStopsForPopup(
       departure,
       this.config.stops_identifier || 'description',
@@ -1030,6 +1096,10 @@ export class TrainDepartureBoard extends LitElement {
     );
     const isCancelled = statusClass === 'cancelled';
     const stockInfo = getStockCategory(departure.stock, departure.operator_name);
+    const entity = this.config.entity
+      ? this.hass?.states?.[this.config.entity]
+      : null;
+    const hasEnrichmentError = Boolean(entity?.attributes?.error);
 
     const statusBadgeClass =
       statusClass === 'on-time'
@@ -1102,11 +1172,19 @@ export class TrainDepartureBoard extends LitElement {
                   </div>`
                 : ''}
             </div>
+            ${hasEnrichmentError
+              ? html`<div class="enrichment-popup-notice">
+                  ℹ Limited journey details
+                </div>`
+              : ''}
             ${this._renderJourneySummary(departure)}
             ${departure.last_report_station
               ? html`<div class="last-seen">
-                  Last seen at ${departure.last_report_station}${departure.last_report_time
-                    ? ` (${extractTimeLabel(departure.last_report_time)})`
+                  Last seen at ${departure.last_report_station}${departure.last_report_time_iso ||
+                  departure.last_report_time
+                    ? ` (${extractTimeLabel(
+                        departure.last_report_time_iso || departure.last_report_time
+                      )})`
                     : ''}
                 </div>`
               : ''}
@@ -1168,7 +1246,11 @@ export class TrainDepartureBoard extends LitElement {
   }
 
   private _renderJourneySummary(departure: TrainDeparture) {
-    const arrival = departure.estimate_arrival || departure.scheduled_arrival;
+    const arrival =
+      departure.estimate_arrival_iso ||
+      departure.scheduled_arrival_iso ||
+      departure.estimate_arrival ||
+      departure.scheduled_arrival;
     const parts: string[] = [];
     if (departure.journey_time_mins != null) {
       parts.push(`${departure.journey_time_mins} min journey`);
@@ -1191,11 +1273,15 @@ export class TrainDepartureBoard extends LitElement {
     highlightIndex = 0,
     now: Date = new Date()
   ) {
-    const scheduledTime = extractTimeLabel(departure.scheduled);
+    const scheduledTime = extractTimeLabel(
+      departure.scheduled_iso || departure.scheduled
+    );
     const { statusClass, statusLabel, offsetStr } = getStatusMeta(departure);
     const platform = departure.platform ? departure.platform : null;
-    const isNextTrain = index === highlightIndex;
-    const isUnreachable = highlightIndex > 0 && index < highlightIndex;
+    const isNextTrain = highlightIndex >= 0 && index === highlightIndex;
+    const walkTime = Number(this.config.walk_time_minutes) || 0;
+    const isUnreachable =
+      walkTime > 0 && (highlightIndex === -1 || index < highlightIndex);
     const isCancelled = statusClass === 'cancelled';
     const stockInfo = getStockCategory(departure.stock, departure.operator_name);
     const timeClass = isCancelled ? 'time-cancelled' : '';
@@ -1228,6 +1314,24 @@ export class TrainDepartureBoard extends LitElement {
       >`;
     }
 
+    const rowAccessibleParts: string[] = [
+      `${departure.destination_name} at ${scheduledTime}`,
+      statusLabel,
+    ];
+    if (platform) {
+      rowAccessibleParts.push(`Platform ${platform}`);
+    }
+    if (showCarriages && departure.length) {
+      rowAccessibleParts.push(`${departure.length} carriages`);
+    }
+    if (stockInfo.label) {
+      rowAccessibleParts.push(stockInfo.label);
+    }
+    if (isUnreachable) {
+      rowAccessibleParts.push('likely out of reach');
+    }
+    const rowAccessibleName = rowAccessibleParts.join(', ');
+
     return html`
       <div
         class="train ${isNextTrain ? 'next-train' : ''} ${isCancelled
@@ -1238,9 +1342,8 @@ export class TrainDepartureBoard extends LitElement {
         role="listitem"
         tabindex="0"
         aria-haspopup="dialog"
-        aria-label="${departure.destination_name} at ${scheduledTime}, ${statusLabel}${platform
-          ? `, Platform ${platform}`
-          : ''}${isUnreachable ? ', likely out of reach' : ''}"
+        aria-label="${rowAccessibleName}"
+        title="${rowAccessibleName}"
         @click=${(e: Event) => this._showDetails(departure, e)}
         @keydown=${(e: KeyboardEvent) => this._handleRowKeyDown(e, departure)}
       >
@@ -1257,18 +1360,18 @@ export class TrainDepartureBoard extends LitElement {
             : ''}
         </div>
         <div class="info-box">
-          <div class="destination-col">
-            <div class="destination-row">
-              <h3 class="terminus">
-                ${departure.is_pinned
-                  ? html`<span
-                      class="pin-marker"
-                      title="Your pinned train"
-                      aria-label="Pinned train"
-                      >📌</span
-                    >`
-                  : ''}${departure.destination_name}
-              </h3>
+          <div class="destination-row">
+            <h3 class="terminus">
+              ${departure.is_pinned
+                ? html`<span
+                    class="pin-marker"
+                    title="Your pinned train"
+                    aria-label="Pinned train"
+                    >📌</span
+                  >`
+                : ''}${departure.destination_name}
+            </h3>
+            <div class="row-meta">
               ${pillHtml}
               ${showCarriages && departure.length
                 ? html`<span class="carriages-badge">${departure.length}-car</span>`

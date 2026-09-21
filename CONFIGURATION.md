@@ -119,7 +119,7 @@ template:
         unique_id: "train_departures"
         state: "updated"
         attributes:
-          departures: |
+          next_trains: |
             {% set departures = [
               {
                 "origin_name": "Dartford",
@@ -145,7 +145,7 @@ rest:
       - name: "Train Departures"
         unique_id: "train_departures"
         json_attributes:
-          - departures
+          - next_trains
         value_template: "{{ now().isoformat() }}"
         headers:
           Authorization: "Bearer YOUR_TOKEN"
@@ -156,7 +156,7 @@ rest:
 For a custom integration providing train data, ensure the entity attributes include:
 ```python
 {
-    "departures": [
+    "next_trains": [
         {
             "origin_name": str,
             "destination_name": str,

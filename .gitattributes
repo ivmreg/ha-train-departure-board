@@ -1,0 +1,5 @@
+# Legacy files stored with CRLF line endings in repository index; treat CR at EOL as part of line ending
+CONFIGURATION.md whitespace=cr-at-eol
+INSTALLATION.md whitespace=cr-at-eol
+TROUBLESHOOTING.md whitespace=cr-at-eol
+preview.html whitespace=cr-at-eol
