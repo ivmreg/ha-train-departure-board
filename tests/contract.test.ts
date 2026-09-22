@@ -5,78 +5,101 @@
 import { describe, expect, it } from 'vitest';
 import sample from '../sample_entity.json';
 import { TrainDeparture } from '../src/types';
-import { getStatusMeta, getStopsForPopup, getStockCategory } from '../src/utils';
+import { getStockCategory, getCallingPointName } from '../src/utils';
 import '../src/train-departure-board';
 import type { TrainDepartureBoard } from '../src/train-departure-board';
 
 const departures = sample.attributes.next_trains as unknown as TrainDeparture[];
 
-const DATETIME = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}$/;
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
+const TIME_LABEL = /^\d{2}:\d{2}$/;
 
-describe('sample_entity.json matches the next_trains contract', () => {
+describe('sample_entity.json matches the Contract v2 contract', () => {
   it('has at least one departure', () => {
     expect(departures.length).toBeGreaterThan(0);
   });
 
-  it('every departure carries the always-present fields', () => {
+  it('exposes contract_version 2 and omits redundant schema_version', () => {
+    expect(sample.attributes.contract_version).toBe(2);
+    expect((sample.attributes as Record<string, unknown>).schema_version).toBeUndefined();
+  });
+
+  it('omits all legacy aliases from departure payloads', () => {
+    const legacyAliases = [
+      'scheduled_iso',
+      'estimated_iso',
+      'subsequent_stops',
+      'reason',
+      'scheduled_arrival',
+      'estimate_arrival',
+      'scheduled_arrival_iso',
+      'estimate_arrival_iso',
+      'journey_time_mins',
+      'stops',
+      'last_report_time_iso',
+    ];
+    for (const train of departures) {
+      const trainRecord = train as unknown as Record<string, unknown>;
+      for (const alias of legacyAliases) {
+        expect(trainRecord[alias]).toBeUndefined();
+      }
+    }
+  });
+
+  it('every departure carries the required Contract v2 fields', () => {
     for (const train of departures) {
       expect(typeof train.origin_name).toBe('string');
       expect(typeof train.destination_name).toBe('string');
       expect(typeof train.service_uid).toBe('string');
       expect(typeof train.headcode).toBe('string');
       expect(typeof train.operator_name).toBe('string');
-      expect(train.scheduled).toMatch(DATETIME);
-      expect(train.estimated).toMatch(DATETIME);
-      if (train.scheduled_iso) {
-        expect(train.scheduled_iso).toMatch(ISO_DATETIME);
+      expect(train.scheduled).toMatch(ISO_DATETIME);
+      if (train.estimated) {
+        expect(train.estimated).toMatch(ISO_DATETIME);
       }
-      if (train.estimated_iso) {
-        expect(train.estimated_iso).toMatch(ISO_DATETIME);
+      expect(train.scheduled_time).toMatch(TIME_LABEL);
+      if (train.estimated_time) {
+        expect(train.estimated_time).toMatch(TIME_LABEL);
       }
       expect(typeof train.minutes).toBe('number');
       expect(typeof train.is_cancelled).toBe('boolean');
-      // platform / length / stock are nullable but must be present
+      expect(typeof train.status).toBe('string');
+      expect(typeof train.status_class).toBe('string');
+      expect(typeof train.status_label).toBe('string');
+      expect('offset_label' in train).toBe(true);
       expect('platform' in train).toBe(true);
       expect('length' in train).toBe(true);
       expect('stock' in train).toBe(true);
+      expect(Array.isArray(train.calling_points)).toBe(true);
     }
   });
 
-  it('sample departures include additive ISO-8601 timestamps', () => {
-    for (const train of departures) {
-      expect(train.scheduled_iso).toMatch(ISO_DATETIME);
-      expect(train.estimated_iso).toMatch(ISO_DATETIME);
-    }
-  });
-
-  it('journey-enriched departures carry the enrichment fields consistently', () => {
-    const enriched = departures.filter(t => t.subsequent_stops !== undefined);
+  it('journey-enriched departures carry Contract v2 enrichment fields consistently', () => {
+    const enriched = departures.filter(t => t.calling_points.length > 0);
     expect(enriched.length).toBeGreaterThan(0);
     for (const train of enriched) {
-      expect(train.scheduled_arrival).toMatch(DATETIME);
-      if (train.scheduled_arrival_iso) {
-        expect(train.scheduled_arrival_iso).toMatch(ISO_DATETIME);
+      expect(train.destination_arrival_scheduled).toMatch(ISO_DATETIME);
+      if (train.destination_arrival_estimated) {
+        expect(train.destination_arrival_estimated).toMatch(ISO_DATETIME);
       }
-      if (train.estimate_arrival_iso) {
-        expect(train.estimate_arrival_iso).toMatch(ISO_DATETIME);
-      }
-      if (train.last_report_time_iso) {
-        expect(train.last_report_time_iso).toMatch(ISO_DATETIME);
-      }
-      expect(typeof train.journey_time_mins).toBe('number');
-      expect(typeof train.stops).toBe('number');
-      for (const stop of train.subsequent_stops) {
-        expect(typeof stop.stop).toBe('string');
-        expect(typeof stop.name).toBe('string');
-        expect(stop.scheduled).toMatch(DATETIME);
-        expect(stop.estimated).toMatch(DATETIME);
-        if (stop.scheduled_iso) {
-          expect(stop.scheduled_iso).toMatch(ISO_DATETIME);
+      expect(train.destination_arrival_time).toMatch(TIME_LABEL);
+      expect(typeof train.journey_duration_minutes).toBe('number');
+      expect(typeof train.stops_count).toBe('number');
+      for (const stop of train.calling_points) {
+        expect(typeof stop.station_name).toBe('string');
+        expect('crs' in stop).toBe(true);
+        expect('tiploc' in stop).toBe(true);
+        expect(stop.scheduled).toMatch(ISO_DATETIME);
+        if (stop.estimated) {
+          expect(stop.estimated).toMatch(ISO_DATETIME);
         }
-        if (stop.estimated_iso) {
-          expect(stop.estimated_iso).toMatch(ISO_DATETIME);
-        }
+        expect(stop.time).toMatch(TIME_LABEL);
+        expect(typeof stop.status).toBe('string');
+        expect(typeof stop.status_class).toBe('string');
+        expect(typeof stop.status_label).toBe('string');
+        expect(typeof stop.is_passed).toBe('boolean');
+        expect(typeof stop.is_current).toBe('boolean');
+        expect(typeof stop.is_between_previous).toBe('boolean');
       }
     }
   });
@@ -89,11 +112,14 @@ describe('sample_entity.json matches the next_trains contract', () => {
     expect(Number.isNaN(new Date(attrs.next_update_at).getTime())).toBe(false);
   });
 
-  it('the card logic digests every sample departure without throwing', () => {
+  it('presentation utilities digest sample departures without throwing', () => {
     for (const train of departures) {
-      expect(() => getStatusMeta(train)).not.toThrow();
       expect(() => getStockCategory(train.stock, train.operator_name)).not.toThrow();
-      expect(() => getStopsForPopup(train, 'description')).not.toThrow();
+      for (const stop of train.calling_points) {
+        expect(() => getCallingPointName(stop, 'description')).not.toThrow();
+        expect(() => getCallingPointName(stop, 'crs')).not.toThrow();
+        expect(() => getCallingPointName(stop, 'tiploc')).not.toThrow();
+      }
     }
   });
 

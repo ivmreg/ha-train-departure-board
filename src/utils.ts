@@ -1,5 +1,5 @@
 // src/utils.ts
-import { TrainDeparture } from './types';
+import { CallingPoint, TrainDeparture } from './types';
 
 export type StockCategory = 'modern' | 'javelin' | 'refurb' | 'older' | 'standard';
 
@@ -68,16 +68,33 @@ export function getStockCategory(
   return STANDARD_STOCK;
 }
 
+export function parseDateTime(
+  datetime?: string | null,
+  dateCache?: Map<string, Date | null>
+): Date | null {
+  if (!datetime) {
+    return null;
+  }
+  if (dateCache && dateCache.has(datetime)) {
+    return dateCache.get(datetime) ?? null;
+  }
+  let parsed: Date | null = null;
+  const candidate = new Date(datetime);
+  if (!Number.isNaN(candidate.getTime())) {
+    parsed = candidate;
+  }
+  if (dateCache) {
+    dateCache.set(datetime, parsed);
+  }
+  return parsed;
+}
+
 export function formatRelativeMinutes(
   departure: TrainDeparture,
   now: Date,
   dateCache?: Map<string, Date | null>
 ): string | null {
-  const timeStr =
-    departure.estimated_iso ||
-    departure.scheduled_iso ||
-    departure.estimated ||
-    departure.scheduled;
+  const timeStr = departure.estimated || departure.scheduled;
   const when = parseDateTime(timeStr, dateCache);
   if (!when) {
     return null;
@@ -95,11 +112,7 @@ export function isCatchable(
   now: Date,
   dateCache?: Map<string, Date | null>
 ): boolean {
-  const timeStr =
-    departure.estimated_iso ||
-    departure.scheduled_iso ||
-    departure.estimated ||
-    departure.scheduled;
+  const timeStr = departure.estimated || departure.scheduled;
   const when = parseDateTime(timeStr, dateCache);
   if (!when) {
     // Without a parseable time we can't rule the train out
@@ -108,331 +121,73 @@ export function isCatchable(
   return when.getTime() - now.getTime() >= walkTimeMinutes * 60000;
 }
 
-export function extractTimeLabel(datetime?: string): string {
-  if (!datetime) {
-    return '—';
+export function getCallingPointName(
+  stop: CallingPoint,
+  stopsIdentifier: 'tiploc' | 'crs' | 'description' = 'description'
+): string {
+  if (stopsIdentifier === 'tiploc') {
+    return (stop.tiploc || stop.crs || stop.station_name || '').trim();
   }
-  const trimmed = datetime.trim();
-  if (!trimmed) {
-    return '—';
+  if (stopsIdentifier === 'crs') {
+    return (stop.crs || stop.station_name || '').trim();
   }
-  if (trimmed.includes('T')) {
-    const timeMatch = trimmed.match(/T(\d{2}:\d{2})/);
-    if (timeMatch) {
-      return timeMatch[1];
-    }
-  }
-  const parts = trimmed.split(' ');
-  if (parts.length === 2 && /^\d{2}:\d{2}$/.test(parts[1])) {
-    return parts[1];
-  }
-  if (/^\d{2}:\d{2}$/.test(trimmed)) {
-    return trimmed;
-  }
-  return parts.length === 2 ? parts[1] || parts[0] : trimmed;
+  return (stop.station_name || stop.crs || stop.tiploc || '').trim();
 }
 
-export function calculateDelayMins(
-  scheduledTime: string,
-  estimatedTime: string
-): number {
-  if (
-    !/^\d{2}:\d{2}$/.test(scheduledTime) ||
-    !/^\d{2}:\d{2}$/.test(estimatedTime)
-  ) {
-    return 0;
+const VALID_SERVICE_STATUSES: Set<unknown> = new Set([
+  'on_time',
+  'delayed',
+  'early',
+  'cancelled',
+]);
+
+const VALID_SERVICE_STATUS_CLASSES: Set<unknown> = new Set([
+  'on-time',
+  'delayed',
+  'early',
+  'cancelled',
+]);
+
+export function isValidContractV2CallingPoint(
+  item: unknown
+): item is CallingPoint {
+  if (typeof item !== 'object' || item === null) {
+    return false;
   }
-  const [sH, sM] = scheduledTime.split(':').map(Number);
-  const [eH, eM] = estimatedTime.split(':').map(Number);
-  let diff = eH * 60 + eM - (sH * 60 + sM);
-  if (diff < -720) diff += 1440;
-  if (diff > 720) diff -= 1440;
-  return diff;
-}
-
-export function parseDateTime(
-  datetime?: string,
-  dateCache?: Map<string, Date | null>
-): Date | null {
-  if (!datetime) {
-    return null;
-  }
-  if (dateCache && dateCache.has(datetime)) {
-    return dateCache.get(datetime) ?? null;
-  }
-  let parsed: Date | null = null;
-  if (datetime.includes('T')) {
-    const candidate = new Date(datetime);
-    parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
-  } else {
-    const [datePart, timePart] = datetime.split(' ');
-    if (datePart && timePart) {
-      const isoDate = `${datePart.split('-').reverse().join('-')}T${timePart}`;
-      const candidate = new Date(isoDate);
-      parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
-    } else if (/^\d{2}:\d{2}$/.test(datetime)) {
-      const today = new Date();
-      const iso = `${today.toISOString().split('T')[0]}T${datetime}`;
-      const candidate = new Date(iso);
-      parsed = Number.isNaN(candidate.getTime()) ? null : candidate;
-    }
-  }
-  if (dateCache) {
-    dateCache.set(datetime, parsed);
-  }
-  return parsed;
-}
-
-export function getStatusMeta(departure: TrainDeparture): {
-  statusLabel: string;
-  statusClass: string;
-  offsetStr?: string;
-} {
-  const scheduledRaw = departure.scheduled_iso || departure.scheduled || '';
-  const estimatedRaw = departure.estimated_iso || departure.estimated || '';
-  const scheduledTime = extractTimeLabel(scheduledRaw);
-  const estimatedTime = extractTimeLabel(estimatedRaw);
-
-  const rawEstimateText = (departure.estimated || '').toLowerCase();
-  if (
-    departure.is_cancelled ||
-    departure.status?.toLowerCase().includes('cancel') ||
-    departure.etd?.toLowerCase().includes('cancel') ||
-    departure.planned_cancel ||
-    departure.cancel_reason ||
-    rawEstimateText.includes('cancel') ||
-    estimatedRaw.toLowerCase().includes('cancel')
-  ) {
-    return { statusLabel: 'Cancelled', statusClass: 'cancelled' };
-  }
-
-  if (!departure.estimated && !departure.estimated_iso) {
-    return { statusLabel: 'Awaiting', statusClass: 'delayed' };
-  }
-
-  if (rawEstimateText === 'on time') {
-    return { statusLabel: 'On Time', statusClass: 'on-time' };
-  }
-
-  let delayMins: number | null = null;
-  if (departure.scheduled_iso && departure.estimated_iso) {
-    const sDate = parseDateTime(departure.scheduled_iso);
-    const eDate = parseDateTime(departure.estimated_iso);
-    if (sDate && eDate) {
-      delayMins = Math.round((eDate.getTime() - sDate.getTime()) / 60000);
-    }
-  }
-
-  if (
-    estimatedTime &&
-    scheduledTime &&
-    (delayMins !== null ? delayMins !== 0 : estimatedTime !== scheduledTime)
-  ) {
-    if (delayMins === null) {
-      delayMins = calculateDelayMins(scheduledTime, estimatedTime);
-    }
-    if (Math.abs(delayMins) <= 1) {
-      return { statusLabel: 'On Time', statusClass: 'on-time' };
-    }
-
-    let sClass = 'delayed';
-    let labelPrefix = 'Exp';
-    let offsetStr = `+${delayMins}m`;
-
-    if (delayMins < 0) {
-      sClass = 'early';
-      labelPrefix = 'Early';
-      offsetStr = `${delayMins}m`;
-    }
-    if (/^\d{2}:\d{2}$/.test(estimatedTime)) {
-      return {
-        statusLabel: `${labelPrefix} ${estimatedTime}`,
-        statusClass: sClass,
-        offsetStr,
-      };
-    }
-    return { statusLabel: estimatedTime, statusClass: sClass, offsetStr };
-  }
-
-  return { statusLabel: 'On Time', statusClass: 'on-time' };
-}
-
-export interface ProcessedStop {
-  name: string;
-  time: string;
-  stopCode: string;
-  isPassed: boolean;
-  isCurrent: boolean;
-  isBetweenPrevious?: boolean;
-  timestamp: number;
-  statusLabel?: string;
-  statusClass?: string;
-}
-
-export function getStopsForPopup(
-  departure: TrainDeparture,
-  stopsIdentifier: 'tiploc' | 'crs' | 'description' = 'description',
-  dateCache?: Map<string, Date | null>
-): ProcessedStop[] {
-  const stops = departure.subsequent_stops || [];
-
-  const stopsProcessed: ProcessedStop[] = stops
-    .map(stop => {
-      let name = '';
-      if (stopsIdentifier === 'tiploc') {
-        name = (stop.stop || '').trim();
-      } else if (stopsIdentifier === 'crs') {
-        name = (stop.name || '').trim();
-      } else {
-        name = (stop.name || stop.stop || '').trim();
-      }
-
-      const datetime =
-        stop.scheduled_iso ||
-        stop.estimated_iso ||
-        stop.scheduled ||
-        stop.estimated;
-      const parsedDate = parseDateTime(datetime, dateCache);
-      const timestamp = parsedDate?.getTime() ?? Number.POSITIVE_INFINITY;
-
-      const estimatedStr = stop.estimated_iso || stop.estimated;
-      const scheduledStr = stop.scheduled_iso || stop.scheduled;
-      let stopStatusLabel = 'On time';
-      let stopStatusClass = 'on-time';
-
-      const estTime = extractTimeLabel(estimatedStr);
-      const schedTime = extractTimeLabel(scheduledStr);
-
-      let delayMins: number | null = null;
-      if (stop.scheduled_iso && stop.estimated_iso) {
-        const sDate = parseDateTime(stop.scheduled_iso, dateCache);
-        const eDate = parseDateTime(stop.estimated_iso, dateCache);
-        if (sDate && eDate) {
-          delayMins = Math.round((eDate.getTime() - sDate.getTime()) / 60000);
-        }
-      }
-      if (delayMins === null && estTime !== '—' && schedTime !== '—') {
-        delayMins = calculateDelayMins(schedTime, estTime);
-      }
-
-      if (delayMins !== null && (estTime !== schedTime || delayMins !== 0)) {
-        if (Math.abs(delayMins) <= 1) {
-          stopStatusClass = 'on-time';
-          stopStatusLabel = 'On time';
-        } else {
-          stopStatusClass = 'delayed';
-          let labelPrefix = 'Exp';
-          if (delayMins < 0) {
-            stopStatusClass = 'early';
-            labelPrefix = 'Early';
-          }
-          if (/^\d{2}:\d{2}$/.test(estTime)) {
-            stopStatusLabel = `${labelPrefix} ${estTime}`;
-          } else {
-            stopStatusLabel = estTime;
-          }
-        }
-      }
-      if (
-        estimatedStr?.toLowerCase().includes('cancel') ||
-        (stop as any).is_cancelled
-      ) {
-        stopStatusLabel = 'Cancelled';
-        stopStatusClass = 'cancelled';
-      }
-
-      return {
-        name,
-        time: extractTimeLabel(datetime),
-        timestamp,
-        stopCode: stop.stop || '',
-        isPassed: false,
-        isCurrent: false,
-        isBetweenPrevious: false,
-        statusLabel: stopStatusLabel,
-        statusClass: stopStatusClass,
-      };
-    })
-    .filter(s => s.name)
-    .sort((a, b) => a.timestamp - b.timestamp);
-
-  if (!departure.last_report_station || !departure.last_report_type) {
-    // No real-time report logic: fall back to marking all as future
-    return stopsProcessed;
-  }
-
-  const reportStation = departure.last_report_station;
-  const reportType = departure.last_report_type; // 'Arrival', 'Departure', 'Pass'
-  const lastReportTimeStr =
-    departure.last_report_time_iso || departure.last_report_time;
-  const reportTimeMs = lastReportTimeStr
-    ? parseDateTime(lastReportTimeStr, dateCache)?.getTime()
-    : undefined;
-
-  // Try to find the exact reported station
-  const exactMatchIndex = stopsProcessed.findIndex(
-    s => s.stopCode === reportStation
+  const cp = item as Record<string, unknown>;
+  return (
+    typeof cp.station_name === 'string' &&
+    (typeof cp.crs === 'string' || cp.crs === null) &&
+    (typeof cp.tiploc === 'string' || cp.tiploc === null) &&
+    typeof cp.scheduled === 'string' &&
+    (typeof cp.estimated === 'string' || cp.estimated === null) &&
+    typeof cp.time === 'string' &&
+    VALID_SERVICE_STATUSES.has(cp.status) &&
+    VALID_SERVICE_STATUS_CLASSES.has(cp.status_class) &&
+    typeof cp.status_label === 'string' &&
+    (typeof cp.delay_minutes === 'number' || cp.delay_minutes === null) &&
+    typeof cp.is_passed === 'boolean' &&
+    typeof cp.is_current === 'boolean' &&
+    typeof cp.is_between_previous === 'boolean'
   );
+}
 
-  if (exactMatchIndex !== -1) {
-    for (let i = 0; i < exactMatchIndex; i++) {
-      stopsProcessed[i].isPassed = true;
-    }
-    if (reportType === 'Arrival') {
-      stopsProcessed[exactMatchIndex].isCurrent = true; // At the station
-      stopsProcessed[exactMatchIndex].isPassed = false;
-    } else {
-      // 'Departure' or 'Pass'
-      stopsProcessed[exactMatchIndex].isPassed = true;
-      if (exactMatchIndex + 1 < stopsProcessed.length) {
-        stopsProcessed[exactMatchIndex + 1].isBetweenPrevious = true;
-      } else {
-        // It left the last station
-        stopsProcessed[exactMatchIndex].isPassed = true;
-      }
-    }
-  } else if (reportTimeMs !== undefined && !Number.isNaN(reportTimeMs)) {
-    // Interpolation fallback based on time
-    let lastPassedIndex = -1;
-    for (let i = 0; i < stopsProcessed.length; i++) {
-      if (stopsProcessed[i].timestamp <= reportTimeMs) {
-        stopsProcessed[i].isPassed = true;
-        lastPassedIndex = i;
-      } else {
-        break;
-      }
-    }
-    if (lastPassedIndex !== -1 && lastPassedIndex + 1 < stopsProcessed.length) {
-      stopsProcessed[lastPassedIndex + 1].isBetweenPrevious = true;
-    } else if (lastPassedIndex === -1 && stopsProcessed.length > 0) {
-      // Not reached the first station yet
-      stopsProcessed[0].isBetweenPrevious = true;
-    }
+export function isValidContractV2Departure(
+  item: unknown
+): item is TrainDeparture {
+  if (typeof item !== 'object' || item === null) {
+    return false;
   }
-
-  // Feature: Inject previous unlisted station to connect the timeline if train is currently between
-  if (
-    stopsProcessed.length > 0 &&
-    stopsProcessed[0].isBetweenPrevious &&
-    exactMatchIndex === -1 &&
-    reportStation
-  ) {
-    // Train has departed an unknown/unlisted station and is headed to our first listed stop.
-    const timeLabel = lastReportTimeStr
-      ? extractTimeLabel(lastReportTimeStr)
-      : '';
-    stopsProcessed.unshift({
-      name: reportStation,
-      time: timeLabel,
-      timestamp: reportTimeMs || 0,
-      stopCode: reportStation,
-      isPassed: true,
-      isCurrent: false,
-      isBetweenPrevious: false,
-      statusLabel: '',
-      statusClass: '',
-    });
-  }
-
-  return stopsProcessed;
+  const d = item as Record<string, unknown>;
+  return (
+    typeof d.destination_name === 'string' &&
+    typeof d.scheduled === 'string' &&
+    typeof d.scheduled_time === 'string' &&
+    VALID_SERVICE_STATUSES.has(d.status) &&
+    VALID_SERVICE_STATUS_CLASSES.has(d.status_class) &&
+    typeof d.status_label === 'string' &&
+    typeof d.is_cancelled === 'boolean' &&
+    Array.isArray(d.calling_points) &&
+    d.calling_points.every((cp: unknown) => isValidContractV2CallingPoint(cp))
+  );
 }

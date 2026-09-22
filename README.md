@@ -63,9 +63,14 @@ If your integration exposes the departures array under a different attribute (fo
 
 See [CONFIGURATION.md](CONFIGURATION.md) for the full option reference and the expected data structure.
 
+> [!WARNING]
+> **Breaking Change (Contract Version 2)**
+> The card now consumes canonical, pre-calculated railway domain attributes directly from the sensor entity (display-ready timestamps, statuses, delays, calling points, and destination arrival).
+> **Coordinated Upgrade Required:** This version requires `ha_realtime_trains_api` Contract Version 2 (`contract_version: 2`). Legacy v1 payloads are not supported.
+
 ### Expected Data Format
 
-The card expects a sensor that provides an array of train departures with the following structure:
+The card expects a sensor providing an array of train departures following Contract Version 2:
 
 ```yaml
 - origin_name: Dartford
@@ -74,20 +79,37 @@ The card expects a sensor that provides an array of train departures with the fo
   headcode: 2A69
   type: TRAIN
   operator_name: Southeastern
-  scheduled: 01-04-2026 22:13
-  estimated: 01-04-2026 22:13
+  scheduled: "2026-04-01T22:13:00+01:00"
+  estimated: "2026-04-01T22:13:00+01:00"
+  scheduled_time: "22:13"
+  estimated_time: "22:13"
   minutes: 8
+  delay_minutes: 0
+  status: on_time
+  status_class: on-time
+  status_label: "On Time"
+  offset_label: null
   lateness: null
   is_cancelled: false
   platform: "1"
   length: 8
   stock: null
-  subsequent_stops:
-    - stop: LEW
-      name: Lewisham
-      scheduled: 01-04-2026 22:16
-      estimated: 01-04-2026 22:16
-  stops: 14
+  calling_points:
+    - station_name: Lewisham
+      crs: LEW
+      tiploc: LEWISHM
+      scheduled: "2026-04-01T22:16:00+01:00"
+      estimated: "2026-04-01T22:16:00+01:00"
+      time: "22:16"
+      status: on_time
+      status_class: on-time
+      status_label: "On time"
+      is_passed: false
+      is_current: false
+      is_between_previous: false
+  destination_arrival_time: "22:45"
+  journey_duration_minutes: 32
+  stops_count: 14
 ```
 
 ## Development

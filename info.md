@@ -31,16 +31,23 @@ The card expects data from a sensor that provides train departure information in
   headcode: 2A69
   type: TRAIN
   operator_name: Southeastern
-  scheduled: 01-04-2026 22:13
-  estimated: 01-04-2026 22:13
+  scheduled: "2026-04-01T22:13:00+01:00"
+  estimated: "2026-04-01T22:13:00+01:00"
+  scheduled_time: "22:13"
+  estimated_time: "22:13"
   minutes: 8
+  delay_minutes: 0
+  status: on_time
+  status_class: on-time
+  status_label: "On Time"
+  offset_label: null
   lateness: null
   is_cancelled: false
   platform: "1"
   length: 8
   stock: null
-  subsequent_stops: []
-  stops: 14
+  calling_points: []
+  stops_count: 14
 ```
 
 ## Support

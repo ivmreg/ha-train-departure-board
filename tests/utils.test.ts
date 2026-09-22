@@ -1,15 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   getStockCategory,
-  extractTimeLabel,
-  calculateDelayMins,
   formatRelativeMinutes,
   parseDateTime,
-  getStatusMeta,
-  getStopsForPopup,
   isCatchable,
+  getCallingPointName,
+  isValidContractV2Departure,
+  isValidContractV2CallingPoint,
 } from '../src/utils';
-import { TrainDeparture, SubsequentStop } from '../src/types';
+import { TrainDeparture, CallingPoint } from '../src/types';
 
 function makeDeparture(overrides: Partial<TrainDeparture> = {}): TrainDeparture {
   return {
@@ -18,27 +17,54 @@ function makeDeparture(overrides: Partial<TrainDeparture> = {}): TrainDeparture 
     service_uid: 'P63128',
     headcode: '2A69',
     type: 'train',
-    scheduled: '10-06-2026 12:00',
-    estimated: '10-06-2026 12:00',
+    operator_name: 'Southeastern',
+    scheduled: '2026-06-10T12:00:00+01:00',
+    estimated: '2026-06-10T12:00:00+01:00',
+    scheduled_time: '12:00',
+    estimated_time: '12:00',
     minutes: 0,
+    delay_minutes: 0,
+    status: 'on_time',
+    status_class: 'on-time',
+    status_label: 'On Time',
+    offset_label: null,
     lateness: 0,
     is_cancelled: false,
     platform: '1',
     length: 8,
     stock: null,
-    operator_name: 'Southeastern',
-    subsequent_stops: [],
-    stops: 0,
+    calling_points: [],
+    destination_arrival_scheduled: null,
+    destination_arrival_estimated: null,
+    destination_arrival_time: null,
+    destination_status: null,
+    destination_delay_minutes: null,
+    journey_duration_minutes: null,
+    stops_count: null,
+    disruption_reason: null,
+    last_report_station: null,
+    last_report_type: null,
+    last_report_time: null,
+    last_report_time_label: null,
     ...overrides,
   };
 }
 
-function makeStop(overrides: Partial<SubsequentStop> = {}): SubsequentStop {
+function makeCallingPoint(overrides: Partial<CallingPoint> = {}): CallingPoint {
   return {
-    stop: 'LEW',
-    name: 'Lewisham',
-    scheduled: '10-06-2026 12:15',
-    estimated: '10-06-2026 12:15',
+    station_name: 'Lewisham',
+    crs: 'LEW',
+    tiploc: 'LEWISHM',
+    scheduled: '2026-06-10T12:15:00+01:00',
+    estimated: '2026-06-10T12:15:00+01:00',
+    time: '12:15',
+    delay_minutes: 0,
+    status: 'on_time',
+    status_class: 'on-time',
+    status_label: 'On time',
+    is_passed: false,
+    is_current: false,
+    is_between_previous: false,
     ...overrides,
   };
 }
@@ -81,7 +107,6 @@ describe('getStockCategory', () => {
   });
 
   it('does not apply Southeastern stock styling to other operators', () => {
-    // "376" could be a coincidental substring in another operator's branding
     expect(getStockCategory('376', 'Avanti West Coast').category).toBe('standard');
     expect(getStockCategory('Javelin', 'Thameslink').category).toBe('standard');
   });
@@ -93,127 +118,63 @@ describe('getStockCategory', () => {
 });
 
 describe('formatRelativeMinutes', () => {
-  const now = new Date('2026-06-10T12:00:00');
+  const now = new Date('2026-06-10T12:00:00+01:00');
 
   it('formats minutes until the estimated departure', () => {
-    const departure = makeDeparture({ estimated: '10-06-2026 12:04' });
+    const departure = makeDeparture({ estimated: '2026-06-10T12:04:00+01:00' });
     expect(formatRelativeMinutes(departure, now)).toBe('4 min');
   });
 
   it('returns Due for imminent or past departures', () => {
     expect(
-      formatRelativeMinutes(makeDeparture({ estimated: '10-06-2026 12:00' }), now)
+      formatRelativeMinutes(makeDeparture({ estimated: '2026-06-10T12:00:00+01:00' }), now)
     ).toBe('Due');
     expect(
-      formatRelativeMinutes(makeDeparture({ estimated: '10-06-2026 11:58' }), now)
+      formatRelativeMinutes(makeDeparture({ estimated: '2026-06-10T11:58:00+01:00' }), now)
     ).toBe('Due');
   });
 
-  it('falls back to the scheduled time and handles garbage', () => {
+  it('falls back to scheduled time and handles invalid dates', () => {
     const departure = makeDeparture({
-      estimated: '',
-      scheduled: '10-06-2026 12:30',
+      estimated: null,
+      scheduled: '2026-06-10T12:30:00+01:00',
     });
     expect(formatRelativeMinutes(departure, now)).toBe('30 min');
     expect(
       formatRelativeMinutes(
-        makeDeparture({ estimated: 'nonsense', scheduled: '' }),
+        makeDeparture({ estimated: 'nonsense', scheduled: null as any }),
         now
       )
     ).toBeNull();
   });
-
-  it('prefers estimated_iso and scheduled_iso when present', () => {
-    const departure = makeDeparture({
-      estimated: '10-06-2026 12:15',
-      estimated_iso: '2026-06-10T12:05:00+01:00',
-    });
-    // now is 2026-06-10T12:00:00 (local). With estimated_iso:
-    expect(formatRelativeMinutes(departure, new Date('2026-06-10T12:00:00+01:00'))).toBe('5 min');
-  });
 });
 
 describe('isCatchable', () => {
-  const now = new Date('2026-06-10T12:00:00');
+  const now = new Date('2026-06-10T12:00:00+01:00');
 
   it('is true when the walk time fits before departure', () => {
-    const departure = makeDeparture({ estimated: '10-06-2026 12:10' });
+    const departure = makeDeparture({ estimated: '2026-06-10T12:10:00+01:00' });
     expect(isCatchable(departure, 10, now)).toBe(true);
     expect(isCatchable(departure, 11, now)).toBe(false);
   });
 
-  it('prefers ISO timestamps for catchability checks', () => {
+  it('falls back to scheduled departure time when estimated is null', () => {
     const departure = makeDeparture({
-      estimated: '10-06-2026 12:05',
-      estimated_iso: '2026-06-10T12:10:00+01:00',
+      estimated: null,
+      scheduled: '2026-06-10T12:15:00+01:00',
     });
-    const refNow = new Date('2026-06-10T12:00:00+01:00');
-    expect(isCatchable(departure, 10, refNow)).toBe(true);
-    expect(isCatchable(departure, 11, refNow)).toBe(false);
+    expect(isCatchable(departure, 14, now)).toBe(true);
+    expect(isCatchable(departure, 16, now)).toBe(false);
   });
 
   it('does not rule out departures without a parseable time', () => {
-    const departure = makeDeparture({ estimated: 'garbage', scheduled: '' });
+    const departure = makeDeparture({ estimated: 'garbage', scheduled: null as any });
     expect(isCatchable(departure, 15, now)).toBe(true);
   });
 });
 
-describe('extractTimeLabel', () => {
-  it('handles falsy/empty values', () => {
-    expect(extractTimeLabel(undefined)).toBe('—');
-    expect(extractTimeLabel('')).toBe('—');
-    expect(extractTimeLabel('  ')).toBe('—');
-  });
-
-  it('extracts time from a DD-MM-YYYY HH:MM string', () => {
-    expect(extractTimeLabel('10-06-2026 20:15')).toBe('20:15');
-  });
-
-  it('extracts time from an ISO-8601 string', () => {
-    expect(extractTimeLabel('2026-06-10T20:15:00+01:00')).toBe('20:15');
-    expect(extractTimeLabel('2026-11-15T09:05:00Z')).toBe('09:05');
-  });
-
-  it('passes through HH:MM directly', () => {
-    expect(extractTimeLabel('08:30')).toBe('08:30');
-  });
-});
-
-describe('calculateDelayMins', () => {
-  it('calculates standard diffs', () => {
-    expect(calculateDelayMins('10:00', '10:05')).toBe(5);
-    expect(calculateDelayMins('10:00', '09:55')).toBe(-5);
-    expect(calculateDelayMins('12:00', '12:00')).toBe(0);
-  });
-
-  it('handles midnight rollover both ways', () => {
-    expect(calculateDelayMins('23:58', '00:03')).toBe(5);
-    expect(calculateDelayMins('00:02', '23:57')).toBe(-5);
-  });
-
-  it('returns 0 for invalid formats', () => {
-    expect(calculateDelayMins('foo', '10:00')).toBe(0);
-    expect(calculateDelayMins('10:00', 'bar')).toBe(0);
-  });
-});
-
 describe('parseDateTime', () => {
-  it('parses full date-time (DD-MM-YYYY HH:MM)', () => {
-    const parsed = parseDateTime('10-06-2026 20:15');
-    expect(parsed).not.toBeNull();
-    expect(parsed!.getFullYear()).toBe(2026);
-    expect(parsed!.getMonth()).toBe(5);
-    expect(parsed!.getDate()).toBe(10);
-  });
-
-  it('parses time-only as today', () => {
-    const parsed = parseDateTime('14:45');
-    expect(parsed).not.toBeNull();
-    expect(parsed!.getHours()).toBe(14);
-    expect(parsed!.getMinutes()).toBe(45);
-  });
-
-  it('parses ISO-8601 datetime strings', () => {
+  it('parses ISO-8601 datetime strings with offset', () => {
     const parsed = parseDateTime('2026-06-10T20:15:00+01:00');
     expect(parsed).not.toBeNull();
     expect(parsed!.getTime()).toBe(new Date('2026-06-10T20:15:00+01:00').getTime());
@@ -227,14 +188,15 @@ describe('parseDateTime', () => {
 
   it('returns null for garbage and undefined', () => {
     expect(parseDateTime(undefined)).toBeNull();
+    expect(parseDateTime(null)).toBeNull();
     expect(parseDateTime('not a date')).toBeNull();
   });
 
-  it('caches results (including nulls) in dateCache', () => {
+  it('caches results in dateCache', () => {
     const cache = new Map<string, Date | null>();
-    const first = parseDateTime('10-06-2026 20:15', cache);
-    expect(cache.has('10-06-2026 20:15')).toBe(true);
-    expect(parseDateTime('10-06-2026 20:15', cache)).toBe(first);
+    const first = parseDateTime('2026-06-10T20:15:00+01:00', cache);
+    expect(cache.has('2026-06-10T20:15:00+01:00')).toBe(true);
+    expect(parseDateTime('2026-06-10T20:15:00+01:00', cache)).toBe(first);
 
     parseDateTime('garbage', cache);
     expect(cache.has('garbage')).toBe(true);
@@ -242,177 +204,160 @@ describe('parseDateTime', () => {
   });
 });
 
-describe('getStatusMeta', () => {
-  it('detects cancellation from every supported field', () => {
-    expect(getStatusMeta(makeDeparture({ is_cancelled: true })).statusClass).toBe('cancelled');
-    expect(getStatusMeta(makeDeparture({ status: 'Cancelled by operator' })).statusClass).toBe('cancelled');
-    expect(getStatusMeta(makeDeparture({ etd: 'Cancel' })).statusClass).toBe('cancelled');
-    expect(getStatusMeta(makeDeparture({ estimated: 'Cancelled' })).statusClass).toBe('cancelled');
-    expect(getStatusMeta(makeDeparture({ planned_cancel: true })).statusClass).toBe('cancelled');
-    expect(getStatusMeta(makeDeparture({ cancel_reason: 'engineering' })).statusClass).toBe('cancelled');
+describe('getCallingPointName', () => {
+  const point = makeCallingPoint({
+    station_name: 'Lewisham',
+    crs: 'LEW',
+    tiploc: 'LEWISHM',
   });
 
-  it('reports Awaiting when no estimate is available', () => {
-    const meta = getStatusMeta(makeDeparture({ estimated: '' }));
-    expect(meta.statusLabel).toBe('Awaiting');
-    expect(meta.statusClass).toBe('delayed');
+  it('returns station_name for description identifier', () => {
+    expect(getCallingPointName(point, 'description')).toBe('Lewisham');
   });
 
-  it('treats literal "On time" estimates as on time', () => {
-    expect(getStatusMeta(makeDeparture({ estimated: 'On Time' })).statusClass).toBe('on-time');
+  it('returns crs for crs identifier', () => {
+    expect(getCallingPointName(point, 'crs')).toBe('LEW');
   });
 
-  it('treats <=1 minute deviation as on time', () => {
-    const meta = getStatusMeta(
-      makeDeparture({ scheduled: '12:00', estimated: '12:01' })
-    );
-    expect(meta.statusClass).toBe('on-time');
+  it('returns tiploc for tiploc identifier', () => {
+    expect(getCallingPointName(point, 'tiploc')).toBe('LEWISHM');
   });
 
-  it('reports delays with label and offset', () => {
-    const meta = getStatusMeta(
-      makeDeparture({ scheduled: '12:00', estimated: '12:05' })
-    );
-    expect(meta).toEqual({
-      statusLabel: 'Exp 12:05',
-      statusClass: 'delayed',
-      offsetStr: '+5m',
+  it('falls back gracefully when crs or tiploc is null', () => {
+    const fallbackPoint = makeCallingPoint({
+      station_name: 'Unknown Halt',
+      crs: null,
+      tiploc: null,
     });
-  });
-
-  it('reports early running with label and negative offset', () => {
-    const meta = getStatusMeta(
-      makeDeparture({ scheduled: '12:00', estimated: '11:55' })
-    );
-    expect(meta).toEqual({
-      statusLabel: 'Early 11:55',
-      statusClass: 'early',
-      offsetStr: '-5m',
-    });
-  });
-
-  it('handles delays across midnight', () => {
-    const meta = getStatusMeta(
-      makeDeparture({
-        scheduled: '10-06-2026 23:58',
-        estimated: '11-06-2026 00:04',
-      })
-    );
-    expect(meta.statusClass).toBe('delayed');
-    expect(meta.offsetStr).toBe('+6m');
+    expect(getCallingPointName(fallbackPoint, 'crs')).toBe('Unknown Halt');
+    expect(getCallingPointName(fallbackPoint, 'tiploc')).toBe('Unknown Halt');
   });
 });
 
-describe('getStopsForPopup', () => {
-  it('maps stops and sorts them chronologically', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [
-        makeStop({ stop: 'LEW', name: 'Lewisham', scheduled: '10-06-2026 12:15', estimated: '10-06-2026 12:15' }),
-        makeStop({ stop: 'LBG', name: 'London Bridge', scheduled: '10-06-2026 12:08', estimated: '10-06-2026 12:08' }),
-      ],
-    });
-
-    const stops = getStopsForPopup(departure, 'description');
-    expect(stops.map(s => s.stopCode)).toEqual(['LBG', 'LEW']);
-    expect(stops[0].time).toBe('12:08');
+describe('isValidContractV2CallingPoint', () => {
+  it('returns true for a valid Contract v2 calling point', () => {
+    expect(isValidContractV2CallingPoint(makeCallingPoint())).toBe(true);
   });
 
-  it('chooses the name according to stopsIdentifier', () => {
-    const departure = makeDeparture({ subsequent_stops: [makeStop()] });
-
-    expect(getStopsForPopup(departure, 'tiploc')[0].name).toBe('LEW');
-    expect(getStopsForPopup(departure, 'crs')[0].name).toBe('Lewisham');
-    expect(getStopsForPopup(departure, 'description')[0].name).toBe('Lewisham');
+  it('accepts null for crs, tiploc, estimated, and delay_minutes', () => {
+    const cp = makeCallingPoint({
+      crs: null,
+      tiploc: null,
+      estimated: null,
+      delay_minutes: null,
+    });
+    expect(isValidContractV2CallingPoint(cp)).toBe(true);
   });
 
-  it('flags per-stop delays', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [
-        makeStop({ scheduled: '10-06-2026 12:15', estimated: '10-06-2026 12:20' }),
-      ],
-    });
-
-    const [stop] = getStopsForPopup(departure, 'description');
-    expect(stop.statusClass).toBe('delayed');
-    expect(stop.statusLabel).toBe('Exp 12:20');
+  it('returns false for null or non-objects', () => {
+    expect(isValidContractV2CallingPoint(null)).toBe(false);
+    expect(isValidContractV2CallingPoint(undefined)).toBe(false);
+    expect(isValidContractV2CallingPoint('string')).toBe(false);
   });
 
-  it('marks all stops as future when there is no last report', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [makeStop()],
-    });
-
-    const stops = getStopsForPopup(departure, 'description');
-    expect(stops[0].isPassed).toBe(false);
-    expect(stops[0].isCurrent).toBe(false);
-    expect(stops[0].isBetweenPrevious).toBe(false);
+  it('returns false when station_name is missing or non-string', () => {
+    const cp = makeCallingPoint() as Record<string, unknown>;
+    delete cp.station_name;
+    expect(isValidContractV2CallingPoint(cp)).toBe(false);
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), station_name: 123 })).toBe(false);
   });
 
-  it('marks the reported station current on Arrival reports', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [
-        makeStop({ stop: 'LBG', name: 'London Bridge', scheduled: '10-06-2026 12:08', estimated: '10-06-2026 12:08' }),
-        makeStop({ stop: 'LEW', name: 'Lewisham', scheduled: '10-06-2026 12:15', estimated: '10-06-2026 12:15' }),
-      ],
-      last_report_station: 'LBG',
-      last_report_type: 'Arrival',
-      last_report_time: '10-06-2026 12:07',
-    });
-
-    const stops = getStopsForPopup(departure, 'description');
-    expect(stops[0].isCurrent).toBe(true);
-    expect(stops[0].isPassed).toBe(false);
-    expect(stops[1].isBetweenPrevious).toBe(false);
+  it('returns false when crs or tiploc is not string or null', () => {
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), crs: 123 })).toBe(false);
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), tiploc: 123 })).toBe(false);
   });
 
-  it('marks the train between stations on Departure reports', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [
-        makeStop({ stop: 'LBG', name: 'London Bridge', scheduled: '10-06-2026 12:08', estimated: '10-06-2026 12:08' }),
-        makeStop({ stop: 'LEW', name: 'Lewisham', scheduled: '10-06-2026 12:15', estimated: '10-06-2026 12:15' }),
-      ],
-      last_report_station: 'LBG',
-      last_report_type: 'Departure',
-      last_report_time: '10-06-2026 12:09',
-    });
+  it('returns false when scheduled or time is missing or not a string', () => {
+    const cp1 = makeCallingPoint() as Record<string, unknown>;
+    delete cp1.scheduled;
+    expect(isValidContractV2CallingPoint(cp1)).toBe(false);
 
-    const stops = getStopsForPopup(departure, 'description');
-    expect(stops[0].isPassed).toBe(true);
-    expect(stops[0].isCurrent).toBe(false);
-    expect(stops[1].isBetweenPrevious).toBe(true);
+    const cp2 = makeCallingPoint() as Record<string, unknown>;
+    delete cp2.time;
+    expect(isValidContractV2CallingPoint(cp2)).toBe(false);
   });
 
-  it('interpolates position by time when the reported station is unlisted', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [
-        makeStop({ stop: 'LBG', name: 'London Bridge', scheduled: '10-06-2026 12:08', estimated: '10-06-2026 12:08' }),
-        makeStop({ stop: 'LEW', name: 'Lewisham', scheduled: '10-06-2026 12:15', estimated: '10-06-2026 12:15' }),
-      ],
-      last_report_station: 'XXX',
-      last_report_type: 'Pass',
-      last_report_time: '10-06-2026 12:10',
-    });
-
-    const stops = getStopsForPopup(departure, 'description');
-    expect(stops.map(s => s.name)).toEqual(['London Bridge', 'Lewisham']);
-    expect(stops[0].isPassed).toBe(true);
-    expect(stops[1].isBetweenPrevious).toBe(true);
+  it('returns false when status or status_class is not a canonical enum value', () => {
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), status: 'unknown' as never })).toBe(false);
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), status_class: 'unknown' as never })).toBe(false);
   });
 
-  it('injects the unlisted previous station before the first stop', () => {
-    const departure = makeDeparture({
-      subsequent_stops: [
-        makeStop({ stop: 'LEW', name: 'Lewisham', scheduled: '10-06-2026 12:15', estimated: '10-06-2026 12:15' }),
-      ],
-      last_report_station: 'LBG',
-      last_report_type: 'Departure',
-      last_report_time: '10-06-2026 12:09',
-    });
+  it('returns false when delay_minutes is non-number and non-null', () => {
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), delay_minutes: '5' as never })).toBe(false);
+  });
 
-    const stops = getStopsForPopup(departure, 'description');
-    // The unlisted station the train just left is prepended as passed
-    expect(stops[0].stopCode).toBe('LBG');
-    expect(stops[0].isPassed).toBe(true);
-    expect(stops[1].isBetweenPrevious).toBe(true);
+  it('returns false when any progress flag is missing or non-boolean', () => {
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), is_passed: null as never })).toBe(false);
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), is_current: undefined as never })).toBe(false);
+    expect(isValidContractV2CallingPoint({ ...makeCallingPoint(), is_between_previous: 'false' as never })).toBe(false);
+  });
+});
+
+describe('isValidContractV2Departure', () => {
+  it('returns true for a valid Contract v2 departure', () => {
+    expect(isValidContractV2Departure(makeDeparture())).toBe(true);
+    expect(isValidContractV2Departure(makeDeparture({ calling_points: [makeCallingPoint()] }))).toBe(true);
+  });
+
+  it('returns false for null or non-objects', () => {
+    expect(isValidContractV2Departure(null)).toBe(false);
+    expect(isValidContractV2Departure(undefined)).toBe(false);
+    expect(isValidContractV2Departure('string')).toBe(false);
+    expect(isValidContractV2Departure(123)).toBe(false);
+  });
+
+  it('returns false when destination_name is missing or not a string', () => {
+    const departure = makeDeparture() as Record<string, unknown>;
+    delete departure.destination_name;
+    expect(isValidContractV2Departure(departure)).toBe(false);
+  });
+
+  it('returns false when canonical time fields are missing', () => {
+    const d1 = makeDeparture() as Record<string, unknown>;
+    delete d1.scheduled;
+    expect(isValidContractV2Departure(d1)).toBe(false);
+
+    const d2 = makeDeparture() as Record<string, unknown>;
+    delete d2.scheduled_time;
+    expect(isValidContractV2Departure(d2)).toBe(false);
+  });
+
+  it('returns false when canonical status fields are missing or non-canonical', () => {
+    const d1 = makeDeparture() as Record<string, unknown>;
+    delete d1.status;
+    expect(isValidContractV2Departure(d1)).toBe(false);
+
+    const d2 = makeDeparture() as Record<string, unknown>;
+    delete d2.status_class;
+    expect(isValidContractV2Departure(d2)).toBe(false);
+
+    const d3 = makeDeparture() as Record<string, unknown>;
+    delete d3.status_label;
+    expect(isValidContractV2Departure(d3)).toBe(false);
+
+    expect(isValidContractV2Departure({ ...makeDeparture(), status: 'custom_status' as never })).toBe(false);
+    expect(isValidContractV2Departure({ ...makeDeparture(), status_class: 'custom_class' as never })).toBe(false);
+  });
+
+  it('returns false when is_cancelled is missing or non-boolean', () => {
+    const d1 = makeDeparture() as Record<string, unknown>;
+    delete d1.is_cancelled;
+    expect(isValidContractV2Departure(d1)).toBe(false);
+
+    const d2 = { ...makeDeparture(), is_cancelled: 'true' };
+    expect(isValidContractV2Departure(d2)).toBe(false);
+  });
+
+  it('returns false when calling_points is not an array', () => {
+    const d = { ...makeDeparture(), calling_points: null };
+    expect(isValidContractV2Departure(d)).toBe(false);
+  });
+
+  it('returns false when calling_points contains null or malformed items', () => {
+    const d1 = { ...makeDeparture(), calling_points: [null] as never };
+    expect(isValidContractV2Departure(d1)).toBe(false);
+
+    const d2 = { ...makeDeparture(), calling_points: [{ station_name: 'Lewisham' }] as never };
+    expect(isValidContractV2Departure(d2)).toBe(false);
   });
 });

@@ -4,14 +4,14 @@ import {
   TrainDeparture,
   TrainDepartureBoardConfig,
   HomeAssistant,
+  CallingPoint,
 } from './types';
 import {
   getStockCategory,
-  extractTimeLabel,
+  getCallingPointName,
   formatRelativeMinutes,
-  getStatusMeta,
-  getStopsForPopup,
   isCatchable,
+  isValidContractV2Departure,
 } from './utils';
 import './editor'; // Import the editor to ensure it's registered
 
@@ -848,6 +848,19 @@ export class TrainDepartureBoard extends LitElement {
       );
     }
 
+    const contractVersion = entity.attributes?.contract_version;
+    if (contractVersion !== 2) {
+      const detail =
+        contractVersion === undefined
+          ? 'missing'
+          : `found v${String(contractVersion)}`;
+      return this._renderMessage(
+        '⚠',
+        `Integration contract version 2 required (${detail}). Please update both realtime_trains_api and ha-train-departure-board together.`,
+        true
+      );
+    }
+
     // Clear date cache only when entity changes
     if (this.lastEntityId !== this.config.entity) {
       this.dateCache.clear();
@@ -876,6 +889,13 @@ export class TrainDepartureBoard extends LitElement {
     }
 
     const departures = attributeValue;
+    if (departures.some((d: unknown) => !isValidContractV2Departure(d))) {
+      return this._renderMessage(
+        '⚠',
+        `Malformed Contract v2 departure data on entity ${this.config.entity}`,
+        true
+      );
+    }
     const lastUpdated = entity.last_updated
       ? new Date(entity.last_updated).toLocaleTimeString([], {
           hour: '2-digit',
@@ -995,9 +1015,9 @@ export class TrainDepartureBoard extends LitElement {
     for (const departure of departures) {
       const key = this._departureKey(departure);
       const current = {
-        time: departure.estimated || departure.scheduled || '',
+        time: departure.estimated_time || departure.scheduled_time || '',
         platform: departure.platform || '',
-        status: getStatusMeta(departure).statusLabel,
+        status: departure.status_label || '',
       };
       const prev = this._prevRowValues.get(key);
       if (prev) {
@@ -1085,16 +1105,11 @@ export class TrainDepartureBoard extends LitElement {
     if (!this._selectedDeparture) return nothing;
 
     const departure = this._selectedDeparture;
-    const { statusClass, statusLabel } = getStatusMeta(departure);
-    const scheduledTime = extractTimeLabel(
-      departure.scheduled_iso || departure.scheduled
-    );
-    const stops = getStopsForPopup(
-      departure,
-      this.config.stops_identifier || 'description',
-      this.dateCache
-    );
-    const isCancelled = statusClass === 'cancelled';
+    const statusClass = departure.status_class;
+    const statusLabel = departure.status_label;
+    const scheduledTime = departure.scheduled_time;
+    const stops: CallingPoint[] = departure.calling_points || [];
+    const isCancelled = departure.is_cancelled || statusClass === 'cancelled';
     const stockInfo = getStockCategory(departure.stock, departure.operator_name);
     const entity = this.config.entity
       ? this.hass?.states?.[this.config.entity]
@@ -1109,7 +1124,7 @@ export class TrainDepartureBoard extends LitElement {
         : 'status-delayed';
 
     // Check if any stops have passed to color the line
-    const hasPassedStops = stops.some(stop => stop.isPassed);
+    const hasPassedStops = stops.some(stop => stop.is_passed);
 
     return html`
       <div
@@ -1180,11 +1195,8 @@ export class TrainDepartureBoard extends LitElement {
             ${this._renderJourneySummary(departure)}
             ${departure.last_report_station
               ? html`<div class="last-seen">
-                  Last seen at ${departure.last_report_station}${departure.last_report_time_iso ||
-                  departure.last_report_time
-                    ? ` (${extractTimeLabel(
-                        departure.last_report_time_iso || departure.last_report_time
-                      )})`
+                  Last seen at ${departure.last_report_station}${departure.last_report_time_label
+                    ? ` (${departure.last_report_time_label})`
                     : ''}
                 </div>`
               : ''}
@@ -1200,7 +1212,7 @@ export class TrainDepartureBoard extends LitElement {
                   >
                     ${stops.map(
                       stop => html`
-                        ${stop.isBetweenPrevious
+                        ${stop.is_between_previous
                           ? html`
                               <div
                                 class="modern-train-pos-wrapper"
@@ -1214,9 +1226,9 @@ export class TrainDepartureBoard extends LitElement {
                             `
                           : ''}
                         <div
-                          class="modern-stop ${stop.isPassed
+                          class="modern-stop ${stop.is_passed
                             ? 'passed'
-                            : ''} ${stop.isCurrent ? 'current' : ''}"
+                            : ''} ${stop.is_current ? 'current' : ''}"
                         >
                           <div class="modern-stop-graphic">
                             <div class="modern-stop-circle"></div>
@@ -1224,11 +1236,14 @@ export class TrainDepartureBoard extends LitElement {
                           <div class="modern-stop-content">
                             <span class="modern-stop-time">${stop.time}</span>
                             <div class="modern-stop-info">
-                              <span class="modern-stop-name">${stop.name}</span>
-                              ${!stop.isPassed && stop.statusLabel
+                              <span class="modern-stop-name">${getCallingPointName(
+                                stop,
+                                this.config.stops_identifier || 'description'
+                              )}</span>
+                              ${!stop.is_passed && stop.status_label
                                 ? html`<span
-                                    class="modern-stop-status ${stop.statusClass}"
-                                    >${stop.statusLabel}</span
+                                    class="modern-stop-status ${stop.status_class}"
+                                    >${stop.status_label}</span
                                   >`
                                 : ''}
                             </div>
@@ -1246,20 +1261,16 @@ export class TrainDepartureBoard extends LitElement {
   }
 
   private _renderJourneySummary(departure: TrainDeparture) {
-    const arrival =
-      departure.estimate_arrival_iso ||
-      departure.scheduled_arrival_iso ||
-      departure.estimate_arrival ||
-      departure.scheduled_arrival;
+    const arrivalTime = departure.destination_arrival_time;
     const parts: string[] = [];
-    if (departure.journey_time_mins != null) {
-      parts.push(`${departure.journey_time_mins} min journey`);
+    if (departure.journey_duration_minutes != null) {
+      parts.push(`${departure.journey_duration_minutes} min journey`);
     }
-    if (departure.stops != null && departure.stops > 0) {
-      parts.push(`${departure.stops} ${departure.stops === 1 ? 'stop' : 'stops'}`);
+    if (departure.stops_count != null && departure.stops_count > 0) {
+      parts.push(`${departure.stops_count} ${departure.stops_count === 1 ? 'stop' : 'stops'}`);
     }
-    if (arrival) {
-      parts.push(`arrives ${extractTimeLabel(arrival)}`);
+    if (arrivalTime) {
+      parts.push(`arrives ${arrivalTime}`);
     }
     if (parts.length === 0) {
       return nothing;
@@ -1273,16 +1284,16 @@ export class TrainDepartureBoard extends LitElement {
     highlightIndex = 0,
     now: Date = new Date()
   ) {
-    const scheduledTime = extractTimeLabel(
-      departure.scheduled_iso || departure.scheduled
-    );
-    const { statusClass, statusLabel, offsetStr } = getStatusMeta(departure);
+    const scheduledTime = departure.scheduled_time;
+    const statusClass = departure.status_class;
+    const statusLabel = departure.status_label;
+    const offsetLabel = departure.offset_label;
     const platform = departure.platform ? departure.platform : null;
     const isNextTrain = highlightIndex >= 0 && index === highlightIndex;
     const walkTime = Number(this.config.walk_time_minutes) || 0;
     const isUnreachable =
       walkTime > 0 && (highlightIndex === -1 || index < highlightIndex);
-    const isCancelled = statusClass === 'cancelled';
+    const isCancelled = departure.is_cancelled || statusClass === 'cancelled';
     const stockInfo = getStockCategory(departure.stock, departure.operator_name);
     const timeClass = isCancelled ? 'time-cancelled' : '';
     const rowSizeClass = `row-size-${this.config.row_size || 'normal'}`;
@@ -1306,11 +1317,11 @@ export class TrainDepartureBoard extends LitElement {
       pillHtml = html`<span class="status-pill cancelled ${statusFlap}"
         >Cancelled</span
       >`;
-    } else if (offsetStr) {
+    } else if (offsetLabel) {
       const isEarly = statusClass === 'early';
       pillHtml = html`<span
         class="status-pill ${isEarly ? 'early' : 'delayed'} ${statusFlap}"
-        >${isEarly ? 'Early ' : ''}${offsetStr}</span
+        >${isEarly ? 'Early ' : ''}${offsetLabel}</span
       >`;
     }
 

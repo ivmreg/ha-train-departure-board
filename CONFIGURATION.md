@@ -6,6 +6,11 @@
 > `tests/contract.test.ts` validates `sample_entity.json` against the card's
 > expectations so drift on either side fails CI.
 
+> [!WARNING]
+> **Breaking Change (Contract Version 2)**
+> The card now consumes canonical, pre-calculated railway domain attributes directly from the sensor entity (display-ready timestamps, statuses, delays, calling points, and destination arrival).
+> **Coordinated Upgrade Required:** This version requires `ha_realtime_trains_api` Contract Version 2 (`contract_version: 2`). Legacy v1 payloads are not supported.
+
 ## Basic Card Configuration
 
 Add this to your Lovelace dashboard YAML or use the visual editor:
@@ -34,17 +39,16 @@ entity: sensor.train_departures
 | `font_size_destination` | string | `1rem` | CSS font size for the destination |
 | `font_size_status` | string | `0.75rem` | CSS font size for the status pill |
 
-> `delay_layout` was removed: the inline status pill introduced in the
-> 2026-04-13 row refinement covers all layouts. The key is ignored if present
-> in existing configs.
-
-## Expected Entity Data Structure
+## Expected Entity Data Structure (Contract Version 2)
 
 The card expects a sensor entity with an array of departures. By default it reads `attributes.next_trains`, but you can change the attribute name through the `attribute` option if your integration uses something like `departures`. Each departure should have:
 
 ```yaml
-state: "updated"
+state: "10"
 attributes:
+  contract_version: 2
+  journey_start: "DFD"
+  journey_end: "CST"
   next_trains:
     - origin_name: "Dartford"
       destination_name: "London Cannon Street"
@@ -52,45 +56,70 @@ attributes:
       headcode: "2A69"
       type: "TRAIN"
       operator_name: "Southeastern"
-      scheduled: "01-04-2026 22:13"
-      estimated: "01-04-2026 22:13"
-      minutes: 8
+      scheduled: "2026-04-01T22:13:00+01:00"
+      estimated: "2026-04-01T22:13:00+01:00"
+      scheduled_time: "22:13"
+      estimated_time: "22:13"
+      minutes: 10
+      delay_minutes: 0
+      status: "on_time"
+      status_class: "on-time"
+      status_label: "On Time"
+      offset_label: null
       lateness: null
       is_cancelled: false
       platform: "1"
       length: 8
       stock: null
-      subsequent_stops:
-        - stop: "LEW"
-          name: "Lewisham"
-          scheduled: "01-04-2026 22:16"
-          estimated: "01-04-2026 22:16"
-      stops: 14
+      calling_points:
+        - station_name: "Lewisham"
+          crs: "LEW"
+          tiploc: "LEWISHM"
+          scheduled: "2026-04-01T22:16:00+01:00"
+          estimated: "2026-04-01T22:16:00+01:00"
+          time: "22:16"
+          delay_minutes: 0
+          status: "on_time"
+          status_class: "on-time"
+          status_label: "On time"
+          is_passed: false
+          is_current: false
+          is_between_previous: false
+      destination_arrival_time: "22:45"
+      journey_duration_minutes: 32
+      stops_count: 14
 ```
 
 ## Field Descriptions
 
-### Required Fields
-- **origin_name**: Where the train departs from
-- **destination_name**: Where the train is going
-- **scheduled**: Scheduled departure time (format: "DD-MM-YYYY HH:MM")
-- **estimated**: Estimated/actual departure time
-- **platform**: Platform number
-- **is_cancelled**: Boolean flag for cancellation
+### Required Departure Fields
+- **origin_name**: Station name where the train departs from
+- **destination_name**: Destination station name
+- **scheduled**: Scheduled departure time (ISO-8601 string)
+- **scheduled_time**: Display-ready 24-hour scheduled departure time (`"HH:MM"`)
+- **status**: Normalized service status (`"on_time"`, `"delayed"`, `"early"`, `"cancelled"`, `"awaiting"`)
+- **status_class**: Status CSS class (`"on-time"`, `"delayed"`, `"early"`, `"cancelled"`)
+- **status_label**: Display-ready status label (e.g. `"On Time"`, `"Exp 22:18"`, `"Cancelled"`)
+- **is_cancelled**: Boolean flag indicating service cancellation
 
-### Optional Fields
+### Optional / Enriched Departure Fields
+- **estimated**: Estimated/actual departure time (ISO-8601 string)
+- **estimated_time**: Display-ready 24-hour estimated departure time (`"HH:MM"`)
+- **delay_minutes**: Integer delay in minutes (or `null`)
+- **offset_label**: Display-ready offset string (e.g. `"+5m"`, `"-2m"`, or `null`)
 - **service_uid**: Unique service identifier
-- **headcode**: Train headcode (e.g. 2A69)
-- **type**: Service type (e.g. TRAIN)
-- **minutes**: Minutes until departure
-- **operator_name**: Train operating company (also scopes rolling-stock badge styling)
-- **subsequent_stops**: List of upcoming stops
-- **stops**: Total number of stops
-- **length**: Number of coaches
-- **stock**: Train stock description (e.g. City Beam)
-- **last_report_station** / **last_report_type** / **last_report_time**: The train's last reported position; shown as "Last seen at …" in the details popup and used to place the live train marker on the timeline
-- **journey_time_mins** / **stops** / **scheduled_arrival** / **estimate_arrival**: Journey enrichment; shown as a "33 min journey · 7 stops · arrives 20:54" summary in the details popup
-- **is_pinned**: Marks the query's pinned recurring train; the row gets a 📌 marker
+- **headcode**: Train headcode (e.g. `2A69`)
+- **type**: Service type (e.g. `TRAIN`)
+- **operator_name**: Train operating company (scopes rolling-stock styling)
+- **platform**: Platform number
+- **length**: Number of carriages
+- **stock**: Rolling stock branding (e.g. `City Beam`, `Javelin`)
+- **calling_points**: Display-ready calling points list with timeline tracking
+- **destination_arrival_time**: Display-ready clock arrival time (`"HH:MM"`)
+- **journey_duration_minutes**: Total journey duration in minutes
+- **stops_count**: Number of intermediate stops
+- **last_report_station** / **last_report_time_label**: Live train location report
+- **is_pinned**: Marks the recurring pinned train (`📌` marker)
 
 When a displayed time, platform, or status *changes* between refreshes, the affected value plays a brief split-flap-style flip (disabled under `prefers-reduced-motion`).
 
@@ -98,75 +127,11 @@ When a displayed time, platform, or status *changes* between refreshes, the affe
 
 - **data_stale** (boolean): Set by the integration when it is serving cached data because the upstream API is down or rate-limited; triggers the card's stale-data chip
 - **next_update_at** (ISO datetime): When the next refresh is expected; if it is more than a minute overdue the card also shows the stale-data chip
+
 ## Display Behavior
 
-The card automatically:
-- **Extracts time** from the scheduled/estimated datetime fields
-- **Detects delays** by comparing scheduled vs estimated times
-- **Color codes status**:
-  - 🟢 Green: "On Time" (scheduled = estimated)
-  - 🟠 Orange: "Delayed" (estimated > scheduled)
-  - 🔴 Red: "Cancelled" (status indicates cancellation)
-
-## Example Home Assistant Template
-
-If you're creating a custom sensor, here's a template structure:
-
-```yaml
-template:
-  - sensor:
-      - name: "Train Departures"
-        unique_id: "train_departures"
-        state: "updated"
-        attributes:
-          next_trains: |
-            {% set departures = [
-              {
-                "origin_name": "Dartford",
-                "destination_name": "London Charing Cross",
-                "scheduled": "14-11-2025 08:30",
-                "estimated": "14-11-2025 08:30",
-                "platform": "1",
-                "operator_name": "Southeastern"
-              }
-            ] %}
-            {{ departures }}
-```
-
-## Tips for Integration
-
-### REST Sensor Example
-
-```yaml
-rest:
-  - resource: "https://your-api.com/departures"
-    scan_interval: 60
-    sensor:
-      - name: "Train Departures"
-        unique_id: "train_departures"
-        json_attributes:
-          - next_trains
-        value_template: "{{ now().isoformat() }}"
-        headers:
-          Authorization: "Bearer YOUR_TOKEN"
-```
-
-### Custom Integration
-
-For a custom integration providing train data, ensure the entity attributes include:
-```python
-{
-    "next_trains": [
-        {
-            "origin_name": str,
-            "destination_name": str,
-            "scheduled": "DD-MM-YYYY HH:MM",
-            "estimated": "DD-MM-YYYY HH:MM",
-            "platform": str,
-            "operator_name": str,
-            # ... other fields
-        },
-        # ... more departures
-    ]
-}
-```
+The card focuses purely on presentation and household policy:
+- **Displays pre-calculated times and statuses** directly from the canonical API contract.
+- **Renders countdowns** dynamically relative to client time when configured.
+- **Applies walking-time filtering**: highlights the first departure the viewer can catch according to `walk_time_minutes`.
+- **Maps rolling stock**: badges and accent colors for known train models per operator.

@@ -27,52 +27,72 @@ export interface HomeAssistant {
   };
 }
 
+export type ServiceStatus =
+  | 'on_time'
+  | 'delayed'
+  | 'early'
+  | 'cancelled';
+
+export type ServiceStatusClass =
+  | 'on-time'
+  | 'delayed'
+  | 'early'
+  | 'cancelled';
+
+export interface CallingPoint {
+  station_name: string;
+  crs: string | null;
+  tiploc: string | null;
+  scheduled: string; // ISO-8601
+  estimated: string | null; // ISO-8601
+  time: string; // Display-ready clock time (HH:MM)
+  delay_minutes: number | null;
+  status: ServiceStatus;
+  status_class: ServiceStatusClass;
+  status_label: string;
+  is_passed: boolean;
+  is_current: boolean;
+  is_between_previous: boolean;
+}
+
 export interface TrainDeparture {
   origin_name: string;
   destination_name: string;
   service_uid: string;
   headcode: string;
   type: string;
-  scheduled: string;
-  estimated: string;
-  scheduled_iso?: string;
-  estimated_iso?: string;
+  operator_name: string;
+  scheduled: string; // ISO-8601
+  estimated: string | null; // ISO-8601
+  scheduled_time: string; // Display-ready clock time (HH:MM)
+  estimated_time: string | null; // Display-ready clock time (HH:MM)
   minutes: number;
+  delay_minutes: number | null;
+  status: ServiceStatus;
+  status_class: ServiceStatusClass;
+  status_label: string; // e.g. "On Time", "Exp 12:05", "Early 11:55", "Cancelled"
+  offset_label: string | null; // e.g. "+5m", "-5m", null
   lateness: number | null;
   is_cancelled: boolean;
-  platform: string;
+  platform: string | null;
   length: number | null;
   stock: string | null;
-  operator_name: string;
-  subsequent_stops: SubsequentStop[];
-  stops: number;
-  last_report_station?: string;
-  last_report_type?: string;
-  last_report_time?: string;
-  last_report_time_iso?: string;
-  status?: string;
-  etd?: string;
-  planned_cancel?: boolean;
-  cancel_reason?: string;
-  // Journey enrichment fields (present when the integration's
-  // journey_data_for_next_X_trains covers this train)
-  scheduled_arrival?: string;
-  estimate_arrival?: string;
-  scheduled_arrival_iso?: string;
-  estimate_arrival_iso?: string;
-  journey_time_mins?: number;
-  reason?: string;
-  // Set when this is the query's pinned recurring train
+  // Journey enrichment fields (display-ready)
+  calling_points: CallingPoint[];
+  destination_arrival_scheduled: string | null;
+  destination_arrival_estimated: string | null;
+  destination_arrival_time: string | null; // Display-ready clock time (HH:MM)
+  destination_status: ServiceStatus | null;
+  destination_delay_minutes: number | null;
+  journey_duration_minutes: number | null;
+  stops_count: number | null;
+  disruption_reason: string | null;
+  last_report_station: string | null;
+  last_report_type: string | null;
+  last_report_time: string | null; // ISO-8601
+  last_report_time_label: string | null; // Display-ready clock time (HH:MM)
+  // Pin marker
   is_pinned?: boolean;
-}
-
-export interface SubsequentStop {
-  stop: string;
-  name: string;
-  scheduled: string;
-  estimated: string;
-  scheduled_iso?: string;
-  estimated_iso?: string;
 }
 
 export interface TrainDepartureBoardConfig {

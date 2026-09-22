@@ -8,11 +8,13 @@ function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
 
-function inMinutes(mins: number): string {
+function inMinutesIso(mins: number): string {
+  return new Date(Date.now() + mins * 60000).toISOString();
+}
+
+function inMinutesTime(mins: number): string {
   const d = new Date(Date.now() + mins * 60000);
-  return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function makeDeparture(overrides: Partial<TrainDeparture> = {}): TrainDeparture {
@@ -22,24 +24,51 @@ function makeDeparture(overrides: Partial<TrainDeparture> = {}): TrainDeparture 
     service_uid: 'P63128',
     headcode: '2A69',
     type: 'train',
-    scheduled: inMinutes(10),
-    estimated: inMinutes(10),
+    operator_name: 'Southeastern',
+    scheduled: inMinutesIso(10),
+    estimated: inMinutesIso(10),
+    scheduled_time: inMinutesTime(10),
+    estimated_time: inMinutesTime(10),
     minutes: 10,
+    delay_minutes: 0,
+    status: 'on_time',
+    status_class: 'on-time',
+    status_label: 'On Time',
+    offset_label: null,
     lateness: null,
     is_cancelled: false,
     platform: '1',
     length: 8,
     stock: null,
-    operator_name: 'Southeastern',
-    subsequent_stops: [
+    calling_points: [
       {
-        stop: 'LEW',
-        name: 'Lewisham',
-        scheduled: inMinutes(16),
-        estimated: inMinutes(16),
+        station_name: 'Lewisham',
+        crs: 'LEW',
+        tiploc: 'LEWISHM',
+        scheduled: inMinutesIso(16),
+        estimated: inMinutesIso(16),
+        time: inMinutesTime(16),
+        delay_minutes: 0,
+        status: 'on_time',
+        status_class: 'on-time',
+        status_label: 'On time',
+        is_passed: false,
+        is_current: false,
+        is_between_previous: false,
       },
     ],
-    stops: 1,
+    destination_arrival_scheduled: inMinutesIso(30),
+    destination_arrival_estimated: inMinutesIso(30),
+    destination_arrival_time: inMinutesTime(30),
+    destination_status: 'on_time',
+    destination_delay_minutes: 0,
+    journey_duration_minutes: 20,
+    stops_count: 1,
+    disruption_reason: null,
+    last_report_station: null,
+    last_report_type: null,
+    last_report_time: null,
+    last_report_time_label: null,
     ...overrides,
   };
 }
@@ -53,7 +82,11 @@ function makeHass(
       'sensor.trains': {
         entity_id: 'sensor.trains',
         state: '10',
-        attributes: { next_trains: departures, ...extraAttributes },
+        attributes: {
+          contract_version: 2,
+          next_trains: departures,
+          ...extraAttributes,
+        },
         last_changed: new Date().toISOString(),
         last_updated: new Date().toISOString(),
         context: { id: '1', parent_id: null, user_id: null },
@@ -151,8 +184,8 @@ describe('train-departure-board component', () => {
     const card = await mountCard(
       { entity: 'sensor.trains', walk_time_minutes: 15 },
       [
-        makeDeparture({ scheduled: inMinutes(5), estimated: inMinutes(5) }),
-        makeDeparture({ scheduled: inMinutes(20), estimated: inMinutes(20) }),
+        makeDeparture({ scheduled: inMinutesIso(5), estimated: inMinutesIso(5), scheduled_time: inMinutesTime(5) }),
+        makeDeparture({ scheduled: inMinutesIso(20), estimated: inMinutesIso(20), scheduled_time: inMinutesTime(20) }),
       ]
     );
 
@@ -166,7 +199,7 @@ describe('train-departure-board component', () => {
   it('renders a countdown when time_display is relative', async () => {
     const card = await mountCard(
       { entity: 'sensor.trains', time_display: 'relative' },
-      [makeDeparture({ scheduled: inMinutes(10), estimated: inMinutes(10) })]
+      [makeDeparture({ scheduled: inMinutesIso(10), estimated: inMinutesIso(10) })]
     );
 
     const time = card.shadowRoot!.querySelector('.scheduled');
@@ -187,7 +220,8 @@ describe('train-departure-board component', () => {
       makeDeparture({
         last_report_station: 'LEW',
         last_report_type: 'Departure',
-        last_report_time: inMinutes(-2),
+        last_report_time: inMinutesIso(-2),
+        last_report_time_label: inMinutesTime(-2),
       }),
     ]);
 
@@ -197,6 +231,7 @@ describe('train-departure-board component', () => {
     const lastSeen = card.shadowRoot!.querySelector('.last-seen');
     expect(lastSeen).not.toBeNull();
     expect(lastSeen!.textContent).toContain('Last seen at LEW');
+    expect(lastSeen!.textContent).toContain(`(${inMinutesTime(-2)})`);
   });
 
   it('only accents stock rows for the matching operator', async () => {
@@ -219,9 +254,9 @@ describe('new card behaviours', () => {
   it('shows the journey summary in the popup when enrichment data exists', async () => {
     const card = await mountCard({ entity: 'sensor.trains' }, [
       makeDeparture({
-        journey_time_mins: 33,
-        stops: 7,
-        estimate_arrival: inMinutes(43),
+        journey_duration_minutes: 33,
+        stops_count: 7,
+        destination_arrival_time: inMinutesTime(43),
       }),
     ]);
 
@@ -237,7 +272,11 @@ describe('new card behaviours', () => {
 
   it('omits the journey summary without enrichment data', async () => {
     const card = await mountCard({ entity: 'sensor.trains' }, [
-      makeDeparture({ stops: 0 }),
+      makeDeparture({
+        journey_duration_minutes: null,
+        stops_count: null,
+        destination_arrival_time: null,
+      }),
     ]);
     (card.shadowRoot!.querySelector('.train') as HTMLElement).click();
     await card.updateComplete;
@@ -319,7 +358,7 @@ describe('new card behaviours', () => {
         'sensor.trains': {
           entity_id: 'sensor.trains',
           state: '10',
-          attributes: { next_trains: 'invalid-string' },
+          attributes: { contract_version: 2, next_trains: 'invalid-string' },
         },
       },
     } as never;
@@ -330,12 +369,79 @@ describe('new card behaviours', () => {
     expect(message!.textContent).toContain('Attribute "next_trains" on entity sensor.trains is not an array');
   });
 
+  it('renders a styled error when contract_version is missing', async () => {
+    const card = document.createElement('train-departure-board') as TrainDepartureBoard;
+    card.setConfig({ type: 'custom:train-departure-board', entity: 'sensor.trains' } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state: '10',
+          attributes: { next_trains: [makeDeparture()] },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    await card.updateComplete;
+    const message = card.shadowRoot!.querySelector('.board-message.error');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Integration contract version 2 required (missing)');
+    expect(message!.textContent).toContain('Please update both realtime_trains_api and ha-train-departure-board together');
+  });
+
+  it('renders a styled error when contract_version is not 2', async () => {
+    const card = document.createElement('train-departure-board') as TrainDepartureBoard;
+    card.setConfig({ type: 'custom:train-departure-board', entity: 'sensor.trains' } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state: '10',
+          attributes: { contract_version: 1, next_trains: [makeDeparture()] },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    await card.updateComplete;
+    const message = card.shadowRoot!.querySelector('.board-message.error');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Integration contract version 2 required (found v1)');
+    expect(message!.textContent).toContain('Please update both realtime_trains_api and ha-train-departure-board together');
+  });
+
+  it('renders a styled error when a departure item is malformed', async () => {
+    const invalidDeparture = {
+      origin_name: 'Dartford',
+      // Missing required fields like scheduled, status_label, calling_points, etc.
+    };
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [invalidDeparture as unknown as TrainDeparture]
+    );
+    const message = card.shadowRoot!.querySelector('.board-message.error');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Malformed Contract v2 departure data on entity sensor.trains');
+  });
+
+  it('renders a styled error when a departure has malformed calling points', async () => {
+    const departureWithBadStops = makeDeparture({
+      calling_points: [null as never],
+    });
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [departureWithBadStops]
+    );
+    const message = card.shadowRoot!.querySelector('.board-message.error');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Malformed Contract v2 departure data on entity sensor.trains');
+  });
+
   it('renders a notice when walk_time_minutes is set and no departures are reachable', async () => {
     const card = await mountCard(
       { entity: 'sensor.trains', walk_time_minutes: 30 },
       [
-        makeDeparture({ scheduled: inMinutes(5), estimated: inMinutes(5) }),
-        makeDeparture({ scheduled: inMinutes(10), estimated: inMinutes(10) }),
+        makeDeparture({ scheduled: inMinutesIso(5), estimated: inMinutesIso(5), scheduled_time: inMinutesTime(5) }),
+        makeDeparture({ scheduled: inMinutesIso(10), estimated: inMinutesIso(10), scheduled_time: inMinutesTime(10) }),
       ]
     );
     const notice = card.shadowRoot!.querySelector('.walk-time-notice');
@@ -395,7 +501,10 @@ describe('new card behaviours', () => {
       makeDeparture({
         platform: '1',
         length: 10,
-        estimated: inMinutes(15),
+        estimated: inMinutesIso(15),
+        status_class: 'delayed',
+        status_label: 'Exp 12:15',
+        offset_label: '+5m',
       }),
     ]);
     const rowMeta = card.shadowRoot!.querySelector('.row-meta');
