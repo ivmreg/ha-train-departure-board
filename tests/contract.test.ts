@@ -112,6 +112,32 @@ describe('sample_entity.json matches the Contract v2 contract', () => {
     expect(Number.isNaN(new Date(attrs.next_update_at).getTime())).toBe(false);
   });
 
+  it('disruption and status attributes match Contract v2 contract', () => {
+    const attrs = sample.attributes as Record<string, unknown>;
+    expect(typeof attrs.service_status).toBe('string');
+    expect([
+      'normal',
+      'delayed',
+      'disrupted',
+      'engineering_work',
+      'station_closed',
+      'no_departures',
+    ]).toContain(attrs.service_status);
+    expect(Array.isArray(attrs.station_messages)).toBe(true);
+    for (const msg of attrs.station_messages as string[]) {
+      expect(typeof msg).toBe('string');
+    }
+    expect(Array.isArray(attrs.disruptions)).toBe(true);
+    for (const disruption of attrs.disruptions as Array<Record<string, unknown>>) {
+      expect(typeof disruption.id).toBe('string');
+      expect(typeof disruption.title).toBe('string');
+      expect(typeof disruption.is_planned).toBe('boolean');
+      expect(typeof disruption.summary).toBe('string');
+      expect('alternative_travel' in disruption).toBe(true);
+      expect('url' in disruption).toBe(true);
+    }
+  });
+
   it('presentation utilities digest sample departures without throwing', () => {
     for (const train of departures) {
       expect(() => getStockCategory(train.stock, train.operator_name)).not.toThrow();

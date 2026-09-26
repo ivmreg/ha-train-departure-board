@@ -35,6 +35,8 @@ entity: sensor.train_departures
 | `walk_time_minutes` | number | `0` | Minutes you need to reach the platform. Highlights the first train you can still catch and dims earlier ones |
 | `show_carriages` | boolean | `true` | Show train carriage/length count details if available |
 | `stale_indicator` | boolean | `true` | Show a "Showing last-known data" chip when the sensor reports `data_stale: true` or its `next_update_at` is overdue |
+| `show_announcements` | boolean | `true` | Show LED-style scrolling/cycling banner for station messages and disruptions |
+| `announcement_position` | string | `top` | Position of the announcements banner: `top` or `bottom` (compatible with `announcements: 'top' \| 'bottom' \| 'off'`) |
 | `font_size_time` | string | `1.25rem` | CSS font size for the departure time |
 | `font_size_destination` | string | `1rem` | CSS font size for the destination |
 | `font_size_status` | string | `0.75rem` | CSS font size for the status pill |
@@ -127,6 +129,9 @@ When a displayed time, platform, or status *changes* between refreshes, the affe
 
 - **data_stale** (boolean): Set by the integration when it is serving cached data because the upstream API is down or rate-limited; triggers the card's stale-data chip
 - **next_update_at** (ISO datetime): When the next refresh is expected; if it is more than a minute overdue the card also shows the stale-data chip
+- **service_status** (`normal`, `delayed`, `disrupted`, `engineering_work`, `station_closed`, `no_departures`): Current operational state of the station/service. Drives dedicated empty-state notices and replacement travel guidance when no departures are running.
+- **station_messages** (`string[]`): Station-specific announcements (e.g. NRCC messages) displayed in the LED dot-matrix banner.
+- **disruptions** (`object[]`): Active incidents impacting the station with `id`, `title`, `is_planned`, `summary`, `alternative_travel`, and `url`. Displayed in the LED banner and interactive details modal.
 
 ## Display Behavior
 

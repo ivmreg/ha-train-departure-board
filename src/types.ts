@@ -115,4 +115,28 @@ export interface TrainDepartureBoardConfig {
   // Show a warning chip when the data source reports stale data or a
   // refresh is overdue (default: true)
   stale_indicator?: boolean;
+  // Whether to show LED-style announcements banner (default: true)
+  show_announcements?: boolean;
+  // Position of LED-style announcements banner: 'top' or 'bottom' (default: 'top')
+  announcement_position?: 'top' | 'bottom';
+  // Legacy / alternative announcement placement: 'top', 'bottom', or 'off'
+  announcements?: 'top' | 'bottom' | 'off';
+}
+
+export type BoardServiceStatus =
+  | 'normal'
+  | 'delayed'
+  | 'disrupted'
+  | 'engineering_work'
+  | 'station_closed'
+  | 'no_departures';
+
+export interface DisruptionItem {
+  id: string;
+  title: string;
+  is_planned: boolean;
+  summary: string;
+  alternative_travel: string | null;
+  url: string | null;
+  [key: string]: unknown;
 }

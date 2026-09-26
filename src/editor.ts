@@ -107,6 +107,28 @@ const SCHEMA: HaFormSchema[] = [
     name: '',
     schema: [
       {
+        name: 'show_announcements',
+        selector: { boolean: {} },
+      },
+      {
+        name: 'announcement_position',
+        selector: {
+          select: {
+            options: [
+              { value: 'top', label: 'Top (Default)' },
+              { value: 'bottom', label: 'Bottom' },
+            ],
+            mode: 'dropdown',
+          },
+        },
+      },
+    ],
+  },
+  {
+    type: 'grid',
+    name: '',
+    schema: [
+      {
         name: 'font_size_time',
         selector: { text: {} },
       },
@@ -136,6 +158,8 @@ const LABELS: Record<string, string> = {
   font_size_status: 'Status Pill Font Size',
   show_carriages: 'Show Carriage Count',
   stale_indicator: 'Show Stale-Data Warning',
+  show_announcements: 'Show Announcements Banner',
+  announcement_position: 'Announcement Position',
 };
 
 // Helper text for fields
@@ -152,6 +176,10 @@ const HELPERS: Record<string, string> = {
   font_size_status: 'e.g. 0.85rem (default: 0.75rem)',
   show_carriages: 'Display carriage/length details when available',
   stale_indicator: 'Warn when the data source is stale or a refresh is overdue',
+  show_announcements:
+    'Display scrolling/cycling announcements banner for station messages and disruptions',
+  announcement_position:
+    'Position of the announcements banner: top (default) or bottom',
 };
 
 declare global {

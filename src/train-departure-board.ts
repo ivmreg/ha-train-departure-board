@@ -5,6 +5,8 @@ import {
   TrainDepartureBoardConfig,
   HomeAssistant,
   CallingPoint,
+  BoardServiceStatus,
+  DisruptionItem,
 } from './types';
 import {
   getStockCategory,
@@ -21,6 +23,15 @@ export class TrainDepartureBoard extends LitElement {
   @property({ type: Object }) config!: TrainDepartureBoardConfig;
   @property({ type: Array }) nextTrains: TrainDeparture[] = [];
   @state() private _selectedDeparture: TrainDeparture | null = null;
+  @state() private _selectedAlert: DisruptionItem | {
+    id?: string;
+    title?: string;
+    summary?: string;
+    alternative_travel?: string | null;
+    url?: string | null;
+    is_planned?: boolean;
+  } | null = null;
+  @state() private _activeAnnouncementIndex = 0;
   private dateCache = new Map<string, Date | null>();
   private lastEntityId: string | null = null;
   private _returnFocusTo: HTMLElement | null = null;
@@ -32,6 +43,7 @@ export class TrainDepartureBoard extends LitElement {
   >();
   private _flapCounters = new Map<string, number>();
   private _tickTimer: number | undefined;
+  private _announcementTimer: number | undefined;
 
   static getConfigElement() {
     return document.createElement('train-departure-board-editor');
@@ -784,6 +796,301 @@ export class TrainDepartureBoard extends LitElement {
       color: var(--secondary-text-color);
       font-weight: 600;
     }
+    /* Amber LED announcements banner */
+    .announcements-banner {
+      background: #0f0f0f;
+      color: #ffaa00;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 8px 12px;
+      font-family: ui-monospace, SFMono-Regular, "Courier New", Consolas, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-sizing: border-box;
+      cursor: pointer;
+      position: relative;
+    }
+    .announcements-banner.position-bottom {
+      border-bottom: none;
+      border-top: 1px solid #2a2a2a;
+    }
+    .announcements-banner:focus-visible {
+      outline: 2px solid #ffaa00;
+      outline-offset: -2px;
+    }
+    .announcement-icon {
+      color: #ffaa00;
+      font-size: 1.1em;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .announcement-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .announcement-ticker-wrap {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .announcement-ticker {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker-scroll 16s linear infinite;
+    }
+    .announcement-counter {
+      font-size: 0.75em;
+      opacity: 0.85;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 170, 0, 0.4);
+      border-radius: 3px;
+      padding: 1px 4px;
+    }
+    .announcement-action {
+      font-size: 0.75em;
+      text-decoration: underline;
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+    @keyframes ticker-scroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    .board-empty-state {
+      padding: 28px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .board-empty-state.station-closed {
+      background: rgba(211, 47, 47, 0.04);
+    }
+    .board-empty-state.engineering-work {
+      background: rgba(255, 152, 0, 0.04);
+    }
+    .board-empty-state.disrupted {
+      background: rgba(230, 81, 0, 0.04);
+    }
+    .board-empty-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary-text-color, #111);
+    }
+    .board-empty-state.station-closed .board-empty-title {
+      color: var(--error-color, #d32f2f);
+    }
+    .board-empty-state.engineering-work .board-empty-title {
+      color: var(--warning-color, #e65100);
+    }
+    .board-empty-state.disrupted .board-empty-title {
+      color: var(--warning-color, #e65100);
+    }
+    .alternative-travel-box {
+      margin-top: 12px;
+      width: 100%;
+      max-width: 480px;
+      background: var(--card-background-color, #fff);
+      border: 1px solid var(--warning-color, #ff9800);
+      border-left: 4px solid var(--warning-color, #ff9800);
+      border-radius: 6px;
+      padding: 10px 14px;
+      text-align: left;
+      box-sizing: border-box;
+    }
+    .alternative-travel-header {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--warning-color, #e65100);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .alternative-travel-item {
+      font-size: 0.85rem;
+      color: var(--primary-text-color, #111);
+      line-height: 1.4;
+    }
+    .alternative-travel-item + .alternative-travel-item {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--divider-color, #e0e0e0);
+    }
+    .empty-disruption-details {
+      margin-top: 10px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    .empty-disruption-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-text-color, #111);
+      margin: 0 0 4px 0;
+    }
+    .empty-state-summary {
+      font-size: 0.88rem;
+      line-height: 1.4;
+      color: var(--secondary-text-color, #555);
+      margin: 0;
+    }
+    .empty-station-messages {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 500px;
+      width: 100%;
+    }
+    .empty-station-message {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--secondary-text-color, #444);
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+      padding: 6px 10px;
+      border-radius: 4px;
+      text-align: left;
+    }
+    .empty-state-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .empty-details-btn {
+      background: var(--primary-color, #03a9f4);
+      color: var(--text-primary-color, #fff);
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .empty-details-btn:hover {
+      opacity: 0.9;
+    }
+    .empty-details-btn:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: 2px;
+    }
+    .empty-external-link {
+      color: var(--primary-color, #03a9f4);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .empty-external-link:hover {
+      text-decoration: underline;
+    }
+    .alert-popup-card {
+      background: var(--card-background-color, #fff);
+      border-radius: 12px;
+      max-width: 460px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .alert-popup-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .alert-popup-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary-text-color, #111);
+      line-height: 1.3;
+    }
+    .alert-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+    .alert-badge.planned {
+      background: rgba(33, 150, 243, 0.12);
+      color: var(--info-color, #1976d2);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+    }
+    .alert-badge.unplanned {
+      background: rgba(230, 81, 0, 0.12);
+      color: var(--warning-color, #e65100);
+      border: 1px solid rgba(230, 81, 0, 0.3);
+    }
+    .alert-summary {
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--primary-text-color, #222);
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .alert-alternative-section {
+      background: rgba(255, 193, 7, 0.08);
+      border-left: 4px solid var(--warning-color, #ff9800);
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    .alert-alternative-title {
+      font-weight: 700;
+      color: var(--warning-color, #e65100);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .alert-link {
+      color: var(--primary-color, #03a9f4);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .alert-link:hover {
+      text-decoration: underline;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .announcement-ticker {
+        animation: none !important;
+        transform: none !important;
+      }
+    }
   `;
 
   private _renderMessage(icon: string, message: string, isError = false) {
@@ -841,11 +1148,27 @@ export class TrainDepartureBoard extends LitElement {
       );
     }
 
-    if (entity.state === 'unavailable' || entity.state === 'unknown') {
+    if (entity.state === 'unavailable') {
       return this._renderMessage(
         '🚆',
-        `Entity ${this.config.entity} is currently ${entity.state}`
+        `Entity ${this.config.entity} is currently unavailable`
       );
+    }
+
+    if (entity.state === 'unknown') {
+      const hasValidV2 =
+        entity.attributes?.contract_version === 2 &&
+        Array.isArray(entity.attributes?.next_trains);
+      if (!hasValidV2) {
+        const errorDetail = entity.attributes?.error
+          ? ` (${entity.attributes.error})`
+          : '';
+        return this._renderMessage(
+          '⚠',
+          `Data currently unavailable for entity ${this.config.entity}${errorDetail}`,
+          true
+        );
+      }
     }
 
     const contractVersion = entity.attributes?.contract_version;
@@ -932,12 +1255,20 @@ export class TrainDepartureBoard extends LitElement {
     const isStale = this._isDataStale(entity);
     this._updateFlapCounters(departures);
 
+    const announcements = this._getAnnouncements();
+    const showAnnouncements =
+      this._isAnnouncementsEnabled() && announcements.length > 0;
+    const announcementPos = this._getAnnouncementPosition();
+
     return html`
       <ha-card style="${customStyles}">
         ${this.config.title
           ? html`<div class="card-header">${this.config.title}</div>`
           : ''}
         <div class="card">
+          ${showAnnouncements && announcementPos === 'top'
+            ? this._renderAnnouncementsBanner(announcements, 'top')
+            : ''}
           ${walkTime > 0 && highlightIndex === -1 && departures.length > 0
             ? html`<div class="walk-time-notice">
                 No listed departures reachable within ${walkTime} min walk
@@ -953,10 +1284,10 @@ export class TrainDepartureBoard extends LitElement {
                   this.renderDepartureRow(departure, index, highlightIndex, now)
                 )}
               </div>`
-            : html`<div class="board-message">
-                <span class="message-icon" aria-hidden="true">🚉</span>
-                <span class="message-text">No departures in the current window</span>
-              </div>`}
+            : this._renderEmptyState(entity, now)}
+          ${showAnnouncements && announcementPos === 'bottom'
+            ? this._renderAnnouncementsBanner(announcements, 'bottom')
+            : ''}
           ${lastUpdated || isStale || entity.attributes?.error
             ? html`<div class="footer">
                 ${isStale
@@ -975,6 +1306,7 @@ export class TrainDepartureBoard extends LitElement {
         </div>
       </ha-card>
       ${this._renderDetailsPopup()}
+      ${this._renderAlertPopup()}
     `;
   }
 
@@ -988,6 +1320,14 @@ export class TrainDepartureBoard extends LitElement {
         this.requestUpdate();
       }
     }, 30_000);
+    this._announcementTimer = window.setInterval(() => {
+      const announcements = this._getAnnouncements();
+      if (announcements.length > 1) {
+        this._activeAnnouncementIndex =
+          (this._activeAnnouncementIndex + 1) % announcements.length;
+        this.requestUpdate();
+      }
+    }, 7000);
   }
 
   disconnectedCallback() {
@@ -996,6 +1336,10 @@ export class TrainDepartureBoard extends LitElement {
     if (this._tickTimer !== undefined) {
       window.clearInterval(this._tickTimer);
       this._tickTimer = undefined;
+    }
+    if (this._announcementTimer !== undefined) {
+      window.clearInterval(this._announcementTimer);
+      this._announcementTimer = undefined;
     }
   }
 
@@ -1047,8 +1391,12 @@ export class TrainDepartureBoard extends LitElement {
   }
 
   private _handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && this._selectedDeparture) {
-      this._closePopup();
+    if (e.key === 'Escape') {
+      if (this._selectedAlert) {
+        this._closeAlertPopup();
+      } else if (this._selectedDeparture) {
+        this._closePopup();
+      }
     }
   };
 
@@ -1075,9 +1423,453 @@ export class TrainDepartureBoard extends LitElement {
     // Move focus into the dialog when it opens
     if (changedProps.has('_selectedDeparture') && this._selectedDeparture) {
       const closeButton =
-        this.shadowRoot?.querySelector<HTMLButtonElement>('.popup-close');
+        this.shadowRoot?.querySelector<HTMLButtonElement>(
+          '.popup-close:not(.alert-popup-close)'
+        );
       closeButton?.focus();
     }
+    if (changedProps.has('_selectedAlert') && this._selectedAlert) {
+      const closeButton =
+        this.shadowRoot?.querySelector<HTMLButtonElement>('.alert-popup-close');
+      closeButton?.focus();
+    }
+  }
+
+  private _isAnnouncementsEnabled(): boolean {
+    if (!this.config) return true;
+    if (
+      this.config.show_announcements === false ||
+      this.config.announcements === 'off'
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  private _getAnnouncementPosition(): 'top' | 'bottom' {
+    if (!this.config) return 'top';
+    if (this.config.announcement_position) {
+      return this.config.announcement_position;
+    }
+    if (this.config.announcements === 'bottom') {
+      return 'bottom';
+    }
+    return 'top';
+  }
+
+  private _getAnnouncements(): Array<{
+    id: string;
+    text: string;
+    isDisruption: boolean;
+    disruption?: DisruptionItem;
+  }> {
+    const entity = this.config?.entity
+      ? this.hass?.states?.[this.config.entity]
+      : null;
+    if (!entity?.attributes) return [];
+
+    const items: Array<{
+      id: string;
+      text: string;
+      isDisruption: boolean;
+      disruption?: DisruptionItem;
+    }> = [];
+
+    const stationMessages = entity.attributes.station_messages;
+    if (Array.isArray(stationMessages)) {
+      stationMessages.forEach((msg, idx) => {
+        if (typeof msg === 'string' && msg.trim()) {
+          items.push({
+            id: `msg-${idx}`,
+            text: msg.trim(),
+            isDisruption: false,
+          });
+        }
+      });
+    }
+
+    const disruptions = entity.attributes.disruptions;
+    if (Array.isArray(disruptions)) {
+      disruptions.forEach((d, idx) => {
+        if (d && typeof d === 'object') {
+          const item = d as DisruptionItem;
+          const text = item.title || item.summary || 'Disruption alert';
+          items.push({
+            id: item.id || `disr-${idx}`,
+            text: text.trim(),
+            isDisruption: true,
+            disruption: item,
+          });
+        }
+      });
+    }
+
+    return items;
+  }
+
+  private _showAlertDetails(
+    announcement: {
+      id: string;
+      text: string;
+      isDisruption: boolean;
+      disruption?: DisruptionItem;
+    },
+    e?: Event
+  ) {
+    this._returnFocusTo = (e?.currentTarget as HTMLElement) ?? null;
+    if (announcement.disruption) {
+      this._selectedAlert = announcement.disruption;
+    } else {
+      this._selectedAlert = {
+        id: announcement.id,
+        title: 'Station Announcement',
+        summary: announcement.text,
+        is_planned: false,
+        alternative_travel: null,
+        url: null,
+      };
+    }
+  }
+
+  private _closeAlertPopup() {
+    this._selectedAlert = null;
+    this._returnFocusTo?.focus();
+    this._returnFocusTo = null;
+  }
+
+  private _handleAlertOverlayClick(e: MouseEvent) {
+    if ((e.target as HTMLElement).classList.contains('popup-overlay')) {
+      this._closeAlertPopup();
+    }
+  }
+
+  private _handleAlertPopupKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Tab') {
+      return;
+    }
+    const focusable = Array.from(
+      this.shadowRoot?.querySelectorAll<HTMLElement>(
+        '.alert-popup-card button, .alert-popup-card a'
+      ) || []
+    ).filter(el => !el.hasAttribute('disabled'));
+
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active =
+      (this.shadowRoot?.activeElement as HTMLElement | null) ||
+      (e.composedPath && (e.composedPath()[0] as HTMLElement)) ||
+      null;
+
+    if (e.shiftKey) {
+      if (active === first || !focusable.includes(active as HTMLElement)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (active === last || !focusable.includes(active as HTMLElement)) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
+  private _handleBannerKeyDown(
+    e: KeyboardEvent,
+    current: {
+      id: string;
+      text: string;
+      isDisruption: boolean;
+      disruption?: DisruptionItem;
+    },
+    announcements: Array<{
+      id: string;
+      text: string;
+      isDisruption: boolean;
+      disruption?: DisruptionItem;
+    }>
+  ) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._showAlertDetails(current, e);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      this._activeAnnouncementIndex =
+        (this._activeAnnouncementIndex + 1) % announcements.length;
+      this.requestUpdate();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      this._activeAnnouncementIndex =
+        (this._activeAnnouncementIndex - 1 + announcements.length) %
+        announcements.length;
+      this.requestUpdate();
+    }
+  }
+
+  private _isSafeUrl(url: string | null | undefined): boolean {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim().toLowerCase();
+    return trimmed.startsWith('https://') || trimmed.startsWith('http://');
+  }
+
+  private _renderAnnouncementsBanner(
+    announcements: Array<{
+      id: string;
+      text: string;
+      isDisruption: boolean;
+      disruption?: DisruptionItem;
+    }>,
+    position: 'top' | 'bottom'
+  ) {
+    if (announcements.length === 0) return nothing;
+    const activeIndex = this._activeAnnouncementIndex % announcements.length;
+    const current = announcements[activeIndex];
+
+    return html`
+      <div
+        class="announcements-banner position-${position}"
+        role="region"
+        aria-label="Station announcements"
+        tabindex="0"
+        aria-haspopup="dialog"
+        @click=${(e: Event) => this._showAlertDetails(current, e)}
+        @keydown=${(e: KeyboardEvent) =>
+          this._handleBannerKeyDown(e, current, announcements)}
+      >
+        <span class="announcement-icon" aria-hidden="true">📢</span>
+        <div class="announcement-body">
+          ${announcements.length > 1
+            ? html`<span
+                class="announcement-counter"
+                aria-label="Announcement ${activeIndex + 1} of ${announcements.length}"
+                >${activeIndex + 1}/${announcements.length}</span
+              >`
+            : ''}
+          <div class="announcement-ticker-wrap">
+            <span class="announcement-ticker">${current.text}</span>
+          </div>
+        </div>
+        <span class="announcement-action">Details</span>
+      </div>
+    `;
+  }
+
+  private _isNighttime(now: Date = new Date()): boolean {
+    try {
+      const hourStr = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/London',
+        hour: 'numeric',
+        hourCycle: 'h23',
+      }).format(now);
+      const hour = parseInt(hourStr, 10);
+      return hour >= 1 && hour < 5;
+    } catch {
+      const hour = now.getHours();
+      return hour >= 1 && hour < 5;
+    }
+  }
+
+  private _renderEmptyState(
+    entity: {
+      attributes?: Record<string, unknown>;
+    },
+    now: Date = new Date()
+  ) {
+    const attrs = entity.attributes || {};
+    const serviceStatus =
+      (attrs.service_status as BoardServiceStatus) ||
+      'no_departures';
+    const disruptions = (Array.isArray(attrs.disruptions)
+      ? attrs.disruptions
+      : []) as DisruptionItem[];
+    const stationMessages = (Array.isArray(attrs.station_messages)
+      ? attrs.station_messages
+      : []).filter((m): m is string => Boolean(m && typeof m === 'string' && m.trim()));
+
+    const altTravels = disruptions
+      .map(d => d.alternative_travel)
+      .filter((t): t is string => Boolean(t && typeof t === 'string' && t.trim()));
+
+    const primaryDisruption = disruptions.length > 0 ? disruptions[0] : null;
+
+    let icon = '🚉';
+    let title = 'No Departures';
+    let defaultMsg = 'No departures in the current window';
+
+    if (serviceStatus === 'station_closed') {
+      icon = '🚫';
+      title = 'Station Closed';
+      defaultMsg = 'This station is currently closed. No train services are operating.';
+    } else if (serviceStatus === 'engineering_work') {
+      icon = '🚧';
+      title = 'Engineering Work';
+      defaultMsg = 'Engineering work is affecting services at this station.';
+    } else if (serviceStatus === 'disrupted') {
+      icon = '⚠';
+      title = 'Service Disrupted';
+      defaultMsg = 'Train services are disrupted. Please check announcements for details.';
+    } else {
+      icon = '🚉';
+      title = 'No Departures';
+      if (this._isNighttime(now)) {
+        defaultMsg = 'No departures scheduled overnight. Services may have finished for the night.';
+      } else {
+        defaultMsg = 'No departures in the current window';
+      }
+    }
+
+    const statusClass = serviceStatus.replace(/_/g, '-');
+
+    return html`
+      <div class="board-message board-empty-state ${statusClass} ${serviceStatus}" role="status">
+        <span class="message-icon" aria-hidden="true">${icon}</span>
+        <div class="board-empty-title">${title}</div>
+        <span class="message-text">${defaultMsg}</span>
+        ${primaryDisruption
+          ? html`
+              <div class="empty-disruption-details">
+                <h4 class="empty-disruption-title">
+                  ${primaryDisruption.title || 'Disruption Notice'}
+                </h4>
+                ${primaryDisruption.summary
+                  ? html`<p class="empty-state-summary">
+                      ${primaryDisruption.summary}
+                    </p>`
+                  : ''}
+              </div>
+            `
+          : ''}
+        ${stationMessages.length > 0
+          ? html`
+              <div class="empty-station-messages">
+                ${stationMessages.map(
+                  msg => html`<div class="empty-station-message">📢 ${msg}</div>`
+                )}
+              </div>
+            `
+          : ''}
+        ${altTravels.length > 0
+          ? html`
+              <div class="alternative-travel-box">
+                <div class="alternative-travel-header">
+                  <span aria-hidden="true">🚌</span> ${serviceStatus === 'engineering_work'
+                    ? 'Replacement Bus & Ticket Acceptance'
+                    : 'Alternative Travel & Ticket Acceptance'}
+                </div>
+                <div class="alternative-travel-content">
+                  ${altTravels.map(
+                    alt =>
+                      html`<div class="alternative-travel-item">${alt}</div>`
+                  )}
+                </div>
+              </div>
+            `
+          : nothing}
+        ${primaryDisruption
+          ? html`
+              <div class="empty-state-actions">
+                <button
+                  class="empty-details-btn"
+                  @click=${(e: Event) =>
+                    this._showAlertDetails(
+                      {
+                        id: primaryDisruption.id,
+                        text:
+                          primaryDisruption.title ||
+                          primaryDisruption.summary ||
+                          'Disruption',
+                        isDisruption: true,
+                        disruption: primaryDisruption,
+                      },
+                      e
+                    )}
+                >
+                  View Details
+                </button>
+                ${this._isSafeUrl(primaryDisruption.url)
+                  ? html`
+                      <a
+                        href="${primaryDisruption.url}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="empty-external-link"
+                      >
+                        National Rail Updates ↗
+                      </a>
+                    `
+                  : ''}
+              </div>
+            `
+          : ''}
+      </div>
+    `;
+  }
+
+  private _renderAlertPopup() {
+    if (!this._selectedAlert) return nothing;
+
+    const alert = this._selectedAlert;
+    const isSafe = this._isSafeUrl(alert.url);
+    const isPlanned = Boolean(alert.is_planned);
+    const title = alert.title || 'Station Notice';
+    const summary = alert.summary || '';
+    const altTravel = alert.alternative_travel;
+
+    return html`
+      <div
+        class="popup-overlay alert-popup-overlay"
+        @click=${this._handleAlertOverlayClick}
+        @keydown=${this._handleAlertPopupKeyDown}
+      >
+        <div
+          class="alert-popup-card"
+          role="dialog"
+          aria-modal="true"
+          aria-label="${title}"
+        >
+          <div class="alert-popup-header">
+            <div>
+              <h2 class="alert-popup-title">${title}</h2>
+              <div class="alert-badge ${isPlanned ? 'planned' : 'unplanned'}">
+                ${isPlanned ? 'Planned Work' : 'Disruption Alert'}
+              </div>
+            </div>
+            <button
+              class="popup-close alert-popup-close"
+              @click=${this._closeAlertPopup}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </div>
+          ${summary ? html`<p class="alert-summary">${summary}</p>` : ''}
+          ${altTravel
+            ? html`
+                <div class="alert-alternative-section">
+                  <div class="alert-alternative-title">
+                    <span aria-hidden="true">🚌</span> Alternative Travel &amp; Ticket Acceptance
+                  </div>
+                  <div>${altTravel}</div>
+                </div>
+              `
+            : ''}
+          ${isSafe && alert.url
+            ? html`
+                <div class="alert-link-container">
+                  <a
+                    href="${alert.url}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="alert-link"
+                  >
+                    More information on National Rail ↗
+                  </a>
+                </div>
+              `
+            : ''}
+        </div>
+      </div>
+    `;
   }
 
   private _handleOverlayClick(e: MouseEvent) {

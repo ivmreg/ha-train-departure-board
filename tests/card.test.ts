@@ -1,7 +1,6 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest';
-import '../src/train-departure-board';
-import type { TrainDepartureBoard } from '../src/train-departure-board';
+import { TrainDepartureBoard } from '../src/train-departure-board';
 import { TrainDeparture } from '../src/types';
 
 function pad(n: number): string {
@@ -512,5 +511,527 @@ describe('new card behaviours', () => {
     expect(rowMeta!.querySelector('.status-pill')).not.toBeNull();
     expect(rowMeta!.querySelector('.carriages-badge')).not.toBeNull();
     expect(rowMeta!.querySelector('.platform-badge')).not.toBeNull();
+  });
+});
+
+describe('rail disruption announcements and empty states', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const sampleDisruption = {
+    id: 'INC100',
+    title: 'Track circuit failure between Lewisham and London Bridge',
+    is_planned: false,
+    summary: 'Services may be cancelled or delayed by up to 20 minutes.',
+    alternative_travel: 'Rail replacement bus running from Lewisham Stop C. Tickets accepted on London Underground.',
+    url: 'https://www.nationalrail.co.uk/incidents/100',
+  };
+
+  it('renders the announcements banner at the top by default when messages or disruptions exist', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        station_messages: ['Please mind the gap'],
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner');
+    expect(banner).not.toBeNull();
+    expect(banner!.classList.contains('position-top')).toBe(true);
+    expect(banner!.textContent).toContain('Please mind the gap');
+
+    // Check DOM position: banner should be before departure-list
+    const cardBody = card.shadowRoot!.querySelector('.card')!;
+    const bannerIndex = Array.from(cardBody.children).indexOf(banner!);
+    const list = card.shadowRoot!.querySelector('.departure-list')!;
+    const listIndex = Array.from(cardBody.children).indexOf(list);
+    expect(bannerIndex).toBeLessThan(listIndex);
+  });
+
+  it('renders the announcements banner at the bottom when announcement_position is bottom', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains', announcement_position: 'bottom' },
+      [makeDeparture()],
+      {
+        station_messages: ['Safety notice'],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner');
+    expect(banner).not.toBeNull();
+    expect(banner!.classList.contains('position-bottom')).toBe(true);
+
+    const cardBody = card.shadowRoot!.querySelector('.card')!;
+    const bannerIndex = Array.from(cardBody.children).indexOf(banner!);
+    const list = card.shadowRoot!.querySelector('.departure-list')!;
+    const listIndex = Array.from(cardBody.children).indexOf(list);
+    expect(bannerIndex).toBeGreaterThan(listIndex);
+  });
+
+  it('renders the announcements banner at bottom with backward-compatible announcements enum', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains', announcements: 'bottom' },
+      [makeDeparture()],
+      {
+        station_messages: ['Safety notice'],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner');
+    expect(banner).not.toBeNull();
+    expect(banner!.classList.contains('position-bottom')).toBe(true);
+  });
+
+  it('hides the announcements banner when show_announcements is false', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains', show_announcements: false },
+      [makeDeparture()],
+      {
+        station_messages: ['Safety notice'],
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    expect(card.shadowRoot!.querySelector('.announcements-banner')).toBeNull();
+  });
+
+  it('hides the announcements banner when announcements is off', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains', announcements: 'off' },
+      [makeDeparture()],
+      {
+        station_messages: ['Safety notice'],
+      }
+    );
+
+    expect(card.shadowRoot!.querySelector('.announcements-banner')).toBeNull();
+  });
+
+  it('cycles through announcements using ArrowRight and ArrowLeft keys', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        station_messages: ['Message 1'],
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    expect(banner.textContent).toContain('Message 1');
+    expect(banner.querySelector('.announcement-counter')?.textContent).toBe('1/2');
+
+    banner.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await card.updateComplete;
+
+    expect(banner.textContent).toContain(sampleDisruption.title);
+    expect(banner.querySelector('.announcement-counter')?.textContent).toBe('2/2');
+
+    banner.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    await card.updateComplete;
+
+    expect(banner.textContent).toContain('Message 1');
+    expect(banner.querySelector('.announcement-counter')?.textContent).toBe('1/2');
+  });
+
+  it('renders station_closed empty state with alternative travel guidance', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [],
+      {
+        service_status: 'station_closed',
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed');
+    expect(empty).not.toBeNull();
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Station Closed');
+    expect(empty!.textContent).toContain('station is currently closed');
+
+    const altTravel = empty!.querySelector('.alternative-travel-box');
+    expect(altTravel).not.toBeNull();
+    expect(altTravel!.textContent).toContain('Rail replacement bus running from Lewisham Stop C');
+    expect(altTravel!.textContent).toContain('Tickets accepted on London Underground');
+  });
+
+  it('renders engineering_work empty state with replacement bus guidance', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [],
+      {
+        service_status: 'engineering_work',
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.engineering-work');
+    expect(empty).not.toBeNull();
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Engineering Work');
+    expect(empty!.textContent).toContain('Engineering work is affecting services');
+
+    const altTravel = empty!.querySelector('.alternative-travel-box');
+    expect(altTravel).not.toBeNull();
+    expect(altTravel!.textContent).toContain('Replacement Bus & Ticket Acceptance');
+  });
+
+  it('renders disrupted empty state with alternative travel guidance', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [],
+      {
+        service_status: 'disrupted',
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.disrupted');
+    expect(empty).not.toBeNull();
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Service Disrupted');
+    expect(empty!.textContent).toContain('Train services are disrupted');
+    expect(empty!.querySelector('.alternative-travel-box')).not.toBeNull();
+  });
+
+  it('opens alert details modal on banner click and closes with Escape key', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    banner.focus();
+    banner.click();
+    await card.updateComplete;
+
+    const dialog = card.shadowRoot!.querySelector('.alert-popup-card');
+    expect(dialog).not.toBeNull();
+    expect(dialog!.getAttribute('role')).toBe('dialog');
+    expect(dialog!.textContent).toContain(sampleDisruption.title);
+    expect(dialog!.textContent).toContain(sampleDisruption.summary);
+    expect(dialog!.textContent).toContain(sampleDisruption.alternative_travel);
+
+    // Escape key closes modal
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
+  });
+
+  it('opens alert details modal with Enter key on announcement banner', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    banner.focus();
+    banner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await card.updateComplete;
+
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).not.toBeNull();
+  });
+
+  it('safely renders http/https links and suppresses unsafe URLs in alert modal', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    banner.click();
+    await card.updateComplete;
+
+    const link = card.shadowRoot!.querySelector('.alert-link') as HTMLAnchorElement;
+    expect(link).not.toBeNull();
+    expect(link.getAttribute('href')).toBe('https://www.nationalrail.co.uk/incidents/100');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+
+    // Close and test with unsafe url
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await card.updateComplete;
+
+    const unsafeCard = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [
+          {
+            ...sampleDisruption,
+            url: 'javascript:alert(document.cookie)',
+          },
+        ],
+      }
+    );
+
+    const unsafeBanner = unsafeCard.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    unsafeBanner.click();
+    await unsafeCard.updateComplete;
+
+    // Unsafe URL must NOT be rendered as a link
+    expect(unsafeCard.shadowRoot!.querySelector('.alert-link')).toBeNull();
+  });
+
+  it('closes alert modal on close button click and overlay click', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    banner.click();
+    await card.updateComplete;
+
+    const closeBtn = card.shadowRoot!.querySelector('.alert-popup-close') as HTMLElement;
+    expect(closeBtn).not.toBeNull();
+    closeBtn.click();
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
+
+    // Re-open and test overlay click
+    banner.click();
+    await card.updateComplete;
+    const overlay = card.shadowRoot!.querySelector('.alert-popup-overlay') as HTMLElement;
+    overlay.click();
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
+  });
+
+  it('includes reduced-motion CSS rules for announcement ticker', () => {
+    const styles = (TrainDepartureBoard as unknown as { styles: { cssText: string } }).styles?.cssText || '';
+    expect(styles).toContain('prefers-reduced-motion');
+    expect(styles).toContain('ticker-scroll');
+    expect(styles).toContain('announcement-ticker');
+  });
+});
+
+describe('entity state unknown and empty state enrichment', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const sampleDisruption = {
+    id: 'INC200',
+    title: 'Emergency engineering works near New Cross',
+    is_planned: true,
+    summary: 'No trains between London Bridge and Dartford via Lewisham.',
+    alternative_travel: 'Replacement buses running between New Cross and Dartford.',
+    url: 'https://www.nationalrail.co.uk/incidents/200',
+  };
+
+  function mountUnknownCard(
+    attributes: Record<string, unknown> = {},
+    state = 'unknown'
+  ): Promise<TrainDepartureBoard> {
+    const card = document.createElement(
+      'train-departure-board'
+    ) as TrainDepartureBoard;
+    card.setConfig({
+      type: 'custom:train-departure-board',
+      entity: 'sensor.trains',
+    } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state,
+          attributes: {
+            contract_version: 2,
+            next_trains: [],
+            ...attributes,
+          },
+          last_changed: new Date().toISOString(),
+          last_updated: new Date().toISOString(),
+          context: { id: '1', parent_id: null, user_id: null },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    return card.updateComplete.then(() => card);
+  }
+
+  it('renders station_closed empty state for HA state: unknown without raw unknown text', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'station_closed',
+      disruptions: [sampleDisruption],
+      station_messages: ['Station will reopen at 06:00 tomorrow.'],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed');
+    expect(empty).not.toBeNull();
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Station Closed');
+    expect(empty!.textContent).toContain(sampleDisruption.title);
+    expect(empty!.textContent).toContain(sampleDisruption.summary);
+    expect(empty!.textContent).toContain('Station will reopen at 06:00 tomorrow.');
+    expect(empty!.textContent).toContain('Replacement buses running');
+    expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
+  });
+
+  it('renders engineering_work empty state for HA state: unknown without raw unknown text', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'engineering_work',
+      disruptions: [sampleDisruption],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.engineering-work');
+    expect(empty).not.toBeNull();
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Engineering Work');
+    expect(empty!.textContent).toContain(sampleDisruption.title);
+    expect(empty!.textContent).toContain('Replacement Bus & Ticket Acceptance');
+    expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
+  });
+
+  it('renders RTT-only no_departures empty state for HA state: unknown without raw unknown text', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'no_departures',
+      disruptions: [],
+      station_messages: [],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.no-departures');
+    expect(empty).not.toBeNull();
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('No Departures');
+    expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
+  });
+
+  it('renders clear data-unavailable message for state: unknown when v2 contract is missing and does not mislabel closure', async () => {
+    const card = document.createElement(
+      'train-departure-board'
+    ) as TrainDepartureBoard;
+    card.setConfig({
+      type: 'custom:train-departure-board',
+      entity: 'sensor.trains',
+    } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state: 'unknown',
+          attributes: {
+            error: 'RTT API timeout',
+            // Missing contract_version 2 and next_trains
+          },
+          last_changed: new Date().toISOString(),
+          last_updated: new Date().toISOString(),
+          context: { id: '1', parent_id: null, user_id: null },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    await card.updateComplete;
+
+    const message = card.shadowRoot!.querySelector('.board-message');
+    expect(message).not.toBeNull();
+    expect(message!.textContent).toContain('Data currently unavailable');
+    expect(message!.textContent).toContain('RTT API timeout');
+    expect(card.shadowRoot!.textContent).not.toContain('Station Closed');
+    expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
+  });
+
+  it('retains rich disruption context in empty state when announcements are disabled', async () => {
+    const card = document.createElement(
+      'train-departure-board'
+    ) as TrainDepartureBoard;
+    card.setConfig({
+      type: 'custom:train-departure-board',
+      entity: 'sensor.trains',
+      show_announcements: false,
+    } as never);
+    card.hass = {
+      states: {
+        'sensor.trains': {
+          entity_id: 'sensor.trains',
+          state: 'unknown',
+          attributes: {
+            contract_version: 2,
+            next_trains: [],
+            service_status: 'disrupted',
+            disruptions: [sampleDisruption],
+            station_messages: ['Platform 2 closed for maintenance.'],
+          },
+          last_changed: new Date().toISOString(),
+          last_updated: new Date().toISOString(),
+          context: { id: '1', parent_id: null, user_id: null },
+        },
+      },
+    } as never;
+    document.body.appendChild(card);
+    await card.updateComplete;
+
+    expect(card.shadowRoot!.querySelector('.announcements-banner')).toBeNull();
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.disrupted');
+    expect(empty).not.toBeNull();
+    expect(empty!.textContent).toContain(sampleDisruption.title);
+    expect(empty!.textContent).toContain(sampleDisruption.summary);
+    expect(empty!.textContent).toContain('Platform 2 closed for maintenance.');
+    expect(empty!.textContent).toContain('Replacement buses running');
+
+    const link = empty!.querySelector('.empty-external-link') as HTMLAnchorElement;
+    expect(link).not.toBeNull();
+    expect(link.href).toBe('https://www.nationalrail.co.uk/incidents/200');
+
+    const detailsBtn = empty!.querySelector('.empty-details-btn') as HTMLElement;
+    expect(detailsBtn).not.toBeNull();
+    detailsBtn.click();
+    await card.updateComplete;
+
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).not.toBeNull();
+  });
+
+  it('traps focus properly inside alert modal using Shadow DOM activeElement', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'disrupted',
+      disruptions: [sampleDisruption],
+    });
+
+    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    banner.click();
+    await card.updateComplete;
+
+    const closeBtn = card.shadowRoot!.querySelector('.alert-popup-close') as HTMLElement;
+    const link = card.shadowRoot!.querySelector('.alert-link') as HTMLElement;
+    expect(closeBtn).not.toBeNull();
+    expect(link).not.toBeNull();
+
+    closeBtn.focus();
+    expect(card.shadowRoot!.activeElement).toBe(closeBtn);
+
+    const overlay = card.shadowRoot!.querySelector('.alert-popup-overlay') as HTMLElement;
+    overlay.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, composed: true })
+    );
+    expect(card.shadowRoot!.activeElement).toBe(link);
+
+    overlay.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: false, bubbles: true, composed: true })
+    );
+    expect(card.shadowRoot!.activeElement).toBe(closeBtn);
+  });
+
+  it('provides nighttime-specific message during overnight hours', () => {
+    const card = document.createElement(
+      'train-departure-board'
+    ) as unknown as { _isNighttime: (date: Date) => boolean };
+
+    const overnightDate = new Date('2026-01-15T03:30:00Z');
+    expect(card._isNighttime(overnightDate)).toBe(true);
+
+    const daytimeDate = new Date('2026-01-15T14:30:00Z');
+    expect(card._isNighttime(daytimeDate)).toBe(false);
   });
 });

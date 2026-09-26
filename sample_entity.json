@@ -3,10 +3,24 @@
     "state": "11.0",
     "attributes": {
         "contract_version": 2,
+        "service_status": "normal",
         "journey_start": "BKH",
         "journey_end": "CHX",
         "platforms_of_interest": [
             "1"
+        ],
+        "station_messages": [
+            "Please keep your personal belongings with you at all times. Report unattended items to a member of staff or text BTP on 61016."
+        ],
+        "disruptions": [
+            {
+                "id": "INC98231",
+                "title": "Minor delays between Lewisham and London Charing Cross",
+                "is_planned": false,
+                "summary": "Points failure near St Johns causing minor delays to some services.",
+                "alternative_travel": "Tickets accepted on London Underground via reasonable routes.",
+                "url": "https://www.nationalrail.co.uk/service-disruptions"
+            }
         ],
         "next_trains": [
             {
