@@ -15,13 +15,13 @@ const t=window,r=t.ShadowRoot&&(void 0===t.ShadyCSS||t.ShadyCSS.nativeShadow)&&"
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var v;f[g]=!0,f.elementProperties=new Map,f.elementStyles=[],f.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:f}),(null!==(s=l.reactiveElementVersions)&&void 0!==s?s:l.reactiveElementVersions=[]).push("1.6.3");const b=window,x=b.trustedTypes,y=x?x.createPolicy("lit-html",{createHTML:e=>e}):void 0,_="$lit$",w=`lit$${(Math.random()+"").slice(9)}$`,$="?"+w,k=`<${$}>`,A=document,E=()=>A.createComment(""),S=e=>null===e||"object"!=typeof e&&"function"!=typeof e,z=Array.isArray,D="[ \t\n\f\r]",C=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,P=/-->/g,T=/>/g,j=RegExp(`>|${D}(?:([^\\s"'>=/]+)(${D}*=${D}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),N=/'/g,R=/"/g,U=/^(?:script|style|textarea|title)$/i,O=(e=>(t,...r)=>({_$litType$:e,strings:t,values:r}))(1),H=Symbol.for("lit-noChange"),M=Symbol.for("lit-nothing"),B=new WeakMap,I=A.createTreeWalker(A,129,null,!1);function L(e,t){if(!Array.isArray(e)||!e.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==y?y.createHTML(t):t}const V=(e,t)=>{const r=e.length-1,i=[];let n,o=2===t?"<svg>":"",a=C;for(let t=0;t<r;t++){const r=e[t];let s,l,d=-1,c=0;for(;c<r.length&&(a.lastIndex=c,l=a.exec(r),null!==l);)c=a.lastIndex,a===C?"!--"===l[1]?a=P:void 0!==l[1]?a=T:void 0!==l[2]?(U.test(l[2])&&(n=RegExp("</"+l[2],"g")),a=j):void 0!==l[3]&&(a=j):a===j?">"===l[0]?(a=null!=n?n:C,d=-1):void 0===l[1]?d=-2:(d=a.lastIndex-l[2].length,s=l[1],a=void 0===l[3]?j:'"'===l[3]?R:N):a===R||a===N?a=j:a===P||a===T?a=C:(a=j,n=void 0);const p=a===j&&e[t+1].startsWith("/>")?" ":"";o+=a===C?r+k:d>=0?(i.push(s),r.slice(0,d)+_+r.slice(d)+w+p):r+w+(-2===d?(i.push(void 0),t):p)}return[L(e,o+(e[r]||"<?>")+(2===t?"</svg>":"")),i]};class K{constructor({strings:e,_$litType$:t},r){let i;this.parts=[];let n=0,o=0;const a=e.length-1,s=this.parts,[l,d]=V(e,t);if(this.el=K.createElement(l,r),I.currentNode=this.el.content,2===t){const e=this.el.content,t=e.firstChild;t.remove(),e.append(...t.childNodes)}for(;null!==(i=I.nextNode())&&s.length<a;){if(1===i.nodeType){if(i.hasAttributes()){const e=[];for(const t of i.getAttributeNames())if(t.endsWith(_)||t.startsWith(w)){const r=d[o++];if(e.push(t),void 0!==r){const e=i.getAttribute(r.toLowerCase()+_).split(w),t=/([.?@])?(.*)/.exec(r);s.push({type:1,index:n,name:t[2],strings:e,ctor:"."===t[1]?J:"?"===t[1]?Z:"@"===t[1]?G:X})}else s.push({type:6,index:n})}for(const t of e)i.removeAttribute(t)}if(U.test(i.tagName)){const e=i.textContent.split(w),t=e.length-1;if(t>0){i.textContent=x?x.emptyScript:"";for(let r=0;r<t;r++)i.append(e[r],E()),I.nextNode(),s.push({type:2,index:++n});i.append(e[t],E())}}}else if(8===i.nodeType)if(i.data===$)s.push({type:2,index:n});else{let e=-1;for(;-1!==(e=i.data.indexOf(w,e+1));)s.push({type:7,index:n}),e+=w.length-1}n++}}static createElement(e,t){const r=A.createElement("template");return r.innerHTML=e,r}}function F(e,t,r=e,i){var n,o,a,s;if(t===H)return t;let l=void 0!==i?null===(n=r._$Co)||void 0===n?void 0:n[i]:r._$Cl;const d=S(t)?void 0:t._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(e),l._$AT(e,r,i)),void 0!==i?(null!==(a=(s=r)._$Co)&&void 0!==a?a:s._$Co=[])[i]=l:r._$Cl=l),void 0!==l&&(t=F(e,l._$AS(e,t.values),l,i)),t}class W{constructor(e,t){this._$AV=[],this._$AN=void 0,this._$AD=e,this._$AM=t}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(e){var t;const{el:{content:r},parts:i}=this._$AD,n=(null!==(t=null==e?void 0:e.creationScope)&&void 0!==t?t:A).importNode(r,!0);I.currentNode=n;let o=I.nextNode(),a=0,s=0,l=i[0];for(;void 0!==l;){if(a===l.index){let t;2===l.type?t=new q(o,o.nextSibling,this,e):1===l.type?t=new l.ctor(o,l.name,l.strings,this,e):6===l.type&&(t=new Q(o,this,e)),this._$AV.push(t),l=i[++s]}a!==(null==l?void 0:l.index)&&(o=I.nextNode(),a++)}return I.currentNode=A,n}v(e){let t=0;for(const r of this._$AV)void 0!==r&&(void 0!==r.strings?(r._$AI(e,r,t),t+=r.strings.length-2):r._$AI(e[t])),t++}}class q{constructor(e,t,r,i){var n;this.type=2,this._$AH=M,this._$AN=void 0,this._$AA=e,this._$AB=t,this._$AM=r,this.options=i,this._$Cp=null===(n=null==i?void 0:i.isConnected)||void 0===n||n}get _$AU(){var e,t;return null!==(t=null===(e=this._$AM)||void 0===e?void 0:e._$AU)&&void 0!==t?t:this._$Cp}get parentNode(){let e=this._$AA.parentNode;const t=this._$AM;return void 0!==t&&11===(null==e?void 0:e.nodeType)&&(e=t.parentNode),e}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(e,t=this){e=F(this,e,t),S(e)?e===M||null==e||""===e?(this._$AH!==M&&this._$AR(),this._$AH=M):e!==this._$AH&&e!==H&&this._(e):void 0!==e._$litType$?this.g(e):void 0!==e.nodeType?this.$(e):(e=>z(e)||"function"==typeof(null==e?void 0:e[Symbol.iterator]))(e)?this.T(e):this._(e)}k(e){return this._$AA.parentNode.insertBefore(e,this._$AB)}$(e){this._$AH!==e&&(this._$AR(),this._$AH=this.k(e))}_(e){this._$AH!==M&&S(this._$AH)?this._$AA.nextSibling.data=e:this.$(A.createTextNode(e)),this._$AH=e}g(e){var t;const{values:r,_$litType$:i}=e,n="number"==typeof i?this._$AC(e):(void 0===i.el&&(i.el=K.createElement(L(i.h,i.h[0]),this.options)),i);if((null===(t=this._$AH)||void 0===t?void 0:t._$AD)===n)this._$AH.v(r);else{const e=new W(n,this),t=e.u(this.options);e.v(r),this.$(t),this._$AH=e}}_$AC(e){let t=B.get(e.strings);return void 0===t&&B.set(e.strings,t=new K(e)),t}T(e){z(this._$AH)||(this._$AH=[],this._$AR());const t=this._$AH;let r,i=0;for(const n of e)i===t.length?t.push(r=new q(this.k(E()),this.k(E()),this,this.options)):r=t[i],r._$AI(n),i++;i<t.length&&(this._$AR(r&&r._$AB.nextSibling,i),t.length=i)}_$AR(e=this._$AA.nextSibling,t){var r;for(null===(r=this._$AP)||void 0===r||r.call(this,!1,!0,t);e&&e!==this._$AB;){const t=e.nextSibling;e.remove(),e=t}}setConnected(e){var t;void 0===this._$AM&&(this._$Cp=e,null===(t=this._$AP)||void 0===t||t.call(this,e))}}class X{constructor(e,t,r,i,n){this.type=1,this._$AH=M,this._$AN=void 0,this.element=e,this.name=t,this._$AM=i,this.options=n,r.length>2||""!==r[0]||""!==r[1]?(this._$AH=Array(r.length-1).fill(new String),this.strings=r):this._$AH=M}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(e,t=this,r,i){const n=this.strings;let o=!1;if(void 0===n)e=F(this,e,t,0),o=!S(e)||e!==this._$AH&&e!==H,o&&(this._$AH=e);else{const i=e;let a,s;for(e=n[0],a=0;a<n.length-1;a++)s=F(this,i[r+a],t,a),s===H&&(s=this._$AH[a]),o||(o=!S(s)||s!==this._$AH[a]),s===M?e=M:e!==M&&(e+=(null!=s?s:"")+n[a+1]),this._$AH[a]=s}o&&!i&&this.j(e)}j(e){e===M?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=e?e:"")}}class J extends X{constructor(){super(...arguments),this.type=3}j(e){this.element[this.name]=e===M?void 0:e}}const Y=x?x.emptyScript:"";class Z extends X{constructor(){super(...arguments),this.type=4}j(e){e&&e!==M?this.element.setAttribute(this.name,Y):this.element.removeAttribute(this.name)}}class G extends X{constructor(e,t,r,i,n){super(e,t,r,i,n),this.type=5}_$AI(e,t=this){var r;if((e=null!==(r=F(this,e,t,0))&&void 0!==r?r:M)===H)return;const i=this._$AH,n=e===M&&i!==M||e.capture!==i.capture||e.once!==i.once||e.passive!==i.passive,o=e!==M&&(i===M||n);n&&this.element.removeEventListener(this.name,this,i),o&&this.element.addEventListener(this.name,this,e),this._$AH=e}handleEvent(e){var t,r;"function"==typeof this._$AH?this._$AH.call(null!==(r=null===(t=this.options)||void 0===t?void 0:t.host)&&void 0!==r?r:this.element,e):this._$AH.handleEvent(e)}}class Q{constructor(e,t,r){this.element=e,this.type=6,this._$AN=void 0,this._$AM=t,this.options=r}get _$AU(){return this._$AM._$AU}_$AI(e){F(this,e)}}const ee=b.litHtmlPolyfillSupport;null==ee||ee(K,q),(null!==(v=b.litHtmlVersions)&&void 0!==v?v:b.litHtmlVersions=[]).push("2.8.0");
+var v;f[g]=!0,f.elementProperties=new Map,f.elementStyles=[],f.shadowRootOptions={mode:"open"},null==p||p({ReactiveElement:f}),(null!==(s=l.reactiveElementVersions)&&void 0!==s?s:l.reactiveElementVersions=[]).push("1.6.3");const b=window,y=b.trustedTypes,_=y?y.createPolicy("lit-html",{createHTML:e=>e}):void 0,x="$lit$",$=`lit$${(Math.random()+"").slice(9)}$`,w="?"+$,k=`<${w}>`,A=document,S=()=>A.createComment(""),E=e=>null===e||"object"!=typeof e&&"function"!=typeof e,z=Array.isArray,C="[ \t\n\f\r]",D=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,T=/-->/g,P=/>/g,j=RegExp(`>|${C}(?:([^\\s"'>=/]+)(${C}*=${C}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),N=/'/g,R=/"/g,U=/^(?:script|style|textarea|title)$/i,O=(e=>(t,...r)=>({_$litType$:e,strings:t,values:r}))(1),M=Symbol.for("lit-noChange"),B=Symbol.for("lit-nothing"),H=new WeakMap,I=A.createTreeWalker(A,129,null,!1);function L(e,t){if(!Array.isArray(e)||!e.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==_?_.createHTML(t):t}const K=(e,t)=>{const r=e.length-1,i=[];let n,o=2===t?"<svg>":"",a=D;for(let t=0;t<r;t++){const r=e[t];let s,l,d=-1,c=0;for(;c<r.length&&(a.lastIndex=c,l=a.exec(r),null!==l);)c=a.lastIndex,a===D?"!--"===l[1]?a=T:void 0!==l[1]?a=P:void 0!==l[2]?(U.test(l[2])&&(n=RegExp("</"+l[2],"g")),a=j):void 0!==l[3]&&(a=j):a===j?">"===l[0]?(a=null!=n?n:D,d=-1):void 0===l[1]?d=-2:(d=a.lastIndex-l[2].length,s=l[1],a=void 0===l[3]?j:'"'===l[3]?R:N):a===R||a===N?a=j:a===T||a===P?a=D:(a=j,n=void 0);const p=a===j&&e[t+1].startsWith("/>")?" ":"";o+=a===D?r+k:d>=0?(i.push(s),r.slice(0,d)+x+r.slice(d)+$+p):r+$+(-2===d?(i.push(void 0),t):p)}return[L(e,o+(e[r]||"<?>")+(2===t?"</svg>":"")),i]};class F{constructor({strings:e,_$litType$:t},r){let i;this.parts=[];let n=0,o=0;const a=e.length-1,s=this.parts,[l,d]=K(e,t);if(this.el=F.createElement(l,r),I.currentNode=this.el.content,2===t){const e=this.el.content,t=e.firstChild;t.remove(),e.append(...t.childNodes)}for(;null!==(i=I.nextNode())&&s.length<a;){if(1===i.nodeType){if(i.hasAttributes()){const e=[];for(const t of i.getAttributeNames())if(t.endsWith(x)||t.startsWith($)){const r=d[o++];if(e.push(t),void 0!==r){const e=i.getAttribute(r.toLowerCase()+x).split($),t=/([.?@])?(.*)/.exec(r);s.push({type:1,index:n,name:t[2],strings:e,ctor:"."===t[1]?J:"?"===t[1]?Z:"@"===t[1]?G:X})}else s.push({type:6,index:n})}for(const t of e)i.removeAttribute(t)}if(U.test(i.tagName)){const e=i.textContent.split($),t=e.length-1;if(t>0){i.textContent=y?y.emptyScript:"";for(let r=0;r<t;r++)i.append(e[r],S()),I.nextNode(),s.push({type:2,index:++n});i.append(e[t],S())}}}else if(8===i.nodeType)if(i.data===w)s.push({type:2,index:n});else{let e=-1;for(;-1!==(e=i.data.indexOf($,e+1));)s.push({type:7,index:n}),e+=$.length-1}n++}}static createElement(e,t){const r=A.createElement("template");return r.innerHTML=e,r}}function V(e,t,r=e,i){var n,o,a,s;if(t===M)return t;let l=void 0!==i?null===(n=r._$Co)||void 0===n?void 0:n[i]:r._$Cl;const d=E(t)?void 0:t._$litDirective$;return(null==l?void 0:l.constructor)!==d&&(null===(o=null==l?void 0:l._$AO)||void 0===o||o.call(l,!1),void 0===d?l=void 0:(l=new d(e),l._$AT(e,r,i)),void 0!==i?(null!==(a=(s=r)._$Co)&&void 0!==a?a:s._$Co=[])[i]=l:r._$Cl=l),void 0!==l&&(t=V(e,l._$AS(e,t.values),l,i)),t}class W{constructor(e,t){this._$AV=[],this._$AN=void 0,this._$AD=e,this._$AM=t}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(e){var t;const{el:{content:r},parts:i}=this._$AD,n=(null!==(t=null==e?void 0:e.creationScope)&&void 0!==t?t:A).importNode(r,!0);I.currentNode=n;let o=I.nextNode(),a=0,s=0,l=i[0];for(;void 0!==l;){if(a===l.index){let t;2===l.type?t=new q(o,o.nextSibling,this,e):1===l.type?t=new l.ctor(o,l.name,l.strings,this,e):6===l.type&&(t=new Q(o,this,e)),this._$AV.push(t),l=i[++s]}a!==(null==l?void 0:l.index)&&(o=I.nextNode(),a++)}return I.currentNode=A,n}v(e){let t=0;for(const r of this._$AV)void 0!==r&&(void 0!==r.strings?(r._$AI(e,r,t),t+=r.strings.length-2):r._$AI(e[t])),t++}}class q{constructor(e,t,r,i){var n;this.type=2,this._$AH=B,this._$AN=void 0,this._$AA=e,this._$AB=t,this._$AM=r,this.options=i,this._$Cp=null===(n=null==i?void 0:i.isConnected)||void 0===n||n}get _$AU(){var e,t;return null!==(t=null===(e=this._$AM)||void 0===e?void 0:e._$AU)&&void 0!==t?t:this._$Cp}get parentNode(){let e=this._$AA.parentNode;const t=this._$AM;return void 0!==t&&11===(null==e?void 0:e.nodeType)&&(e=t.parentNode),e}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(e,t=this){e=V(this,e,t),E(e)?e===B||null==e||""===e?(this._$AH!==B&&this._$AR(),this._$AH=B):e!==this._$AH&&e!==M&&this._(e):void 0!==e._$litType$?this.g(e):void 0!==e.nodeType?this.$(e):(e=>z(e)||"function"==typeof(null==e?void 0:e[Symbol.iterator]))(e)?this.T(e):this._(e)}k(e){return this._$AA.parentNode.insertBefore(e,this._$AB)}$(e){this._$AH!==e&&(this._$AR(),this._$AH=this.k(e))}_(e){this._$AH!==B&&E(this._$AH)?this._$AA.nextSibling.data=e:this.$(A.createTextNode(e)),this._$AH=e}g(e){var t;const{values:r,_$litType$:i}=e,n="number"==typeof i?this._$AC(e):(void 0===i.el&&(i.el=F.createElement(L(i.h,i.h[0]),this.options)),i);if((null===(t=this._$AH)||void 0===t?void 0:t._$AD)===n)this._$AH.v(r);else{const e=new W(n,this),t=e.u(this.options);e.v(r),this.$(t),this._$AH=e}}_$AC(e){let t=H.get(e.strings);return void 0===t&&H.set(e.strings,t=new F(e)),t}T(e){z(this._$AH)||(this._$AH=[],this._$AR());const t=this._$AH;let r,i=0;for(const n of e)i===t.length?t.push(r=new q(this.k(S()),this.k(S()),this,this.options)):r=t[i],r._$AI(n),i++;i<t.length&&(this._$AR(r&&r._$AB.nextSibling,i),t.length=i)}_$AR(e=this._$AA.nextSibling,t){var r;for(null===(r=this._$AP)||void 0===r||r.call(this,!1,!0,t);e&&e!==this._$AB;){const t=e.nextSibling;e.remove(),e=t}}setConnected(e){var t;void 0===this._$AM&&(this._$Cp=e,null===(t=this._$AP)||void 0===t||t.call(this,e))}}class X{constructor(e,t,r,i,n){this.type=1,this._$AH=B,this._$AN=void 0,this.element=e,this.name=t,this._$AM=i,this.options=n,r.length>2||""!==r[0]||""!==r[1]?(this._$AH=Array(r.length-1).fill(new String),this.strings=r):this._$AH=B}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(e,t=this,r,i){const n=this.strings;let o=!1;if(void 0===n)e=V(this,e,t,0),o=!E(e)||e!==this._$AH&&e!==M,o&&(this._$AH=e);else{const i=e;let a,s;for(e=n[0],a=0;a<n.length-1;a++)s=V(this,i[r+a],t,a),s===M&&(s=this._$AH[a]),o||(o=!E(s)||s!==this._$AH[a]),s===B?e=B:e!==B&&(e+=(null!=s?s:"")+n[a+1]),this._$AH[a]=s}o&&!i&&this.j(e)}j(e){e===B?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=e?e:"")}}class J extends X{constructor(){super(...arguments),this.type=3}j(e){this.element[this.name]=e===B?void 0:e}}const Y=y?y.emptyScript:"";class Z extends X{constructor(){super(...arguments),this.type=4}j(e){e&&e!==B?this.element.setAttribute(this.name,Y):this.element.removeAttribute(this.name)}}class G extends X{constructor(e,t,r,i,n){super(e,t,r,i,n),this.type=5}_$AI(e,t=this){var r;if((e=null!==(r=V(this,e,t,0))&&void 0!==r?r:B)===M)return;const i=this._$AH,n=e===B&&i!==B||e.capture!==i.capture||e.once!==i.once||e.passive!==i.passive,o=e!==B&&(i===B||n);n&&this.element.removeEventListener(this.name,this,i),o&&this.element.addEventListener(this.name,this,e),this._$AH=e}handleEvent(e){var t,r;"function"==typeof this._$AH?this._$AH.call(null!==(r=null===(t=this.options)||void 0===t?void 0:t.host)&&void 0!==r?r:this.element,e):this._$AH.handleEvent(e)}}class Q{constructor(e,t,r){this.element=e,this.type=6,this._$AN=void 0,this._$AM=t,this.options=r}get _$AU(){return this._$AM._$AU}_$AI(e){V(this,e)}}const ee=b.litHtmlPolyfillSupport;null==ee||ee(F,q),(null!==(v=b.litHtmlVersions)&&void 0!==v?v:b.litHtmlVersions=[]).push("2.8.0");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var te,re;class ie extends f{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var e,t;const r=super.createRenderRoot();return null!==(e=(t=this.renderOptions).renderBefore)&&void 0!==e||(t.renderBefore=r.firstChild),r}update(e){const t=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(e),this._$Do=((e,t,r)=>{var i,n;const o=null!==(i=null==r?void 0:r.renderBefore)&&void 0!==i?i:t;let a=o._$litPart$;if(void 0===a){const e=null!==(n=null==r?void 0:r.renderBefore)&&void 0!==n?n:null;o._$litPart$=a=new q(t.insertBefore(E(),e),e,void 0,null!=r?r:{})}return a._$AI(e),a})(t,this.renderRoot,this.renderOptions)}connectedCallback(){var e;super.connectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!0)}disconnectedCallback(){var e;super.disconnectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!1)}render(){return H}}ie.finalized=!0,ie._$litElement$=!0,null===(te=globalThis.litElementHydrateSupport)||void 0===te||te.call(globalThis,{LitElement:ie});const ne=globalThis.litElementPolyfillSupport;null==ne||ne({LitElement:ie}),(null!==(re=globalThis.litElementVersions)&&void 0!==re?re:globalThis.litElementVersions=[]).push("3.3.3");
+var te,re;class ie extends f{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var e,t;const r=super.createRenderRoot();return null!==(e=(t=this.renderOptions).renderBefore)&&void 0!==e||(t.renderBefore=r.firstChild),r}update(e){const t=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(e),this._$Do=((e,t,r)=>{var i,n;const o=null!==(i=null==r?void 0:r.renderBefore)&&void 0!==i?i:t;let a=o._$litPart$;if(void 0===a){const e=null!==(n=null==r?void 0:r.renderBefore)&&void 0!==n?n:null;o._$litPart$=a=new q(t.insertBefore(S(),e),e,void 0,null!=r?r:{})}return a._$AI(e),a})(t,this.renderRoot,this.renderOptions)}connectedCallback(){var e;super.connectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!0)}disconnectedCallback(){var e;super.disconnectedCallback(),null===(e=this._$Do)||void 0===e||e.setConnected(!1)}render(){return M}}ie.finalized=!0,ie._$litElement$=!0,null===(te=globalThis.litElementHydrateSupport)||void 0===te||te.call(globalThis,{LitElement:ie});const ne=globalThis.litElementPolyfillSupport;null==ne||ne({LitElement:ie}),(null!==(re=globalThis.litElementVersions)&&void 0!==re?re:globalThis.litElementVersions=[]).push("3.3.3");
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -42,7 +42,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var de;null===(de=window.HTMLSlotElement)||void 0===de||de.prototype.assignedElements;const ce={category:"standard",label:""},pe={southeastern:[{matches:["city beam","707"],category:"modern",label:"CITY BEAM"},{matches:["javelin","395"],category:"javelin",label:"JAVELIN"},{matches:["376"],category:"refurb",label:"REFURB 376"},{matches:["465","466","networker"],category:"older",label:"CLASS 465"}]};function ue(e,t){for(const r of e)if(r.matches.some(e=>t.includes(e)))return{category:r.category,label:r.label};return null}function he(e,t){const r=(e||"").toLowerCase();if(!r)return ce;const i=(t||"").toLowerCase().trim();if(i){const e=Object.keys(pe).find(e=>i.includes(e));return e&&ue(pe[e],r)||ce}for(const e of Object.values(pe)){const t=ue(e,r);if(t)return t}return ce}function me(e,t){var r;if(!e)return null;if(t&&t.has(e))return null!==(r=t.get(e))&&void 0!==r?r:null;let i=null;const n=new Date(e);return Number.isNaN(n.getTime())||(i=n),t&&t.set(e,i),i}const ge=new Set(["on_time","delayed","early","cancelled"]),fe=new Set(["on-time","delayed","early","cancelled"]);function ve(e){if("object"!=typeof e||null===e)return!1;const t=e;return"string"==typeof t.destination_name&&"string"==typeof t.scheduled&&"string"==typeof t.scheduled_time&&ge.has(t.status)&&fe.has(t.status_class)&&"string"==typeof t.status_label&&"boolean"==typeof t.is_cancelled&&Array.isArray(t.calling_points)&&t.calling_points.every(e=>function(e){if("object"!=typeof e||null===e)return!1;const t=e;return"string"==typeof t.station_name&&("string"==typeof t.crs||null===t.crs)&&("string"==typeof t.tiploc||null===t.tiploc)&&"string"==typeof t.scheduled&&("string"==typeof t.estimated||null===t.estimated)&&"string"==typeof t.time&&ge.has(t.status)&&fe.has(t.status_class)&&"string"==typeof t.status_label&&("number"==typeof t.delay_minutes||null===t.delay_minutes)&&"boolean"==typeof t.is_passed&&"boolean"==typeof t.is_current&&"boolean"==typeof t.is_between_previous}(e))}const be=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"row_size",selector:{select:{options:[{value:"compact",label:"Compact"},{value:"normal",label:"Normal (Default)"},{value:"comfortable",label:"Comfortable"}],mode:"dropdown"}}},{name:"time_display",selector:{select:{options:[{value:"scheduled",label:"Scheduled time (Default)"},{value:"relative",label:'Countdown ("4 min")'},{value:"both",label:"Scheduled + countdown"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"walk_time_minutes",selector:{number:{min:0,max:120,mode:"box",unit_of_measurement:"min"}}},{name:"show_carriages",selector:{boolean:{}}},{name:"stale_indicator",selector:{boolean:{}}}]},{type:"grid",name:"",schema:[{name:"show_announcements",selector:{boolean:{}}},{name:"announcement_position",selector:{select:{options:[{value:"top",label:"Top (Default)"},{value:"bottom",label:"Bottom"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}],xe={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier",row_size:"Row Size",time_display:"Time Display",walk_time_minutes:"Walk Time to Station",font_size_time:"Time Font Size",font_size_destination:"Destination Font Size",font_size_status:"Status Pill Font Size",show_carriages:"Show Carriage Count",stale_indicator:"Show Stale-Data Warning",show_announcements:"Show Announcements Banner",announcement_position:"Announcement Position"},ye={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",row_size:"Vertical padding of the departure rows",time_display:"Show clock time, a countdown, or both",walk_time_minutes:"Highlight the first train you can still reach; earlier ones are dimmed",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)",show_carriages:"Display carriage/length details when available",stale_indicator:"Warn when the data source is stale or a refresh is overdue",show_announcements:"Display scrolling/cycling announcements banner for station messages and disruptions",announcement_position:"Position of the announcements banner: top (default) or bottom"};let _e=class extends ie{constructor(){super(...arguments),this._computeLabel=e=>xe[e.name]||e.name,this._computeHelper=e=>ye[e.name]}setConfig(e){this._config=e}render(){return this.hass&&this._config?O`
+ */var de;null===(de=window.HTMLSlotElement)||void 0===de||de.prototype.assignedElements;const ce={category:"standard",label:""},pe={southeastern:[{matches:["city beam","707"],category:"modern",label:"CITY BEAM"},{matches:["javelin","395"],category:"javelin",label:"JAVELIN"},{matches:["376"],category:"refurb",label:"REFURB 376"},{matches:["465","466","networker"],category:"older",label:"CLASS 465"}]};function ue(e,t){for(const r of e)if(r.matches.some(e=>t.includes(e)))return{category:r.category,label:r.label};return null}function he(e,t){const r=(e||"").toLowerCase();if(!r)return ce;const i=(t||"").toLowerCase().trim();if(i){const e=Object.keys(pe).find(e=>i.includes(e));return e&&ue(pe[e],r)||ce}for(const e of Object.values(pe)){const t=ue(e,r);if(t)return t}return ce}function me(e,t){var r;if(!e)return null;if(t&&t.has(e))return null!==(r=t.get(e))&&void 0!==r?r:null;let i=null;const n=new Date(e);return Number.isNaN(n.getTime())||(i=n),t&&t.set(e,i),i}const ge=new Set(["on_time","delayed","early","cancelled"]),fe=new Set(["on-time","delayed","early","cancelled"]);function ve(e){if("object"!=typeof e||null===e)return!1;const t=e;return"string"==typeof t.destination_name&&"string"==typeof t.scheduled&&"string"==typeof t.scheduled_time&&ge.has(t.status)&&fe.has(t.status_class)&&"string"==typeof t.status_label&&"boolean"==typeof t.is_cancelled&&Array.isArray(t.calling_points)&&t.calling_points.every(e=>function(e){if("object"!=typeof e||null===e)return!1;const t=e;return"string"==typeof t.station_name&&("string"==typeof t.crs||null===t.crs)&&("string"==typeof t.tiploc||null===t.tiploc)&&"string"==typeof t.scheduled&&("string"==typeof t.estimated||null===t.estimated)&&"string"==typeof t.time&&ge.has(t.status)&&fe.has(t.status_class)&&"string"==typeof t.status_label&&("number"==typeof t.delay_minutes||null===t.delay_minutes)&&"boolean"==typeof t.is_passed&&"boolean"==typeof t.is_current&&"boolean"==typeof t.is_between_previous}(e))}const be=[{name:"entity",required:!0,selector:{entity:{filter:[{domain:"sensor"}]}}},{name:"title",selector:{text:{}}},{type:"grid",name:"",schema:[{name:"attribute",selector:{text:{}}},{name:"stops_identifier",selector:{select:{options:[{value:"description",label:"Description (Default)"},{value:"tiploc",label:"TIPLOC"},{value:"crs",label:"CRS"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"row_size",selector:{select:{options:[{value:"compact",label:"Compact"},{value:"normal",label:"Normal (Default)"},{value:"comfortable",label:"Comfortable"}],mode:"dropdown"}}},{name:"time_display",selector:{select:{options:[{value:"scheduled",label:"Scheduled time (Default)"},{value:"relative",label:'Countdown ("4 min")'},{value:"both",label:"Scheduled + countdown"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"walk_time_minutes",selector:{number:{min:0,max:120,mode:"box",unit_of_measurement:"min"}}},{name:"show_carriages",selector:{boolean:{}}},{name:"stale_indicator",selector:{boolean:{}}}]},{type:"grid",name:"",schema:[{name:"show_announcements",selector:{boolean:{}}},{name:"announcement_position",selector:{select:{options:[{value:"top",label:"Top (Default)"},{value:"bottom",label:"Bottom"}],mode:"dropdown"}}}]},{type:"grid",name:"",schema:[{name:"font_size_time",selector:{text:{}}},{name:"font_size_destination",selector:{text:{}}},{name:"font_size_status",selector:{text:{}}}]}],ye={entity:"Entity",title:"Card Title",attribute:"Data Attribute",stops_identifier:"Station Identifier",row_size:"Row Size",time_display:"Time Display",walk_time_minutes:"Walk Time to Station",font_size_time:"Time Font Size",font_size_destination:"Destination Font Size",font_size_status:"Status Pill Font Size",show_carriages:"Show Carriage Count",stale_indicator:"Show Stale-Data Warning",show_announcements:"Show Announcements Banner",announcement_position:"Announcement Position"},_e={entity:"Select a realtime trains sensor",attribute:"Attribute with departure data (default: next_trains)",stops_identifier:"How stations are identified in the data",row_size:"Vertical padding of the departure rows",time_display:"Show clock time, a countdown, or both",walk_time_minutes:"Highlight the first train you can still reach; earlier ones are dimmed",font_size_time:"e.g. 1.5rem (default: 1.25rem)",font_size_destination:"e.g. 1.2rem (default: 1rem)",font_size_status:"e.g. 0.85rem (default: 0.75rem)",show_carriages:"Display carriage/length details when available",stale_indicator:"Warn when the data source is stale or a refresh is overdue",show_announcements:"Display scrolling/cycling announcements banner for station messages and disruptions",announcement_position:"Position of the announcements banner: top (default) or bottom"};let xe=class extends ie{constructor(){super(...arguments),this._computeLabel=e=>ye[e.name]||e.name,this._computeHelper=e=>_e[e.name]}setConfig(e){this._config=e}render(){return this.hass&&this._config?O`
       <ha-form
         .hass=${this.hass}
         .data=${this._config}
@@ -51,7 +51,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
         .computeHelper=${this._computeHelper}
         @value-changed=${this._valueChanged}
       ></ha-form>
-    `:M}_valueChanged(e){e.stopPropagation();const t=e.detail.value,r=Object.assign(Object.assign(Object.assign({},this._config),t),{attribute:t.attribute||"next_trains",stops_identifier:t.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:r},bubbles:!0,composed:!0}))}};e([se({attribute:!1})],_e.prototype,"hass",void 0),e([le()],_e.prototype,"_config",void 0),_e=e([oe("train-departure-board-editor")],_e);let we=class extends ie{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this._selectedAlert=null,this._activeAnnouncementIndex=0,this._disruptionDetailsExpanded=!1,this._bannerDrawerExpanded=!1,this.dateCache=new Map,this.lastEntityId=null,this._returnFocusTo=null,this._prevRowValues=new Map,this._flapCounters=new Map,this._handleKeyDown=e=>{"Escape"===e.key&&(this._selectedAlert?this._closeAlertPopup():this._selectedDeparture&&this._closePopup())},this._handleAlertPopupKeyDown=e=>{var t,r;if("Tab"!==e.key)return;const i=Array.from((null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelectorAll(".alert-popup-card button, .alert-popup-card a"))||[]).filter(e=>!e.hasAttribute("disabled"));if(0===i.length)return;const n=i[0],o=i[i.length-1],a=(null===(r=this.shadowRoot)||void 0===r?void 0:r.activeElement)||e.composedPath&&e.composedPath()[0]||null;e.shiftKey?a!==n&&i.includes(a)||(e.preventDefault(),o.focus()):a!==o&&i.includes(a)||(e.preventDefault(),n.focus())},this._handlePopupKeyDown=e=>{var t;if("Tab"!==e.key)return;const r=null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelector(".popup-close");r&&(e.preventDefault(),r.focus())}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(e){if(!e)throw new Error("Invalid configuration");const t=Object.assign({attribute:"next_trains"},e);"string"==typeof t.attribute?t.attribute=t.attribute.trim()||"next_trains":t.attribute="next_trains",this.config=t}_renderMessage(e,t,r=!1){var i;return O`
+    `:B}_valueChanged(e){e.stopPropagation();const t=e.detail.value,r=Object.assign(Object.assign(Object.assign({},this._config),t),{attribute:t.attribute||"next_trains",stops_identifier:t.stops_identifier||"description"});this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:r},bubbles:!0,composed:!0}))}};e([se({attribute:!1})],xe.prototype,"hass",void 0),e([le()],xe.prototype,"_config",void 0),xe=e([oe("train-departure-board-editor")],xe);let $e=class extends ie{constructor(){super(...arguments),this.nextTrains=[],this._selectedDeparture=null,this._selectedAlert=null,this._activeAnnouncementIndex=0,this.dateCache=new Map,this.lastEntityId=null,this._returnFocusTo=null,this._prevRowValues=new Map,this._flapCounters=new Map,this._handleKeyDown=e=>{"Escape"===e.key&&(this._selectedAlert?this._closeAlertPopup():this._selectedDeparture&&this._closePopup())},this._handleAlertPopupKeyDown=e=>{var t,r;if("Tab"!==e.key)return;const i=Array.from((null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelectorAll(".alert-popup-card button, .alert-popup-card a"))||[]).filter(e=>!e.hasAttribute("disabled"));if(0===i.length)return;const n=i[0],o=i[i.length-1],a=(null===(r=this.shadowRoot)||void 0===r?void 0:r.activeElement)||e.composedPath&&e.composedPath()[0]||null;e.shiftKey?a!==n&&i.includes(a)||(e.preventDefault(),o.focus()):a!==o&&i.includes(a)||(e.preventDefault(),n.focus())},this._handlePopupKeyDown=e=>{var t;if("Tab"!==e.key)return;const r=null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelector(".popup-close");r&&(e.preventDefault(),r.focus())}}static getConfigElement(){return document.createElement("train-departure-board-editor")}static getStubConfig(){return{type:"custom:train-departure-board",title:"Train Departures",entity:"",attribute:"next_trains"}}setConfig(e){if(!e)throw new Error("Invalid configuration");const t=Object.assign({attribute:"next_trains"},e);"string"==typeof t.attribute?t.attribute=t.attribute.trim()||"next_trains":t.attribute="next_trains",this.config=t}_renderMessage(e,t,r=!1){var i;return O`
       <ha-card>
         ${(null===(i=this.config)||void 0===i?void 0:i.title)?O`<div class="card-header">${this.config.title}</div>`:""}
         <div class="card">
@@ -61,11 +61,11 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           </div>
         </div>
       </ha-card>
-    `}_isDataStale(e){var t,r;if(!1===this.config.stale_indicator)return!1;if(!0===(null===(t=e.attributes)||void 0===t?void 0:t.data_stale))return!0;const i=null===(r=e.attributes)||void 0===r?void 0:r.next_update_at;if("string"==typeof i){const e=new Date(i).getTime();if(!Number.isNaN(e)&&Date.now()>e+6e4)return!0}return!1}render(){var e,t,r,i,n,o,a,s,l;if(!this.config)return this._renderMessage("🚆","No configuration provided",!0);if(!this.config.entity)return this._renderMessage("🚆","Please configure an entity");const d=null===(t=null===(e=this.hass)||void 0===e?void 0:e.states)||void 0===t?void 0:t[this.config.entity];if(!d)return this._renderMessage("🚆",`Entity not found: ${this.config.entity}`,!0);if("unavailable"===d.state)return this._renderMessage("🚆",`Entity ${this.config.entity} is currently unavailable`);if("unknown"===d.state){if(!(2===(null===(r=d.attributes)||void 0===r?void 0:r.contract_version)&&Array.isArray(null===(i=d.attributes)||void 0===i?void 0:i.next_trains))){const e=(null===(n=d.attributes)||void 0===n?void 0:n.error)?` (${d.attributes.error})`:"";return this._renderMessage("⚠",`Data currently unavailable for entity ${this.config.entity}${e}`,!0)}}const c=null===(o=d.attributes)||void 0===o?void 0:o.contract_version;if(2!==c){const e=void 0===c?"missing":`found v${String(c)}`;return this._renderMessage("⚠",`Integration contract version 2 required (${e}). Please update both realtime_trains_api and ha-train-departure-board together.`,!0)}this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity),this.dateCache.size>500&&this.dateCache.clear();const p=this.config.attribute||"next_trains",u=null===(a=d.attributes)||void 0===a?void 0:a[p];if(void 0===u)return this._renderMessage("⚠",`Attribute "${p}" not found on entity ${this.config.entity}`,!0);if(!Array.isArray(u))return this._renderMessage("⚠",`Attribute "${p}" on entity ${this.config.entity} is not an array`,!0);const h=u;if(h.some(e=>!ve(e)))return this._renderMessage("⚠",`Malformed Contract v2 departure data on entity ${this.config.entity}`,!0);const m=d.last_updated?new Date(d.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"",g=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; "),f=new Date,v=Number(this.config.walk_time_minutes)||0;let b=0;v>0&&(b=h.findIndex(e=>function(e,t,r,i){const n=me(e.estimated||e.scheduled,i);return!n||n.getTime()-r.getTime()>=6e4*t}(e,v,f,this.dateCache)));const x=this._isDataStale(d);this._updateFlapCounters(h);const y=this._getAnnouncements(),_=this._isAnnouncementsEnabled()&&y.length>0,w=this._getAnnouncementPosition();return O`
+    `}_isDataStale(e){var t,r;if(!1===this.config.stale_indicator)return!1;if(!0===(null===(t=e.attributes)||void 0===t?void 0:t.data_stale))return!0;const i=null===(r=e.attributes)||void 0===r?void 0:r.next_update_at;if("string"==typeof i){const e=new Date(i).getTime();if(!Number.isNaN(e)&&Date.now()>e+6e4)return!0}return!1}render(){var e,t,r,i,n,o,a,s,l;if(!this.config)return this._renderMessage("🚆","No configuration provided",!0);if(!this.config.entity)return this._renderMessage("🚆","Please configure an entity");const d=null===(t=null===(e=this.hass)||void 0===e?void 0:e.states)||void 0===t?void 0:t[this.config.entity];if(!d)return this._renderMessage("🚆",`Entity not found: ${this.config.entity}`,!0);if("unavailable"===d.state)return this._renderMessage("🚆",`Entity ${this.config.entity} is currently unavailable`);if("unknown"===d.state){if(!(2===(null===(r=d.attributes)||void 0===r?void 0:r.contract_version)&&Array.isArray(null===(i=d.attributes)||void 0===i?void 0:i.next_trains))){const e=(null===(n=d.attributes)||void 0===n?void 0:n.error)?` (${d.attributes.error})`:"";return this._renderMessage("⚠",`Data currently unavailable for entity ${this.config.entity}${e}`,!0)}}const c=null===(o=d.attributes)||void 0===o?void 0:o.contract_version;if(2!==c){const e=void 0===c?"missing":`found v${String(c)}`;return this._renderMessage("⚠",`Integration contract version 2 required (${e}). Please update both realtime_trains_api and ha-train-departure-board together.`,!0)}this.lastEntityId!==this.config.entity&&(this.dateCache.clear(),this.lastEntityId=this.config.entity),this.dateCache.size>500&&this.dateCache.clear();const p=this.config.attribute||"next_trains",u=null===(a=d.attributes)||void 0===a?void 0:a[p];if(void 0===u)return this._renderMessage("⚠",`Attribute "${p}" not found on entity ${this.config.entity}`,!0);if(!Array.isArray(u))return this._renderMessage("⚠",`Attribute "${p}" on entity ${this.config.entity} is not an array`,!0);const h=u;if(h.some(e=>!ve(e)))return this._renderMessage("⚠",`Malformed Contract v2 departure data on entity ${this.config.entity}`,!0);const m=d.last_updated?new Date(d.last_updated).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"",g=[this.config.font_size_time?`--train-board-time-size: ${this.config.font_size_time}`:"",this.config.font_size_destination?`--train-board-destination-size: ${this.config.font_size_destination}`:"",this.config.font_size_status?`--train-board-status-size: ${this.config.font_size_status}`:""].filter(Boolean).join("; "),f=new Date,v=Number(this.config.walk_time_minutes)||0;let b=0;v>0&&(b=h.findIndex(e=>function(e,t,r,i){const n=me(e.estimated||e.scheduled,i);return!n||n.getTime()-r.getTime()>=6e4*t}(e,v,f,this.dateCache)));const y=this._isDataStale(d);this._updateFlapCounters(h);const _=this._getAnnouncements(),x=this._isAnnouncementsEnabled()&&_.length>0,$=this._getAnnouncementPosition();return O`
       <ha-card style="${g}">
         ${this.config.title?O`<div class="card-header">${this.config.title}</div>`:""}
         <div class="card">
-          ${_&&"top"===w&&h.length>0?this._renderAnnouncementsBanner(y,"top"):""}
+          ${x&&"top"===$&&h.length>0?this._renderAnnouncementsBanner(_,"top"):""}
           ${v>0&&-1===b&&h.length>0?O`<div class="walk-time-notice">
                 No listed departures reachable within ${v} min walk
               </div>`:""}
@@ -76,9 +76,9 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
               >
                 ${h.map((e,t)=>this.renderDepartureRow(e,t,b,f))}
               </div>`:this._renderEmptyState(d,f)}
-          ${_&&"bottom"===w&&h.length>0?this._renderAnnouncementsBanner(y,"bottom"):""}
-          ${m||x||(null===(s=d.attributes)||void 0===s?void 0:s.error)?O`<div class="footer">
-                ${x?O`<span class="stale-chip" role="status"
+          ${x&&"bottom"===$&&h.length>0?this._renderAnnouncementsBanner(_,"bottom"):""}
+          ${m||y||(null===(s=d.attributes)||void 0===s?void 0:s.error)?O`<div class="footer">
+                ${y?O`<span class="stale-chip" role="status"
                       >⚠ Showing last-known data</span
                     >`:""}
                 ${(null===(l=d.attributes)||void 0===l?void 0:l.error)?O`<span class="enrichment-error-chip" role="status"
@@ -90,13 +90,15 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       </ha-card>
       ${this._renderDetailsPopup()}
       ${this._renderAlertPopup()}
-    `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown),this._tickTimer=window.setInterval(()=>{var e;const t=null===(e=this.config)||void 0===e?void 0:e.time_display;"relative"!==t&&"both"!==t||this.requestUpdate()},3e4),this._announcementTimer=window.setInterval(()=>{if(this._bannerDrawerExpanded||this._selectedAlert)return;const e=this._getAnnouncements();e.length>1&&(this._activeAnnouncementIndex=(this._activeAnnouncementIndex+1)%e.length,this.requestUpdate())},7e3)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown),void 0!==this._tickTimer&&(window.clearInterval(this._tickTimer),this._tickTimer=void 0),void 0!==this._announcementTimer&&(window.clearInterval(this._announcementTimer),this._announcementTimer=void 0)}_departureKey(e){return e.service_uid||`${e.scheduled}-${e.destination_name}`}_updateFlapCounters(e){this._prevRowValues.size>200&&(this._prevRowValues.clear(),this._flapCounters.clear());for(const t of e){const e=this._departureKey(t),r={time:t.estimated_time||t.scheduled_time||"",platform:t.platform||"",status:t.status_label||""},i=this._prevRowValues.get(e);if(i)for(const t of["time","platform","status"])if(i[t]!==r[t]){const r=`${e}:${t}`;this._flapCounters.set(r,(this._flapCounters.get(r)||0)+1)}this._prevRowValues.set(e,r)}}_flapClass(e,t){const r=this._flapCounters.get(`${this._departureKey(e)}:${t}`)||0;return 0===r?"":r%2?"flap-a":"flap-b"}_handleRowKeyDown(e,t){"Enter"!==e.key&&" "!==e.key||(e.preventDefault(),this._showDetails(t,e))}_showDetails(e,t){var r;this._returnFocusTo=null!==(r=null==t?void 0:t.currentTarget)&&void 0!==r?r:null,this._selectedDeparture=e}_closePopup(){var e;this._selectedDeparture=null,null===(e=this._returnFocusTo)||void 0===e||e.focus(),this._returnFocusTo=null}updated(e){var t,r;if(super.updated(e),e.has("_selectedDeparture")&&this._selectedDeparture){const e=null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelector(".popup-close:not(.alert-popup-close)");null==e||e.focus()}if(e.has("_selectedAlert")&&this._selectedAlert){const e=null===(r=this.shadowRoot)||void 0===r?void 0:r.querySelector(".alert-popup-close");null==e||e.focus()}}_isAnnouncementsEnabled(){return!this.config||!1!==this.config.show_announcements&&"off"!==this.config.announcements}_getAnnouncementPosition(){return this.config?this.config.announcement_position?this.config.announcement_position:"bottom"===this.config.announcements?"bottom":"top":"top"}_getAnnouncements(){var e,t,r;const i=(null===(e=this.config)||void 0===e?void 0:e.entity)?null===(r=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===r?void 0:r[this.config.entity]:null;if(!(null==i?void 0:i.attributes))return[];const n=[],o=i.attributes.station_messages;Array.isArray(o)&&o.forEach((e,t)=>{"string"==typeof e&&e.trim()&&n.push({id:`msg-${t}`,text:e.trim(),isDisruption:!1})});const a=i.attributes.disruptions;return Array.isArray(a)&&a.forEach((e,t)=>{if(e&&"object"==typeof e){const r=e,i=r.title||this._getBriefSummary(r.summary)||"Disruption alert";n.push({id:r.id||`disr-${t}`,text:i.trim(),isDisruption:!0,disruption:r})}}),n}_getBriefSummary(e,t=160){if(!e||"string"!=typeof e)return"";const r=e.replace(/\s+/g," ").trim();if(r.length<=t)return r;const i=r.match(/^(.+?[.!?])(?:\s|$)/);if(i&&i[1]&&i[1].length<=t)return i[1];const n=r.substring(0,t),o=n.lastIndexOf(" ");return(o>40?n.substring(0,o):n)+"..."}_toggleDisruptionDetails(){this._disruptionDetailsExpanded=!this._disruptionDetailsExpanded}_toggleBannerDrawer(){this._bannerDrawerExpanded=!this._bannerDrawerExpanded}_showAlertDetails(e,t){var r;this._returnFocusTo=null!==(r=null==t?void 0:t.currentTarget)&&void 0!==r?r:null,e.disruption?this._selectedAlert=e.disruption:this._selectedAlert={id:e.id,title:"Station Announcement",summary:e.text,is_planned:!1,alternative_travel:null,url:null}}_closeAlertPopup(){var e;this._selectedAlert=null,null===(e=this._returnFocusTo)||void 0===e||e.focus(),this._returnFocusTo=null}_handleAlertOverlayClick(e){e.target.classList.contains("popup-overlay")&&this._closeAlertPopup()}_handleBannerKeyDown(e,t){e.target===e.currentTarget&&("ArrowRight"===e.key?(e.preventDefault(),this._activeAnnouncementIndex=(this._activeAnnouncementIndex+1)%t.length,this.requestUpdate()):"ArrowLeft"===e.key&&(e.preventDefault(),this._activeAnnouncementIndex=(this._activeAnnouncementIndex-1+t.length)%t.length,this.requestUpdate()))}_isSafeUrl(e){if(!e||"string"!=typeof e)return!1;const t=e.trim().toLowerCase();return t.startsWith("https://")||t.startsWith("http://")}_renderAnnouncementsBanner(e,t){var r,i,n,o,a,s,l;if(0===e.length)return M;const d=this._activeAnnouncementIndex%e.length,c=e[d];return O`
+    `}connectedCallback(){super.connectedCallback(),window.addEventListener("keydown",this._handleKeyDown),this._tickTimer=window.setInterval(()=>{var e;const t=null===(e=this.config)||void 0===e?void 0:e.time_display;"relative"!==t&&"both"!==t||this.requestUpdate()},3e4),this._announcementTimer=window.setInterval(()=>{if(this._selectedAlert)return;const e=this._getAnnouncements();e.length>1&&(this._activeAnnouncementIndex=(this._activeAnnouncementIndex+1)%e.length,this.requestUpdate())},7e3)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("keydown",this._handleKeyDown),void 0!==this._tickTimer&&(window.clearInterval(this._tickTimer),this._tickTimer=void 0),void 0!==this._announcementTimer&&(window.clearInterval(this._announcementTimer),this._announcementTimer=void 0)}_departureKey(e){return e.service_uid||`${e.scheduled}-${e.destination_name}`}_updateFlapCounters(e){this._prevRowValues.size>200&&(this._prevRowValues.clear(),this._flapCounters.clear());for(const t of e){const e=this._departureKey(t),r={time:t.estimated_time||t.scheduled_time||"",platform:t.platform||"",status:t.status_label||""},i=this._prevRowValues.get(e);if(i)for(const t of["time","platform","status"])if(i[t]!==r[t]){const r=`${e}:${t}`;this._flapCounters.set(r,(this._flapCounters.get(r)||0)+1)}this._prevRowValues.set(e,r)}}_flapClass(e,t){const r=this._flapCounters.get(`${this._departureKey(e)}:${t}`)||0;return 0===r?"":r%2?"flap-a":"flap-b"}_handleRowKeyDown(e,t){"Enter"!==e.key&&" "!==e.key||(e.preventDefault(),this._showDetails(t,e))}_showDetails(e,t){var r;this._returnFocusTo=null!==(r=null==t?void 0:t.currentTarget)&&void 0!==r?r:null,this._selectedDeparture=e}_closePopup(){var e;this._selectedDeparture=null,null===(e=this._returnFocusTo)||void 0===e||e.focus(),this._returnFocusTo=null}updated(e){var t,r;if(super.updated(e),e.has("_selectedDeparture")&&this._selectedDeparture){const e=null===(t=this.shadowRoot)||void 0===t?void 0:t.querySelector(".popup-close:not(.alert-popup-close)");null==e||e.focus()}if(e.has("_selectedAlert")&&this._selectedAlert){const e=null===(r=this.shadowRoot)||void 0===r?void 0:r.querySelector(".alert-popup-close");null==e||e.focus()}}_isAnnouncementsEnabled(){return!this.config||!1!==this.config.show_announcements&&"off"!==this.config.announcements}_getAnnouncementPosition(){return this.config?this.config.announcement_position?this.config.announcement_position:"bottom"===this.config.announcements?"bottom":"top":"top"}_getAnnouncements(){var e,t,r;const i=(null===(e=this.config)||void 0===e?void 0:e.entity)?null===(r=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===r?void 0:r[this.config.entity]:null;if(!(null==i?void 0:i.attributes))return[];const n=[],o=i.attributes.station_messages;Array.isArray(o)&&o.forEach((e,t)=>{"string"==typeof e&&e.trim()&&n.push({id:`msg-${t}`,text:e.trim(),isDisruption:!1})});const a=i.attributes.disruptions;return Array.isArray(a)&&a.forEach((e,t)=>{if(e&&"object"==typeof e){const r=e,i=r.title||this._getBriefSummary(r.summary)||"Disruption alert";n.push({id:r.id||`disr-${t}`,text:i.trim(),isDisruption:!0,disruption:r})}}),n}_getBriefSummary(e,t=160){if(!e||"string"!=typeof e)return"";const r=e.replace(/\s+/g," ").trim();if(r.length<=t)return r;const i=r.match(/^(.+?[.!?])(?:\s|$)/);if(i&&i[1]&&i[1].length<=t)return i[1];const n=r.substring(0,t),o=n.lastIndexOf(" ");return(o>40?n.substring(0,o):n)+"..."}_showAlertDetails(e,t){var r;this._returnFocusTo=null!==(r=null==t?void 0:t.currentTarget)&&void 0!==r?r:null,e.disruption?this._selectedAlert={title:e.disruption.title||"Disruption Alert",is_planned:e.disruption.is_planned,summary:e.disruption.summary,description:e.disruption.description,alternative_travel:e.disruption.alternative_travel,url:e.disruption.url,disruptions:[e.disruption]}:this._selectedAlert={title:"Station Announcement",summary:e.text,is_planned:!1,alternative_travel:null,url:null}}_handleEmptyStateKeyDown(e,t,r,i,n,o){"Enter"!==e.key&&" "!==e.key||(e.preventDefault(),this._showEmptyStateDetails(t,r,i,n,o,e))}_showEmptyStateDetails(e,t,r,i,n,o){var a;this._returnFocusTo=null!==(a=null==o?void 0:o.currentTarget)&&void 0!==a?a:null;const s=1===t.length&&t[0].title?t[0].title:e;this._selectedAlert={title:s,is_planned:n,disruptions:t,station_messages:r,alternative_travels:i}}_closeAlertPopup(){var e;this._selectedAlert=null,null===(e=this._returnFocusTo)||void 0===e||e.focus(),this._returnFocusTo=null}_handleAlertOverlayClick(e){e.target.classList.contains("popup-overlay")&&this._closeAlertPopup()}_handleBannerKeyDown(e,t,r){e.target===e.currentTarget&&("Enter"===e.key||" "===e.key?(e.preventDefault(),this._showAlertDetails(t,e)):"ArrowRight"===e.key?(e.preventDefault(),this._activeAnnouncementIndex=(this._activeAnnouncementIndex+1)%r.length,this.requestUpdate()):"ArrowLeft"===e.key&&(e.preventDefault(),this._activeAnnouncementIndex=(this._activeAnnouncementIndex-1+r.length)%r.length,this.requestUpdate()))}_isSafeUrl(e){if(!e||"string"!=typeof e)return!1;const t=e.trim().toLowerCase();return t.startsWith("https://")||t.startsWith("http://")}_renderAnnouncementsBanner(e,t){if(0===e.length)return B;const r=this._activeAnnouncementIndex%e.length,i=e[r],n=e.length>1?`Announcement ${r+1} of ${e.length}: ${i.text}`:`Station announcement: ${i.text}`;return O`
       <div
         class="announcements-banner position-${t}"
-        role="region"
-        aria-label="Station announcements"
+        role="button"
+        aria-label="${n}"
         tabindex="0"
-        @keydown=${t=>this._handleBannerKeyDown(t,e)}
+        aria-haspopup="dialog"
+        @click=${e=>this._showAlertDetails(i,e)}
+        @keydown=${t=>this._handleBannerKeyDown(t,i,e)}
       >
         <div class="announcement-main">
           <span class="announcement-icon" aria-hidden="true"
@@ -105,97 +107,31 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           <div class="announcement-body">
             ${e.length>1?O`<span
                   class="announcement-counter"
-                  aria-label="Announcement ${d+1} of ${e.length}"
-                  >${d+1}/${e.length}</span
+                  aria-label="Announcement ${r+1} of ${e.length}"
+                  >${r+1}/${e.length}</span
                 >`:""}
             <div class="announcement-ticker-wrap">
-              <span class="announcement-ticker">${c.text}</span>
+              <span class="announcement-ticker">${i.text}</span>
             </div>
           </div>
         </div>
-        <button
-          class="announcement-toggle-btn"
-          aria-expanded="${this._bannerDrawerExpanded?"true":"false"}"
-          aria-label="${this._bannerDrawerExpanded?"Hide announcement details":"Show announcement details"}"
-          aria-controls="announcement-drawer-content"
-          @click=${()=>this._toggleBannerDrawer()}
-        >
-          <span>${this._bannerDrawerExpanded?"Hide":"Details"}</span>
-          <span class="chevron" aria-hidden="true"
-            >${this._bannerDrawerExpanded?"▲":"▼"}</span
-          >
-        </button>
       </div>
-      ${this._bannerDrawerExpanded?O`
-            <div
-              id="announcement-drawer-content"
-              class="announcement-drawer position-${t}"
-            >
-              <div class="announcement-drawer-header">
-                <span class="announcement-drawer-title">
-                  ${(null===(r=c.disruption)||void 0===r?void 0:r.title)||(c.isDisruption?"Disruption":"Station Announcement")}
-                </span>
-                ${(null===(i=c.disruption)||void 0===i?void 0:i.is_planned)?O`<span class="alert-badge planned">Planned Work</span>`:c.isDisruption?O`<span class="alert-badge unplanned"
-                      >Disruption Alert</span
-                    >`:""}
-              </div>
-              <div class="announcement-drawer-summary">
-                ${(null===(n=c.disruption)||void 0===n?void 0:n.summary)||c.text}
-              </div>
-              ${(null===(o=c.disruption)||void 0===o?void 0:o.description)&&c.disruption.description!==c.disruption.summary?O`
-                    <div class="announcement-drawer-desc">
-                      ${c.disruption.description}
-                    </div>
-                  `:""}
-              ${(null===(a=c.disruption)||void 0===a?void 0:a.alternative_travel)?O`
-                    <div class="announcement-drawer-alt">
-                      <ha-icon
-                        icon="mdi:bus"
-                        style="--mdc-icon-size: 1.1em; vertical-align: middle; margin-right: 4px;"
-                      ></ha-icon>
-                      ${c.disruption.alternative_travel}
-                    </div>
-                  `:""}
-              <div class="announcement-drawer-actions">
-                ${this._isSafeUrl(null===(s=c.disruption)||void 0===s?void 0:s.url)?O`
-                      <a
-                        href="${(null===(l=c.disruption)||void 0===l?void 0:l.url)||""}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="empty-external-link"
-                      >
-                        National Rail Updates ↗
-                      </a>
-                    `:""}
-                <button
-                  class="empty-details-btn"
-                  @click=${e=>this._showAlertDetails(c,e)}
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          `:""}
-    `}_isNighttime(e=new Date){try{const t=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"numeric",hourCycle:"h23"}).format(e),r=parseInt(t,10);return r>=1&&r<5}catch(t){const r=e.getHours();return r>=1&&r<5}}_renderEmptyState(e,t=new Date){const r=e.attributes||{},i=r.service_status||"no_departures",n=Array.isArray(r.disruptions)?r.disruptions:[],o=(Array.isArray(r.station_messages)?r.station_messages:[]).filter(e=>Boolean(e&&"string"==typeof e&&e.trim())),a=n.map(e=>e.alternative_travel).filter(e=>Boolean(e&&"string"==typeof e&&e.trim())),s=n.length>0?n[0]:null;let l="mdi:clock-outline",d="No Departures",c="No departures in the current window";"station_closed"===i?(l="mdi:train",d="Station Closed",c="This station is currently closed. No train services are operating."):"engineering_work"===i?(l="mdi:wrench-clock",d="Engineering Work",c="Engineering work is affecting services at this station."):"disrupted"===i?(l="mdi:alert-circle-outline",d="Service Disrupted",c="Train services are disrupted. Please check announcements for details."):(l=this._isNighttime(t)?"mdi:weather-night":"mdi:clock-outline",d="No Departures",c=this._isNighttime(t)?"No departures scheduled overnight. Services may have finished for the night.":"No departures in the current window");const p=i.replace(/_/g,"-"),u=Boolean(n.some(e=>Boolean(e.summary)||Boolean(e.description)||Boolean(e.alternative_travel)||Boolean(e.url))||a.length>0||o.length>0),h=s&&(s.title||this._getBriefSummary(s.summary))||c;return O`
-      <div class="board-message board-empty-state ${p} ${i}" role="status">
+    `}_isNighttime(e=new Date){try{const t=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"numeric",hourCycle:"h23"}).format(e),r=parseInt(t,10);return r>=1&&r<5}catch(t){const r=e.getHours();return r>=1&&r<5}}_renderEmptyState(e,t=new Date){const r=e.attributes||{},i=r.service_status||"no_departures",n=Array.isArray(r.disruptions)?r.disruptions:[],o=(Array.isArray(r.station_messages)?r.station_messages:[]).filter(e=>Boolean(e&&"string"==typeof e&&e.trim())),a=n.map(e=>e.alternative_travel).filter(e=>Boolean(e&&"string"==typeof e&&e.trim())),s=n.length>0?n[0]:null;let l="mdi:clock-outline",d="No Departures",c="No departures in the current window";"station_closed"===i?(l="mdi:train",d="Station Closed",c="This station is currently closed. No train services are operating."):"engineering_work"===i?(l="mdi:wrench-clock",d="Engineering Work",c="Engineering work is affecting services at this station."):"disrupted"===i?(l="mdi:alert-circle-outline",d="Service Disrupted",c="Train services are disrupted. Please check announcements for details."):(l=this._isNighttime(t)?"mdi:weather-night":"mdi:clock-outline",d="No Departures",c=this._isNighttime(t)?"No departures scheduled overnight. Services may have finished for the night.":"No departures in the current window");const p=i.replace(/_/g,"-"),u=Boolean(n.some(e=>Boolean(e.title)||Boolean(e.summary)||Boolean(e.description)||Boolean(e.alternative_travel)||Boolean(e.url))||a.length>0||o.length>0),h=s&&(s.title||this._getBriefSummary(s.summary))||c;return O`
+      <div
+        class="board-message board-empty-state ${u?"is-interactive":""} ${p} ${i}"
+        role="${u?"button":"status"}"
+        tabindex="${u?"0":B}"
+        aria-haspopup="${u?"dialog":B}"
+        aria-label="${u?`${d}: ${h}`:B}"
+        @click=${u?e=>this._showEmptyStateDetails(d,n,o,a,Boolean(null==s?void 0:s.is_planned),e):B}
+        @keydown=${u?e=>this._handleEmptyStateKeyDown(e,d,n,o,a,Boolean(null==s?void 0:s.is_planned)):B}
+      >
         <div class="empty-state-header">
           <div class="empty-state-title-row">
             <span class="message-icon" aria-hidden="true">${l.startsWith("mdi:")?O`<ha-icon .icon=${l}></ha-icon>`:l}</span>
             <div class="board-empty-title">${d}</div>
             ${(null==s?void 0:s.is_planned)?O`<span class="alert-badge planned">Planned Work</span>`:""}
           </div>
-          ${u?O`
-                <button
-                  class="disruption-toggle-btn"
-                  aria-expanded="${this._disruptionDetailsExpanded?"true":"false"}"
-                  aria-label="${this._disruptionDetailsExpanded?"Hide details":"Show details"}"
-                  aria-controls="disruption-details-content"
-                  @click=${this._toggleDisruptionDetails}
-                >
-                  <span>${this._disruptionDetailsExpanded?"Hide details":"Show details"}</span>
-                  <span class="chevron" aria-hidden="true">${this._disruptionDetailsExpanded?"▲":"▼"}</span>
-                </button>
-              `:""}
         </div>
         <div class="empty-compact-summary">${h}</div>
         ${a.length>0?O`
@@ -208,50 +144,8 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
                 </div>
               </div>
             `:""}
-        ${this._disruptionDetailsExpanded&&u?O`
-              <div id="disruption-details-content" class="disruption-expanded-content">
-                ${n.map((e,t)=>O`
-                    <div class="empty-disruption-details">
-                      ${e.title&&(e.title!==h||n.length>1)?O`<h4 class="empty-disruption-title">
-                            ${e.title||`Disruption Notice ${t+1}`}
-                          </h4>`:""}
-                      ${e.summary?O`<p class="empty-state-summary">
-                            ${e.summary}
-                          </p>`:""}
-                      ${e.description&&e.description!==e.summary?O`<p class="empty-state-description">
-                            ${e.description}
-                          </p>`:""}
-                    </div>
-                  `)}
-                ${o.length>0?O`
-                      <div class="empty-station-messages">
-                        ${o.map(e=>O`<div class="empty-station-message"><ha-icon icon="mdi:bullhorn" style="--mdc-icon-size: 1.1em; vertical-align: text-bottom; margin-right: 4px;"></ha-icon>${e}</div>`)}
-                      </div>
-                    `:""}
-                ${s?O`
-                      <div class="empty-state-actions">
-                        <button
-                          class="empty-details-btn"
-                          @click=${e=>this._showAlertDetails({id:s.id,text:s.title||s.summary||"Disruption",isDisruption:!0,disruption:s},e)}
-                        >
-                          View Details
-                        </button>
-                        ${this._isSafeUrl(s.url)?O`
-                              <a
-                                href="${s.url}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="empty-external-link"
-                              >
-                                National Rail Updates ↗
-                              </a>
-                            `:""}
-                      </div>
-                    `:""}
-              </div>
-            `:M}
       </div>
-    `}_renderAlertPopup(){if(!this._selectedAlert)return M;const e=this._selectedAlert,t=this._isSafeUrl(e.url),r=Boolean(e.is_planned),i=e.title||"Station Notice",n=e.summary||"",o=e.alternative_travel;return O`
+    `}_renderAlertPopup(){if(!this._selectedAlert)return B;const e=this._selectedAlert,t=Boolean(e.is_planned),r=e.title||"Station Notice",i=e.disruptions||[],n=[];e.alternative_travels&&e.alternative_travels.length>0&&n.push(...e.alternative_travels),e.alternative_travel&&n.push(e.alternative_travel);for(const e of i)e.alternative_travel&&n.push(e.alternative_travel);const o=Array.from(new Set(n.filter(e=>Boolean(e&&"string"==typeof e&&e.trim())))),a=(e.station_messages||[]).filter(e=>Boolean(e&&"string"==typeof e&&e.trim())),s=i.length>0;return O`
       <div
         class="popup-overlay alert-popup-overlay"
         @click=${this._handleAlertOverlayClick}
@@ -261,14 +155,14 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           class="alert-popup-card"
           role="dialog"
           aria-modal="true"
-          aria-label="${i}"
+          aria-label="${r}"
         >
           <div class="alert-popup-header">
             <div>
-              <h2 class="alert-popup-title">${i}</h2>
-              <div class="alert-badge ${r?"planned":"unplanned"}">
-                ${r?"Planned Work":"Disruption Alert"}
-              </div>
+              <h2 class="alert-popup-title">${r}</h2>
+              ${s?O`<div class="alert-badge ${t?"planned":"unplanned"}">
+                    ${t?"Planned Work":"Disruption Alert"}
+                  </div>`:""}
             </div>
             <button
               class="popup-close alert-popup-close"
@@ -278,31 +172,64 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
               &times;
             </button>
           </div>
-          ${n?O`<p class="alert-summary">${n}</p>`:""}
-          ${e.description&&e.description!==n?O`<p class="alert-description">${e.description}</p>`:""}
-          ${o?O`
-                <div class="alert-alternative-section">
-                  <div class="alert-alternative-title">
-                    <ha-icon icon="mdi:bus" style="--mdc-icon-size: 1.1em; vertical-align: middle; margin-right: 4px;"></ha-icon> Alternative Travel &amp; Ticket Acceptance
+          ${i.length>0?i.map((e,t)=>O`
+                  <div class="empty-disruption-details">
+                    ${e.title&&(i.length>1||e.title!==r)?O`<h4 class="empty-disruption-title">
+                          ${e.title||`Disruption Notice ${t+1}`}
+                        </h4>`:""}
+                    ${e.summary?O`<p class="alert-summary">${e.summary}</p>`:""}
+                    ${e.description&&e.description!==e.summary?O`<p class="alert-description">${e.description}</p>`:""}
+                    ${this._isSafeUrl(e.url)?O`
+                          <div class="alert-link-container">
+                            <a
+                              href="${e.url}"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="alert-link"
+                            >
+                              More information on National Rail ↗
+                            </a>
+                          </div>
+                        `:""}
                   </div>
-                  <div>${o}</div>
+                `):O`
+                ${e.summary?O`<p class="alert-summary">${e.summary}</p>`:""}
+                ${e.description&&e.description!==e.summary?O`<p class="alert-description">${e.description}</p>`:""}
+                ${this._isSafeUrl(e.url)?O`
+                      <div class="alert-link-container">
+                        <a
+                          href="${e.url}"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="alert-link"
+                        >
+                          More information on National Rail ↗
+                        </a>
+                      </div>
+                    `:""}
+              `}
+          ${a.length>0?O`
+                <div class="empty-station-messages">
+                  ${a.map(e=>O`<div class="empty-station-message"><ha-icon icon="mdi:bullhorn" style="--mdc-icon-size: 1.1em; vertical-align: text-bottom; margin-right: 4px;"></ha-icon>${e}</div>`)}
                 </div>
               `:""}
-          ${t&&e.url?O`
-                <div class="alert-link-container">
-                  <a
-                    href="${e.url}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="alert-link"
-                  >
-                    More information on National Rail ↗
-                  </a>
+          ${o.length>0?O`
+                <div class="alert-alternative-section">
+                  <div class="alert-alternative-title">
+                    <ha-icon
+                      icon="mdi:bus"
+                      style="--mdc-icon-size: 1.1em; vertical-align: middle; margin-right: 4px;"
+                    ></ha-icon>
+                    Alternative Travel &amp; Ticket Acceptance
+                  </div>
+                  <div>
+                    ${o.map(e=>O`<div class="alternative-travel-item">${e}</div>`)}
+                  </div>
                 </div>
               `:""}
         </div>
       </div>
-    `}_handleOverlayClick(e){e.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){var e,t,r;if(!this._selectedDeparture)return M;const i=this._selectedDeparture,n=i.status_class,o=i.status_label,a=i.scheduled_time,s=i.calling_points||[],l=i.is_cancelled||"cancelled"===n,d=he(i.stock,i.operator_name),c=this.config.entity?null===(t=null===(e=this.hass)||void 0===e?void 0:e.states)||void 0===t?void 0:t[this.config.entity]:null,p=Boolean(null===(r=null==c?void 0:c.attributes)||void 0===r?void 0:r.error),u="on-time"===n?"status-ok":"cancelled"===n?"status-cancelled":"status-delayed",h=s.some(e=>e.is_passed);return O`
+    `}_handleOverlayClick(e){e.target.classList.contains("popup-overlay")&&this._closePopup()}_renderDetailsPopup(){var e,t,r;if(!this._selectedDeparture)return B;const i=this._selectedDeparture,n=i.status_class,o=i.status_label,a=i.scheduled_time,s=i.calling_points||[],l=i.is_cancelled||"cancelled"===n,d=he(i.stock,i.operator_name),c=this.config.entity?null===(t=null===(e=this.hass)||void 0===e?void 0:e.states)||void 0===t?void 0:t[this.config.entity]:null,p=Boolean(null===(r=null==c?void 0:c.attributes)||void 0===r?void 0:r.error),u="on-time"===n?"status-ok":"cancelled"===n?"status-cancelled":"status-delayed",h=s.some(e=>e.is_passed);return O`
       <div
         class="popup-overlay"
         @click=${this._handleOverlayClick}
@@ -402,19 +329,19 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           </div>
         </div>
       </div>
-    `}_renderJourneySummary(e){const t=e.destination_arrival_time,r=[];return null!=e.journey_duration_minutes&&r.push(`${e.journey_duration_minutes} min journey`),null!=e.stops_count&&e.stops_count>0&&r.push(`${e.stops_count} ${1===e.stops_count?"stop":"stops"}`),t&&r.push(`arrives ${t}`),0===r.length?M:O`<div class="journey-summary">${r.join(" · ")}</div>`}renderDepartureRow(e,t,r=0,i=new Date){const n=e.scheduled_time,o=e.status_class,a=e.status_label,s=e.offset_label,l=e.platform?e.platform:null,d=r>=0&&t===r,c=(Number(this.config.walk_time_minutes)||0)>0&&(-1===r||t<r),p=e.is_cancelled||"cancelled"===o,u=he(e.stock,e.operator_name),h=p?"time-cancelled":"",m=`row-size-${this.config.row_size||"normal"}`,g=!1!==this.config.show_carriages,f=["modern","javelin","refurb"].includes(u.category)?`stock-row-${u.category}`:"",v=this.config.time_display||"scheduled",b="relative"===v||"both"===v?function(e,t,r){const i=me(e.estimated||e.scheduled,r);if(!i)return null;const n=Math.floor((i.getTime()-t.getTime())/6e4);return n<=0?"Due":`${n} min`}(e,i,this.dateCache):null,x="relative"===v&&b?b:n,y=this._flapClass(e,"status");let _=O``;if(p)_=O`<span class="status-pill cancelled ${y}"
+    `}_renderJourneySummary(e){const t=e.destination_arrival_time,r=[];return null!=e.journey_duration_minutes&&r.push(`${e.journey_duration_minutes} min journey`),null!=e.stops_count&&e.stops_count>0&&r.push(`${e.stops_count} ${1===e.stops_count?"stop":"stops"}`),t&&r.push(`arrives ${t}`),0===r.length?B:O`<div class="journey-summary">${r.join(" · ")}</div>`}renderDepartureRow(e,t,r=0,i=new Date){const n=e.scheduled_time,o=e.status_class,a=e.status_label,s=e.offset_label,l=e.platform?e.platform:null,d=r>=0&&t===r,c=(Number(this.config.walk_time_minutes)||0)>0&&(-1===r||t<r),p=e.is_cancelled||"cancelled"===o,u=he(e.stock,e.operator_name),h=p?"time-cancelled":"",m=`row-size-${this.config.row_size||"normal"}`,g=!1!==this.config.show_carriages,f=["modern","javelin","refurb"].includes(u.category)?`stock-row-${u.category}`:"",v=this.config.time_display||"scheduled",b="relative"===v||"both"===v?function(e,t,r){const i=me(e.estimated||e.scheduled,r);if(!i)return null;const n=Math.floor((i.getTime()-t.getTime())/6e4);return n<=0?"Due":`${n} min`}(e,i,this.dateCache):null,y="relative"===v&&b?b:n,_=this._flapClass(e,"status");let x=O``;if(p)x=O`<span class="status-pill cancelled ${_}"
         >Cancelled</span
-      >`;else if(s){const e="early"===o;_=O`<span
-        class="status-pill ${e?"early":"delayed"} ${y}"
+      >`;else if(s){const e="early"===o;x=O`<span
+        class="status-pill ${e?"early":"delayed"} ${_}"
         >${e?"Early ":""}${s}</span
-      >`}const w=[`${e.destination_name} at ${n}`,a];l&&w.push(`Platform ${l}`),g&&e.length&&w.push(`${e.length} carriages`),u.label&&w.push(u.label),c&&w.push("likely out of reach");const $=w.join(", ");return O`
+      >`}const $=[`${e.destination_name} at ${n}`,a];l&&$.push(`Platform ${l}`),g&&e.length&&$.push(`${e.length} carriages`),u.label&&$.push(u.label),c&&$.push("likely out of reach");const w=$.join(", ");return O`
       <div
         class="train ${d?"next-train":""} ${p?"cancelled-row":""} ${c?"unreachable":""} ${f} ${m}"
         role="listitem"
         tabindex="0"
         aria-haspopup="dialog"
-        aria-label="${$}"
-        title="${$}"
+        aria-label="${w}"
+        title="${w}"
         @click=${t=>this._showDetails(e,t)}
         @keydown=${t=>this._handleRowKeyDown(t,e)}
       >
@@ -422,7 +349,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           <span
             class="scheduled ${this._flapClass(e,"time")}"
             aria-label="Scheduled time"
-            >${x}</span
+            >${y}</span
           >
           ${"both"===v&&b?O`<span class="relative-time"
                 >${"Due"===b?b:`in ${b}`}</span
@@ -439,7 +366,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
                   >`:""}${e.destination_name}
             </h3>
             <div class="row-meta">
-              ${_}
+              ${x}
               ${g&&e.length?O`<span class="carriages-badge">${e.length}-car</span>`:""}
               ${l?O`<span
                     class="platform-badge ${this._flapClass(e,"platform")}"
@@ -450,7 +377,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
           </div>
         </div>
       </div>
-    `}};we.styles=((e,...t)=>{const r=1===e.length?e[0]:t.reduce((t,r,i)=>t+(e=>{if(!0===e._$cssResult$)return e.cssText;if("number"==typeof e)return e;throw Error("Value passed to 'css' function must be a 'css' function result: "+e+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(r)+e[i+1],e[0]);return new o(r,e,i)})`
+    `}};$e.styles=((e,...t)=>{const r=1===e.length?e[0]:t.reduce((t,r,i)=>t+(e=>{if(!0===e._$cssResult$)return e.cssText;if("number"==typeof e)return e;throw Error("Value passed to 'css' function must be a 'css' function result: "+e+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(r)+e[i+1],e[0]);return new o(r,e,i)})`
     ha-card {
       height: 100%;
       background: var(--ha-card-background, var(--card-background-color, #fff));
@@ -1202,6 +1129,11 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       box-sizing: border-box;
       position: relative;
       flex-wrap: wrap;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+    .announcements-banner:hover {
+      background: rgba(255, 170, 0, 0.14);
     }
     .announcements-banner.position-bottom {
       border-bottom: none;
@@ -1269,101 +1201,7 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       opacity: 0.9;
       flex-shrink: 0;
     }
-    .announcement-toggle-btn,
-    .disruption-toggle-btn {
-      background: transparent;
-      border: 1px solid var(--divider-color, rgba(128, 128, 128, 0.3));
-      color: var(--primary-text-color, #222);
-      border-radius: 4px;
-      padding: 3px 8px;
-      font-family: inherit;
-      font-size: 0.75em;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-      transition: background 0.15s ease, border-color 0.15s ease;
-      margin: 0;
-      line-height: 1.2;
-    }
-    .announcement-toggle-btn:hover,
-    .disruption-toggle-btn:hover {
-      background: var(--secondary-background-color, rgba(128, 128, 128, 0.1));
-      border-color: var(--primary-text-color, #444);
-    }
-    .announcement-toggle-btn:focus-visible,
-    .disruption-toggle-btn:focus-visible {
-      outline: 2px solid var(--warning-color, #ffaa00);
-      outline-offset: 1px;
-    }
-    .announcement-toggle-btn .chevron,
-    .disruption-toggle-btn .chevron {
-      font-size: 0.7rem;
-      line-height: 1;
-      transition: transform 0.2s ease;
-    }
-    .announcement-drawer {
-      background: var(--ha-card-background, var(--card-background-color, #fff));
-      color: var(--primary-text-color, #111);
-      border-bottom: 1px solid var(--divider-color, rgba(128, 128, 128, 0.2));
-      border-left: 3px solid var(--warning-color, #e65100);
-      padding: 12px 14px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 0.85rem;
-      line-height: 1.45;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-sizing: border-box;
-      width: 100%;
-      text-align: left;
-    }
-    .announcement-drawer.position-bottom {
-      border-bottom: none;
-      border-top: 1px solid var(--divider-color, rgba(128, 128, 128, 0.2));
-    }
-    .announcement-drawer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .announcement-drawer-title {
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--primary-text-color, #111);
-    }
-    .announcement-drawer-summary {
-      color: var(--secondary-text-color, #444);
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .announcement-drawer-desc {
-      color: var(--secondary-text-color, #555);
-      font-size: 0.82rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .announcement-drawer-alt {
-      background: var(--card-background-color, #fff);
-      border: 1px solid var(--divider-color, rgba(128, 128, 128, 0.2));
-      border-left: 3px solid var(--warning-color, #e65100);
-      padding: 8px 10px;
-      border-radius: 4px;
-      color: var(--primary-text-color, #222);
-      font-size: 0.82rem;
-      word-break: break-word;
-    }
-    .announcement-drawer-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 4px;
-      flex-wrap: wrap;
-    }
+
     .board-empty-state {
       padding: 12px 14px;
       text-align: left;
@@ -1458,15 +1296,23 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       width: 100%;
       word-break: break-word;
     }
-    .disruption-expanded-content {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
-      margin-top: 4px;
-      box-sizing: border-box;
-      text-align: left;
+    .board-empty-state.is-interactive {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+    .board-empty-state.is-interactive:hover {
+      background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+    }
+    .board-empty-state.station-closed.is-interactive:hover {
+      background: rgba(211, 47, 47, 0.08);
+    }
+    .board-empty-state.engineering-work.is-interactive:hover,
+    .board-empty-state.disrupted.is-interactive:hover {
+      background: rgba(255, 152, 0, 0.09);
+    }
+    .board-empty-state.is-interactive:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: -2px;
     }
     .alternative-travel-box {
       margin-top: 4px;
@@ -1505,6 +1351,11 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       width: 100%;
       text-align: left;
     }
+    .empty-disruption-details + .empty-disruption-details {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--divider-color, rgba(128, 128, 128, 0.25));
+    }
     .empty-disruption-title {
       font-size: 0.88rem;
       font-weight: 600;
@@ -1538,46 +1389,6 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
       border-radius: 4px;
       text-align: left;
       word-break: break-word;
-    }
-    .empty-state-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      margin-top: 4px;
-      flex-wrap: wrap;
-    }
-    .empty-details-btn {
-      background: transparent;
-      color: var(--primary-text-color, #222);
-      border: 1px solid var(--divider-color, rgba(128, 128, 128, 0.3));
-      border-radius: 4px;
-      padding: 4px 10px;
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
-    }
-    .empty-details-btn:hover {
-      background: var(--secondary-background-color, rgba(128, 128, 128, 0.1));
-      border-color: var(--primary-text-color, #444);
-    }
-    .empty-details-btn:focus-visible {
-      outline: 2px solid var(--warning-color, #ffaa00);
-      outline-offset: 1px;
-    }
-    .empty-external-link {
-      color: var(--warning-color, #e65100);
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .empty-external-link:hover {
-      text-decoration: underline;
     }
     .alert-popup-card {
       background: var(--card-background-color, #fff);
@@ -1659,5 +1470,5 @@ const oe=e=>t=>"function"==typeof t?((e,t)=>(customElements.define(e,t),t))(e,t)
     .alert-link:hover {
       text-decoration: underline;
     }
-  `,e([se({type:Object})],we.prototype,"hass",void 0),e([se({type:Object})],we.prototype,"config",void 0),e([se({type:Array})],we.prototype,"nextTrains",void 0),e([le()],we.prototype,"_selectedDeparture",void 0),e([le()],we.prototype,"_selectedAlert",void 0),e([le()],we.prototype,"_activeAnnouncementIndex",void 0),e([le()],we.prototype,"_disruptionDetailsExpanded",void 0),e([le()],we.prototype,"_bannerDrawerExpanded",void 0),we=e([oe("train-departure-board")],we),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-board",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{we as TrainDepartureBoard};
+  `,e([se({type:Object})],$e.prototype,"hass",void 0),e([se({type:Object})],$e.prototype,"config",void 0),e([se({type:Array})],$e.prototype,"nextTrains",void 0),e([le()],$e.prototype,"_selectedDeparture",void 0),e([le()],$e.prototype,"_selectedAlert",void 0),e([le()],$e.prototype,"_activeAnnouncementIndex",void 0),$e=e([oe("train-departure-board")],$e),window.customCards=window.customCards||[],window.customCards.push({type:"custom:train-departure-board",name:"Train Departure Board",description:"Display train departure information in a TFL-style board",preview:!0,support_url:"https://github.com/ivmreg/ha-train-departure-board/issues"});export{$e as TrainDepartureBoard};
 //# sourceMappingURL=ha-train-departure-board.js.map
