@@ -136,6 +136,7 @@ export interface DisruptionItem {
   title: string;
   is_planned: boolean;
   summary: string;
+  description?: string | null;
   alternative_travel: string | null;
   url: string | null;
   [key: string]: unknown;

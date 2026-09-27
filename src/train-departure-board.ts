@@ -27,6 +27,7 @@ export class TrainDepartureBoard extends LitElement {
     id?: string;
     title?: string;
     summary?: string;
+    description?: string | null;
     alternative_travel?: string | null;
     url?: string | null;
     is_planned?: boolean;
@@ -979,7 +980,7 @@ export class TrainDepartureBoard extends LitElement {
     .empty-compact-summary {
       font-size: 0.9rem;
       line-height: 1.4;
-      color: var(--secondary-text-color, #555);
+      color: var(--secondary-text-color, #9e9e9e);
       max-width: 480px;
       margin: 2px 0 4px 0;
       text-align: center;
@@ -989,22 +990,22 @@ export class TrainDepartureBoard extends LitElement {
       align-items: center;
       gap: 6px;
       background: var(--card-background-color, rgba(255, 255, 255, 0.05));
-      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.15));
+      border: 1px solid var(--divider-color, rgba(255, 170, 0, 0.35));
       border-radius: 16px;
       padding: 6px 14px;
       font-size: 0.82rem;
       font-weight: 600;
-      color: var(--primary-color, #03a9f4);
+      color: var(--primary-color, #ffaa00);
       cursor: pointer;
       transition: all 0.2s ease-in-out;
       margin-top: 4px;
     }
     .disruption-toggle-btn:hover {
-      background: rgba(3, 169, 244, 0.08);
-      border-color: var(--primary-color, #03a9f4);
+      background: rgba(255, 170, 0, 0.12);
+      border-color: #ffaa00;
     }
     .disruption-toggle-btn:focus-visible {
-      outline: 2px solid var(--primary-color, #03a9f4);
+      outline: 2px solid #ffaa00;
       outline-offset: 2px;
     }
     .disruption-toggle-btn .chevron {
@@ -1440,6 +1441,7 @@ export class TrainDepartureBoard extends LitElement {
       }
     }, 30_000);
     this._announcementTimer = window.setInterval(() => {
+      if (this._bannerDrawerExpanded || this._selectedAlert) return;
       const announcements = this._getAnnouncements();
       if (announcements.length > 1) {
         this._activeAnnouncementIndex =
@@ -1796,6 +1798,7 @@ export class TrainDepartureBoard extends LitElement {
           class="announcement-toggle-btn"
           aria-expanded="${this._bannerDrawerExpanded ? 'true' : 'false'}"
           aria-label="${this._bannerDrawerExpanded ? 'Hide announcement details' : 'Show announcement details'}"
+          aria-controls="announcement-drawer-content"
           @click=${(e: Event) => {
             e.stopPropagation();
             this._toggleBannerDrawer();
@@ -1807,7 +1810,7 @@ export class TrainDepartureBoard extends LitElement {
       </div>
       ${this._bannerDrawerExpanded
         ? html`
-            <div class="announcement-drawer position-${position}">
+            <div id="announcement-drawer-content" class="announcement-drawer position-${position}">
               <div class="announcement-drawer-header">
                 <span class="announcement-drawer-title">
                   ${current.disruption?.title ||
@@ -1822,6 +1825,14 @@ export class TrainDepartureBoard extends LitElement {
               <div class="announcement-drawer-summary">
                 ${current.disruption?.summary || current.text}
               </div>
+              ${current.disruption?.description &&
+              current.disruption.description !== current.disruption.summary
+                ? html`
+                    <div class="announcement-drawer-desc">
+                      ${current.disruption.description}
+                    </div>
+                  `
+                : ''}
               ${current.disruption?.alternative_travel
                 ? html`
                     <div class="announcement-drawer-alt">
@@ -1846,7 +1857,7 @@ export class TrainDepartureBoard extends LitElement {
                   class="empty-details-btn"
                   @click=${(e: Event) => this._showAlertDetails(current, e)}
                 >
-                  View Modal
+                  View Details
                 </button>
               </div>
             </div>
@@ -1925,7 +1936,13 @@ export class TrainDepartureBoard extends LitElement {
 
     const statusClass = serviceStatus.replace(/_/g, '-');
     const hasDetails = Boolean(
-      primaryDisruption?.summary ||
+      disruptions.some(
+        d =>
+          Boolean(d.summary) ||
+          Boolean(d.description) ||
+          Boolean(d.alternative_travel) ||
+          Boolean(d.url)
+      ) ||
       altTravels.length > 0 ||
       stationMessages.length > 0
     );
@@ -1955,20 +1972,27 @@ export class TrainDepartureBoard extends LitElement {
         ${this._disruptionDetailsExpanded && hasDetails
           ? html`
               <div id="disruption-details-content" class="disruption-expanded-content">
-                ${primaryDisruption
-                  ? html`
-                      <div class="empty-disruption-details">
-                        <h4 class="empty-disruption-title">
-                          ${primaryDisruption.title || 'Disruption Notice'}
-                        </h4>
-                        ${primaryDisruption.summary
-                          ? html`<p class="empty-state-summary">
-                              ${primaryDisruption.summary}
-                            </p>`
-                          : ''}
-                      </div>
-                    `
-                  : ''}
+                ${disruptions.map(
+                  (d, idx) => html`
+                    <div class="empty-disruption-details">
+                      ${d.title && (d.title !== briefSummary || disruptions.length > 1)
+                        ? html`<h4 class="empty-disruption-title">
+                            ${d.title || `Disruption Notice ${idx + 1}`}
+                          </h4>`
+                        : ''}
+                      ${d.summary
+                        ? html`<p class="empty-state-summary">
+                            ${d.summary}
+                          </p>`
+                        : ''}
+                      ${d.description && d.description !== d.summary
+                        ? html`<p class="empty-state-description">
+                            ${d.description}
+                          </p>`
+                        : ''}
+                    </div>
+                  `
+                )}
                 ${stationMessages.length > 0
                   ? html`
                       <div class="empty-station-messages">
@@ -2076,6 +2100,9 @@ export class TrainDepartureBoard extends LitElement {
             </button>
           </div>
           ${summary ? html`<p class="alert-summary">${summary}</p>` : ''}
+          ${alert.description && alert.description !== summary
+            ? html`<p class="alert-description">${alert.description}</p>`
+            : ''}
           ${altTravel
             ? html`
                 <div class="alert-alternative-section">

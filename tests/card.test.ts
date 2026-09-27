@@ -1200,4 +1200,74 @@ describe('entity state unknown and empty state enrichment', () => {
     const empty = card.shadowRoot!.querySelector('.board-empty-state.no-departures')!;
     expect(empty.querySelector('.disruption-toggle-btn')).toBeNull();
   });
+
+  it('sets aria-controls on announcement toggle button and labels details button View Details', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    expect(toggleBtn.getAttribute('aria-controls')).toBe('announcement-drawer-content');
+
+    toggleBtn.click();
+    await card.updateComplete;
+
+    const drawer = card.shadowRoot!.querySelector('#announcement-drawer-content') as HTMLElement;
+    expect(drawer).not.toBeNull();
+    const detailsBtn = drawer.querySelector('.empty-details-btn') as HTMLElement;
+    expect(detailsBtn).not.toBeNull();
+    expect(detailsBtn.textContent).toContain('View Details');
+    expect(detailsBtn.textContent).not.toContain('View Modal');
+  });
+
+  it('renders all disruptions and description in expanded empty state', async () => {
+    const secondDisruption = {
+      id: 'INC201',
+      title: 'Signalling fault at Bexleyheath',
+      is_planned: false,
+      summary: 'Trains through Bexleyheath delayed up to 15 mins.',
+      description: 'Engineers are on site resolving track circuit issue.',
+      alternative_travel: null,
+      url: null,
+    };
+
+    const card = await mountUnknownCard({
+      service_status: 'disrupted',
+      disruptions: [sampleDisruption, secondDisruption],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.disrupted')!;
+    const toggleBtn = empty.querySelector('.disruption-toggle-btn') as HTMLElement;
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(empty.textContent).toContain(sampleDisruption.title);
+    expect(empty.textContent).toContain(sampleDisruption.summary);
+    expect(empty.textContent).toContain(secondDisruption.title);
+    expect(empty.textContent).toContain(secondDisruption.summary);
+    expect(empty.textContent).toContain(secondDisruption.description);
+  });
+
+  it('does not duplicate title in empty disruption details when title matches compact headline', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'station_closed',
+      disruptions: [sampleDisruption],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed')!;
+    const toggleBtn = empty.querySelector('.disruption-toggle-btn') as HTMLElement;
+    toggleBtn.click();
+    await card.updateComplete;
+
+    // The compact summary already contains sampleDisruption.title, so the expanded details container
+    // should not have a duplicate h4 repeating sampleDisruption.title for a single disruption
+    const detailsTitle = empty.querySelector('#disruption-details-content .empty-disruption-title');
+    expect(detailsTitle).toBeNull();
+    expect(empty.querySelector('.empty-state-summary')!.textContent).toContain(sampleDisruption.summary);
+  });
 });
+
