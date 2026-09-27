@@ -845,11 +845,10 @@ describe('rail disruption announcements and empty states', () => {
     expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
   });
 
-  it('includes reduced-motion CSS rules for announcement ticker', () => {
+  it('includes static ticker CSS rules for announcement banner', () => {
     const styles = (TrainDepartureBoard as unknown as { styles: { cssText: string } }).styles?.cssText || '';
-    expect(styles).toContain('prefers-reduced-motion');
-    expect(styles).toContain('ticker-scroll');
     expect(styles).toContain('announcement-ticker');
+    expect(styles).toContain('text-overflow');
   });
 });
 

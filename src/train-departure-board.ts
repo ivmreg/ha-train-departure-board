@@ -681,7 +681,22 @@ export class TrainDepartureBoard extends LitElement {
     .board-message .message-icon {
       font-size: 1.8em;
       line-height: 1;
-      opacity: 0.7;
+      opacity: 0.85;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .board-message .message-icon ha-icon {
+      --mdc-icon-size: 40px;
+      width: 40px;
+      height: 40px;
+    }
+    .board-empty-state.station-closed .message-icon {
+      color: var(--error-color, #d32f2f);
+    }
+    .board-empty-state.engineering-work .message-icon,
+    .board-empty-state.disrupted .message-icon {
+      color: var(--warning-color, #e65100);
     }
     .board-message .message-text {
       font-size: 0.95em;
@@ -830,6 +845,13 @@ export class TrainDepartureBoard extends LitElement {
       font-size: 1.1em;
       line-height: 1;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+    .announcement-icon ha-icon {
+      --mdc-icon-size: 1.15em;
+      width: 1.15em;
+      height: 1.15em;
     }
     .announcement-body {
       flex: 1;
@@ -848,7 +870,9 @@ export class TrainDepartureBoard extends LitElement {
     .announcement-ticker {
       display: inline-block;
       white-space: nowrap;
-      animation: ticker-scroll 16s linear infinite;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
     .announcement-counter {
       font-size: 0.75em;
@@ -936,14 +960,6 @@ export class TrainDepartureBoard extends LitElement {
       gap: 12px;
       margin-top: 4px;
       flex-wrap: wrap;
-    }
-    @keyframes ticker-scroll {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(-50%);
-      }
     }
     .board-empty-state {
       padding: 24px 16px;
@@ -1205,12 +1221,6 @@ export class TrainDepartureBoard extends LitElement {
     .alert-link:hover {
       text-decoration: underline;
     }
-    @media (prefers-reduced-motion: reduce) {
-      .announcement-ticker {
-        animation: none !important;
-        transform: none !important;
-      }
-    }
   `;
 
   private _renderMessage(icon: string, message: string, isError = false) {
@@ -1221,7 +1231,11 @@ export class TrainDepartureBoard extends LitElement {
           : ''}
         <div class="card">
           <div class="board-message ${isError ? 'error' : ''}">
-            <span class="message-icon" aria-hidden="true">${icon}</span>
+            <span class="message-icon" aria-hidden="true">${
+              icon.startsWith('mdi:')
+                ? html`<ha-icon .icon=${icon}></ha-icon>`
+                : icon
+            }</span>
             <span class="message-text">${message}</span>
           </div>
         </div>
@@ -1781,7 +1795,7 @@ export class TrainDepartureBoard extends LitElement {
         @keydown=${(e: KeyboardEvent) =>
           this._handleBannerKeyDown(e, current, announcements)}
       >
-        <span class="announcement-icon" aria-hidden="true">📢</span>
+        <span class="announcement-icon" aria-hidden="true"><ha-icon icon="mdi:bullhorn"></ha-icon></span>
         <div class="announcement-body">
           ${announcements.length > 1
             ? html`<span
@@ -1836,7 +1850,7 @@ export class TrainDepartureBoard extends LitElement {
               ${current.disruption?.alternative_travel
                 ? html`
                     <div class="announcement-drawer-alt">
-                      <span aria-hidden="true">🚌</span> ${current.disruption.alternative_travel}
+                      <ha-icon icon="mdi:bus" style="--mdc-icon-size: 1.1em; vertical-align: middle; margin-right: 4px;"></ha-icon> ${current.disruption.alternative_travel}
                     </div>
                   `
                 : ''}
@@ -1904,12 +1918,12 @@ export class TrainDepartureBoard extends LitElement {
 
     const primaryDisruption = disruptions.length > 0 ? disruptions[0] : null;
 
-    let icon = '🚉';
+    let icon = 'mdi:clock-outline';
     let title = 'No Departures';
     let defaultMsg = 'No departures in the current window';
 
     if (serviceStatus === 'station_closed') {
-      icon = '🚫';
+      icon = 'mdi:train-variant-off';
       if (primaryDisruption?.is_planned) {
         title = 'Station Closed: Planned Engineering Work';
       } else {
@@ -1917,15 +1931,15 @@ export class TrainDepartureBoard extends LitElement {
       }
       defaultMsg = 'This station is currently closed. No train services are operating.';
     } else if (serviceStatus === 'engineering_work') {
-      icon = '🚧';
+      icon = 'mdi:wrench-clock';
       title = 'Engineering Work';
       defaultMsg = 'Engineering work is affecting services at this station.';
     } else if (serviceStatus === 'disrupted') {
-      icon = '⚠';
+      icon = 'mdi:train-alert';
       title = 'Service Disrupted';
       defaultMsg = 'Train services are disrupted. Please check announcements for details.';
     } else {
-      icon = '🚉';
+      icon = this._isNighttime(now) ? 'mdi:weather-night' : 'mdi:clock-outline';
       title = 'No Departures';
       if (this._isNighttime(now)) {
         defaultMsg = 'No departures scheduled overnight. Services may have finished for the night.';
@@ -1953,7 +1967,11 @@ export class TrainDepartureBoard extends LitElement {
 
     return html`
       <div class="board-message board-empty-state ${statusClass} ${serviceStatus}" role="status">
-        <span class="message-icon" aria-hidden="true">${icon}</span>
+        <span class="message-icon" aria-hidden="true">${
+          icon.startsWith('mdi:')
+            ? html`<ha-icon .icon=${icon}></ha-icon>`
+            : icon
+        }</span>
         <div class="board-empty-title">${title}</div>
         <div class="empty-compact-summary">${briefSummary}</div>
         ${hasDetails
@@ -1997,7 +2015,7 @@ export class TrainDepartureBoard extends LitElement {
                   ? html`
                       <div class="empty-station-messages">
                         ${stationMessages.map(
-                          msg => html`<div class="empty-station-message">📢 ${msg}</div>`
+                          msg => html`<div class="empty-station-message"><ha-icon icon="mdi:bullhorn" style="--mdc-icon-size: 1.1em; vertical-align: text-bottom; margin-right: 4px;"></ha-icon>${msg}</div>`
                         )}
                       </div>
                     `
@@ -2006,7 +2024,7 @@ export class TrainDepartureBoard extends LitElement {
                   ? html`
                       <div class="alternative-travel-box">
                         <div class="alternative-travel-header">
-                          <span aria-hidden="true">🚌</span> ${serviceStatus === 'engineering_work'
+                          <ha-icon icon="mdi:bus" style="--mdc-icon-size: 1.2em; vertical-align: middle; margin-right: 4px;"></ha-icon> ${serviceStatus === 'engineering_work'
                             ? 'Replacement Bus & Ticket Acceptance'
                             : 'Alternative Travel & Ticket Acceptance'}
                         </div>
@@ -2107,7 +2125,7 @@ export class TrainDepartureBoard extends LitElement {
             ? html`
                 <div class="alert-alternative-section">
                   <div class="alert-alternative-title">
-                    <span aria-hidden="true">🚌</span> Alternative Travel &amp; Ticket Acceptance
+                    <ha-icon icon="mdi:bus" style="--mdc-icon-size: 1.1em; vertical-align: middle; margin-right: 4px;"></ha-icon> Alternative Travel &amp; Ticket Acceptance
                   </div>
                   <div>${altTravel}</div>
                 </div>
