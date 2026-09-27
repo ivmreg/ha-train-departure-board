@@ -621,9 +621,17 @@ describe('rail disruption announcements and empty states', () => {
     );
 
     const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
+    expect(banner.getAttribute('tabindex')).toBe('0');
     expect(banner.textContent).toContain('Message 1');
     expect(banner.querySelector('.announcement-counter')?.textContent).toBe('1/2');
 
+    // Arrow keys on focused Details button should not cycle announcements
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    toggleBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await card.updateComplete;
+    expect(banner.querySelector('.announcement-counter')?.textContent).toBe('1/2');
+
+    // Arrow keys on the focusable banner region cycle announcements
     banner.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     await card.updateComplete;
 
@@ -652,8 +660,14 @@ describe('rail disruption announcements and empty states', () => {
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Station Closed');
     expect(empty!.textContent).toContain(sampleDisruption.title);
 
-    // Initially collapsed: alternative travel box is not shown
-    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
+    // Alternative travel advice visible by default
+    const altTravel = empty!.querySelector('.alternative-travel-box');
+    expect(altTravel).not.toBeNull();
+    expect(altTravel!.textContent).toContain('Rail replacement bus running from Lewisham Stop C');
+    expect(altTravel!.textContent).toContain('Tickets accepted on London Underground');
+
+    // Long narrative is initially collapsed in disclosure
+    expect(empty!.querySelector('#disruption-details-content')).toBeNull();
     const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
     expect(toggleBtn).not.toBeNull();
     expect(toggleBtn.textContent).toContain('Show details');
@@ -663,16 +677,15 @@ describe('rail disruption announcements and empty states', () => {
     await card.updateComplete;
 
     expect(toggleBtn.textContent).toContain('Hide details');
-    const altTravel = empty!.querySelector('.alternative-travel-box');
-    expect(altTravel).not.toBeNull();
-    expect(altTravel!.textContent).toContain('Rail replacement bus running from Lewisham Stop C');
-    expect(altTravel!.textContent).toContain('Tickets accepted on London Underground');
+    expect(empty!.querySelector('#disruption-details-content')).not.toBeNull();
+    expect(empty!.textContent).toContain(sampleDisruption.summary);
 
     // Click toggle again to collapse
     toggleBtn.click();
     await card.updateComplete;
     expect(toggleBtn.textContent).toContain('Show details');
-    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
+    expect(empty!.querySelector('#disruption-details-content')).toBeNull();
+    expect(empty!.querySelector('.alternative-travel-box')).not.toBeNull();
   });
 
   it('renders engineering_work empty state with replacement bus guidance', async () => {
@@ -690,18 +703,22 @@ describe('rail disruption announcements and empty states', () => {
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Engineering Work');
     expect(empty!.textContent).toContain(sampleDisruption.title);
 
-    // Collapsed initially
-    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
-    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
-    expect(toggleBtn).not.toBeNull();
-
-    // Expand to reveal alternative travel
-    toggleBtn.click();
-    await card.updateComplete;
-
+    // Alternative travel advice visible by default
     const altTravel = empty!.querySelector('.alternative-travel-box');
     expect(altTravel).not.toBeNull();
     expect(altTravel!.textContent).toContain('Replacement Bus & Ticket Acceptance');
+
+    // Long narrative is in disclosure
+    expect(empty!.querySelector('#disruption-details-content')).toBeNull();
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+
+    // Expand to reveal long narrative
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(empty!.querySelector('#disruption-details-content')).not.toBeNull();
+    expect(empty!.textContent).toContain(sampleDisruption.summary);
   });
 
   it('renders disrupted empty state with alternative travel guidance', async () => {
@@ -719,17 +736,24 @@ describe('rail disruption announcements and empty states', () => {
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Service Disrupted');
     expect(empty!.textContent).toContain(sampleDisruption.title);
 
-    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
+    // Alternative travel advice visible by default
+    const altTravel = empty!.querySelector('.alternative-travel-box');
+    expect(altTravel).not.toBeNull();
+    expect(altTravel!.textContent).toContain('Alternative Travel & Ticket Acceptance');
+
+    // Long narrative is in disclosure
+    expect(empty!.querySelector('#disruption-details-content')).toBeNull();
     const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
     expect(toggleBtn).not.toBeNull();
 
     toggleBtn.click();
     await card.updateComplete;
 
-    expect(empty!.querySelector('.alternative-travel-box')).not.toBeNull();
+    expect(empty!.querySelector('#disruption-details-content')).not.toBeNull();
+    expect(empty!.textContent).toContain(sampleDisruption.summary);
   });
 
-  it('opens alert details modal on banner click and closes with Escape key', async () => {
+  it('opens alert details modal via drawer View Details button and closes with Escape key', async () => {
     const card = await mountCard(
       { entity: 'sensor.trains' },
       [makeDeparture()],
@@ -738,9 +762,15 @@ describe('rail disruption announcements and empty states', () => {
       }
     );
 
-    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
-    banner.focus();
-    banner.click();
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    toggleBtn.click();
+    await card.updateComplete;
+
+    const drawer = card.shadowRoot!.querySelector('.announcement-drawer') as HTMLElement;
+    expect(drawer).not.toBeNull();
+    const detailsBtn = drawer.querySelector('.empty-details-btn') as HTMLElement;
+    expect(detailsBtn).not.toBeNull();
+    detailsBtn.click();
     await card.updateComplete;
 
     const dialog = card.shadowRoot!.querySelector('.alert-popup-card');
@@ -756,7 +786,7 @@ describe('rail disruption announcements and empty states', () => {
     expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
   });
 
-  it('opens alert details modal with Enter key on announcement banner', async () => {
+  it('does not open modal when Enter or Space key is pressed on banner or Details button', async () => {
     const card = await mountCard(
       { entity: 'sensor.trains' },
       [makeDeparture()],
@@ -766,10 +796,33 @@ describe('rail disruption announcements and empty states', () => {
     );
 
     const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
-    banner.focus();
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+
+    // Pressing Enter or Space on banner or Details button does not open modal
     banner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
 
+    toggleBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
+
+    toggleBtn.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
+
+    // Clicking banner does not open modal
+    banner.click();
+    await card.updateComplete;
+    expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
+
+    // Only explicit View Details inside drawer opens modal
+    toggleBtn.click();
+    await card.updateComplete;
+    const detailsBtn = card.shadowRoot!.querySelector('.announcement-drawer .empty-details-btn') as HTMLElement;
+    expect(detailsBtn).not.toBeNull();
+    detailsBtn.click();
+    await card.updateComplete;
     expect(card.shadowRoot!.querySelector('.alert-popup-card')).not.toBeNull();
   });
 
@@ -782,8 +835,12 @@ describe('rail disruption announcements and empty states', () => {
       }
     );
 
-    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
-    banner.click();
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    toggleBtn.click();
+    await card.updateComplete;
+
+    const detailsBtn = card.shadowRoot!.querySelector('.announcement-drawer .empty-details-btn') as HTMLElement;
+    detailsBtn.click();
     await card.updateComplete;
 
     const link = card.shadowRoot!.querySelector('.alert-link') as HTMLAnchorElement;
@@ -809,8 +866,12 @@ describe('rail disruption announcements and empty states', () => {
       }
     );
 
-    const unsafeBanner = unsafeCard.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
-    unsafeBanner.click();
+    const unsafeToggleBtn = unsafeCard.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    unsafeToggleBtn.click();
+    await unsafeCard.updateComplete;
+
+    const unsafeDetailsBtn = unsafeCard.shadowRoot!.querySelector('.announcement-drawer .empty-details-btn') as HTMLElement;
+    unsafeDetailsBtn.click();
     await unsafeCard.updateComplete;
 
     // Unsafe URL must NOT be rendered as a link
@@ -826,8 +887,12 @@ describe('rail disruption announcements and empty states', () => {
       }
     );
 
-    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
-    banner.click();
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    toggleBtn.click();
+    await card.updateComplete;
+
+    const detailsBtn = card.shadowRoot!.querySelector('.announcement-drawer .empty-details-btn') as HTMLElement;
+    detailsBtn.click();
     await card.updateComplete;
 
     const closeBtn = card.shadowRoot!.querySelector('.alert-popup-close') as HTMLElement;
@@ -837,7 +902,7 @@ describe('rail disruption announcements and empty states', () => {
     expect(card.shadowRoot!.querySelector('.alert-popup-card')).toBeNull();
 
     // Re-open and test overlay click
-    banner.click();
+    detailsBtn.click();
     await card.updateComplete;
     const overlay = card.shadowRoot!.querySelector('.alert-popup-overlay') as HTMLElement;
     overlay.click();
@@ -906,9 +971,8 @@ describe('entity state unknown and empty state enrichment', () => {
 
     const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed');
     expect(empty).not.toBeNull();
-    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe(
-      'Station Closed: Planned Engineering Work'
-    );
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Station Closed');
+    expect(empty!.querySelector('.alert-badge.planned')!.textContent).toContain('Planned Work');
     expect(empty!.textContent).toContain(sampleDisruption.title);
     expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
 
@@ -1067,8 +1131,12 @@ describe('entity state unknown and empty state enrichment', () => {
       }
     );
 
-    const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
-    banner.click();
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    toggleBtn.click();
+    await card.updateComplete;
+
+    const detailsBtn = card.shadowRoot!.querySelector('.announcement-drawer .empty-details-btn') as HTMLElement;
+    detailsBtn.click();
     await card.updateComplete;
 
     const closeBtn = card.shadowRoot!.querySelector('.alert-popup-close') as HTMLElement;
@@ -1166,15 +1234,16 @@ describe('entity state unknown and empty state enrichment', () => {
     expect(empty.querySelector('#disruption-details-content')).toBeNull();
   });
 
-  it('formats Station Closed: Planned Engineering Work for planned closures and Station Closed for unplanned', async () => {
+  it('retains Station Closed headline and displays planned badge for planned closures', async () => {
     const plannedCard = await mountUnknownCard({
       service_status: 'station_closed',
       disruptions: [{ ...sampleDisruption, is_planned: true }],
     });
     const plannedEmpty = plannedCard.shadowRoot!.querySelector('.board-empty-state.station-closed')!;
     expect(plannedEmpty.querySelector('.board-empty-title')!.textContent).toBe(
-      'Station Closed: Planned Engineering Work'
+      'Station Closed'
     );
+    expect(plannedEmpty.querySelector('.alert-badge.planned')!.textContent).toContain('Planned Work');
 
     const unplannedCard = await mountUnknownCard({
       service_status: 'station_closed',
@@ -1184,6 +1253,7 @@ describe('entity state unknown and empty state enrichment', () => {
     expect(unplannedEmpty.querySelector('.board-empty-title')!.textContent).toBe(
       'Station Closed'
     );
+    expect(unplannedEmpty.querySelector('.alert-badge.planned')).toBeNull();
   });
 
   it('extracts first sentence as brief summary for verbose disruption summaries', () => {
