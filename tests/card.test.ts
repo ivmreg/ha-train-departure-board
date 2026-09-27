@@ -650,12 +650,29 @@ describe('rail disruption announcements and empty states', () => {
     const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed');
     expect(empty).not.toBeNull();
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Station Closed');
-    expect(empty!.textContent).toContain('station is currently closed');
+    expect(empty!.textContent).toContain(sampleDisruption.title);
 
+    // Initially collapsed: alternative travel box is not shown
+    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+    expect(toggleBtn.textContent).toContain('Show details');
+
+    // Click toggle to expand
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(toggleBtn.textContent).toContain('Hide details');
     const altTravel = empty!.querySelector('.alternative-travel-box');
     expect(altTravel).not.toBeNull();
     expect(altTravel!.textContent).toContain('Rail replacement bus running from Lewisham Stop C');
     expect(altTravel!.textContent).toContain('Tickets accepted on London Underground');
+
+    // Click toggle again to collapse
+    toggleBtn.click();
+    await card.updateComplete;
+    expect(toggleBtn.textContent).toContain('Show details');
+    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
   });
 
   it('renders engineering_work empty state with replacement bus guidance', async () => {
@@ -671,7 +688,16 @@ describe('rail disruption announcements and empty states', () => {
     const empty = card.shadowRoot!.querySelector('.board-empty-state.engineering-work');
     expect(empty).not.toBeNull();
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Engineering Work');
-    expect(empty!.textContent).toContain('Engineering work is affecting services');
+    expect(empty!.textContent).toContain(sampleDisruption.title);
+
+    // Collapsed initially
+    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+
+    // Expand to reveal alternative travel
+    toggleBtn.click();
+    await card.updateComplete;
 
     const altTravel = empty!.querySelector('.alternative-travel-box');
     expect(altTravel).not.toBeNull();
@@ -691,7 +717,15 @@ describe('rail disruption announcements and empty states', () => {
     const empty = card.shadowRoot!.querySelector('.board-empty-state.disrupted');
     expect(empty).not.toBeNull();
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Service Disrupted');
-    expect(empty!.textContent).toContain('Train services are disrupted');
+    expect(empty!.textContent).toContain(sampleDisruption.title);
+
+    expect(empty!.querySelector('.alternative-travel-box')).toBeNull();
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+
+    toggleBtn.click();
+    await card.updateComplete;
+
     expect(empty!.querySelector('.alternative-travel-box')).not.toBeNull();
   });
 
@@ -873,12 +907,21 @@ describe('entity state unknown and empty state enrichment', () => {
 
     const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed');
     expect(empty).not.toBeNull();
-    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Station Closed');
+    expect(empty!.querySelector('.board-empty-title')!.textContent).toBe(
+      'Station Closed: Planned Engineering Work'
+    );
     expect(empty!.textContent).toContain(sampleDisruption.title);
+    expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
+
+    // Expand details
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+    toggleBtn.click();
+    await card.updateComplete;
+
     expect(empty!.textContent).toContain(sampleDisruption.summary);
     expect(empty!.textContent).toContain('Station will reopen at 06:00 tomorrow.');
     expect(empty!.textContent).toContain('Replacement buses running');
-    expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
   });
 
   it('renders engineering_work empty state for HA state: unknown without raw unknown text', async () => {
@@ -891,8 +934,14 @@ describe('entity state unknown and empty state enrichment', () => {
     expect(empty).not.toBeNull();
     expect(empty!.querySelector('.board-empty-title')!.textContent).toBe('Engineering Work');
     expect(empty!.textContent).toContain(sampleDisruption.title);
-    expect(empty!.textContent).toContain('Replacement Bus & Ticket Acceptance');
     expect(card.shadowRoot!.textContent).not.toContain('is currently unknown');
+
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(empty!.textContent).toContain('Replacement Bus & Ticket Acceptance');
   });
 
   it('renders RTT-only no_departures empty state for HA state: unknown without raw unknown text', async () => {
@@ -977,6 +1026,13 @@ describe('entity state unknown and empty state enrichment', () => {
     const empty = card.shadowRoot!.querySelector('.board-empty-state.disrupted');
     expect(empty).not.toBeNull();
     expect(empty!.textContent).toContain(sampleDisruption.title);
+
+    // Expand details
+    const toggleBtn = empty!.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+    toggleBtn.click();
+    await card.updateComplete;
+
     expect(empty!.textContent).toContain(sampleDisruption.summary);
     expect(empty!.textContent).toContain('Platform 2 closed for maintenance.');
     expect(empty!.textContent).toContain('Replacement buses running');
@@ -1033,5 +1089,115 @@ describe('entity state unknown and empty state enrichment', () => {
 
     const daytimeDate = new Date('2026-01-15T14:30:00Z');
     expect(card._isNighttime(daytimeDate)).toBe(false);
+  });
+
+  it('toggles announcement banner inline drawer via Details button', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        disruptions: [sampleDisruption],
+      }
+    );
+
+    const toggleBtn = card.shadowRoot!.querySelector('.announcement-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+    expect(toggleBtn.textContent).toContain('Details');
+    expect(toggleBtn.getAttribute('aria-expanded')).toBe('false');
+
+    // Drawer is initially closed
+    expect(card.shadowRoot!.querySelector('.announcement-drawer')).toBeNull();
+
+    // Click Details button to expand inline drawer
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(toggleBtn.textContent).toContain('Hide');
+    expect(toggleBtn.getAttribute('aria-expanded')).toBe('true');
+    const drawer = card.shadowRoot!.querySelector('.announcement-drawer');
+    expect(drawer).not.toBeNull();
+    expect(drawer!.textContent).toContain(sampleDisruption.title);
+    expect(drawer!.textContent).toContain(sampleDisruption.summary);
+    expect(drawer!.textContent).toContain(sampleDisruption.alternative_travel);
+
+    // Click Details button again to collapse
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(toggleBtn.textContent).toContain('Details');
+    expect(toggleBtn.getAttribute('aria-expanded')).toBe('false');
+    expect(card.shadowRoot!.querySelector('.announcement-drawer')).toBeNull();
+  });
+
+  it('toggles empty state details via toggle button and updates aria-expanded', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'station_closed',
+      disruptions: [sampleDisruption],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.station-closed')!;
+    const toggleBtn = empty.querySelector('.disruption-toggle-btn') as HTMLElement;
+    expect(toggleBtn).not.toBeNull();
+    expect(toggleBtn.getAttribute('aria-expanded')).toBe('false');
+    expect(empty.querySelector('#disruption-details-content')).toBeNull();
+
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(toggleBtn.getAttribute('aria-expanded')).toBe('true');
+    expect(empty.querySelector('#disruption-details-content')).not.toBeNull();
+
+    toggleBtn.click();
+    await card.updateComplete;
+
+    expect(toggleBtn.getAttribute('aria-expanded')).toBe('false');
+    expect(empty.querySelector('#disruption-details-content')).toBeNull();
+  });
+
+  it('formats Station Closed: Planned Engineering Work for planned closures and Station Closed for unplanned', async () => {
+    const plannedCard = await mountUnknownCard({
+      service_status: 'station_closed',
+      disruptions: [{ ...sampleDisruption, is_planned: true }],
+    });
+    const plannedEmpty = plannedCard.shadowRoot!.querySelector('.board-empty-state.station-closed')!;
+    expect(plannedEmpty.querySelector('.board-empty-title')!.textContent).toBe(
+      'Station Closed: Planned Engineering Work'
+    );
+
+    const unplannedCard = await mountUnknownCard({
+      service_status: 'station_closed',
+      disruptions: [{ ...sampleDisruption, is_planned: false }],
+    });
+    const unplannedEmpty = unplannedCard.shadowRoot!.querySelector('.board-empty-state.station-closed')!;
+    expect(unplannedEmpty.querySelector('.board-empty-title')!.textContent).toBe(
+      'Station Closed'
+    );
+  });
+
+  it('extracts first sentence as brief summary for verbose disruption summaries', () => {
+    const card = document.createElement(
+      'train-departure-board'
+    ) as unknown as { _getBriefSummary: (summary?: string | null, max?: number) => string };
+
+    const longSummary =
+      'Engineering work is taking place at Lewisham, closing the station and the Bexleyheath line all weekend. Bexleyheath Line: Trains between London Charing Cross and Dartford will not run.';
+    const brief = card._getBriefSummary(longSummary);
+    expect(brief).toBe(
+      'Engineering work is taking place at Lewisham, closing the station and the Bexleyheath line all weekend.'
+    );
+
+    const shortSummary = 'Signals failed.';
+    expect(card._getBriefSummary(shortSummary)).toBe('Signals failed.');
+  });
+
+  it('does not render disruption toggle button when no disruption details exist', async () => {
+    const card = await mountUnknownCard({
+      service_status: 'no_departures',
+      disruptions: [],
+      station_messages: [],
+    });
+
+    const empty = card.shadowRoot!.querySelector('.board-empty-state.no-departures')!;
+    expect(empty.querySelector('.disruption-toggle-btn')).toBeNull();
   });
 });

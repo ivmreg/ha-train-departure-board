@@ -32,6 +32,8 @@ export class TrainDepartureBoard extends LitElement {
     is_planned?: boolean;
   } | null = null;
   @state() private _activeAnnouncementIndex = 0;
+  @state() private _disruptionDetailsExpanded = false;
+  @state() private _bannerDrawerExpanded = false;
   private dateCache = new Map<string, Date | null>();
   private lastEntityId: string | null = null;
   private _returnFocusTo: HTMLElement | null = null;
@@ -861,6 +863,79 @@ export class TrainDepartureBoard extends LitElement {
       opacity: 0.9;
       flex-shrink: 0;
     }
+    .announcement-toggle-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 170, 0, 0.4);
+      color: #ffaa00;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-family: inherit;
+      font-size: 0.75em;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .announcement-toggle-btn:hover {
+      background: rgba(255, 170, 0, 0.15);
+      border-color: #ffaa00;
+    }
+    .announcement-toggle-btn:focus-visible {
+      outline: 1px solid #ffaa00;
+    }
+    .announcement-drawer {
+      background: #141414;
+      color: #e0e0e0;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 12px 16px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-sizing: border-box;
+      width: 100%;
+      text-align: left;
+    }
+    .announcement-drawer.position-bottom {
+      border-bottom: none;
+      border-top: 1px solid #2a2a2a;
+    }
+    .announcement-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .announcement-drawer-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #ffaa00;
+    }
+    .announcement-drawer-summary {
+      color: #cccccc;
+      white-space: pre-wrap;
+    }
+    .announcement-drawer-alt {
+      background: rgba(255, 170, 0, 0.08);
+      border-left: 3px solid #ffaa00;
+      padding: 8px 10px;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 0.82rem;
+    }
+    .announcement-drawer-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
     @keyframes ticker-scroll {
       0% {
         transform: translateX(0);
@@ -870,12 +945,12 @@ export class TrainDepartureBoard extends LitElement {
       }
     }
     .board-empty-state {
-      padding: 28px 16px;
+      padding: 24px 16px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex: 1;
     }
     .board-empty-state.station-closed {
@@ -901,8 +976,52 @@ export class TrainDepartureBoard extends LitElement {
     .board-empty-state.disrupted .board-empty-title {
       color: var(--warning-color, #e65100);
     }
+    .empty-compact-summary {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--secondary-text-color, #555);
+      max-width: 480px;
+      margin: 2px 0 4px 0;
+      text-align: center;
+    }
+    .disruption-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card-background-color, rgba(255, 255, 255, 0.05));
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.15));
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary-color, #03a9f4);
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      margin-top: 4px;
+    }
+    .disruption-toggle-btn:hover {
+      background: rgba(3, 169, 244, 0.08);
+      border-color: var(--primary-color, #03a9f4);
+    }
+    .disruption-toggle-btn:focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: 2px;
+    }
+    .disruption-toggle-btn .chevron {
+      font-size: 0.75rem;
+      transition: transform 0.2s ease;
+    }
+    .disruption-expanded-content {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
     .alternative-travel-box {
-      margin-top: 12px;
+      margin-top: 4px;
       width: 100%;
       max-width: 480px;
       background: var(--card-background-color, #fff);
@@ -1493,7 +1612,10 @@ export class TrainDepartureBoard extends LitElement {
       disruptions.forEach((d, idx) => {
         if (d && typeof d === 'object') {
           const item = d as DisruptionItem;
-          const text = item.title || item.summary || 'Disruption alert';
+          const text =
+            item.title ||
+            this._getBriefSummary(item.summary) ||
+            'Disruption alert';
           items.push({
             id: item.id || `disr-${idx}`,
             text: text.trim(),
@@ -1505,6 +1627,27 @@ export class TrainDepartureBoard extends LitElement {
     }
 
     return items;
+  }
+
+  private _getBriefSummary(summary?: string | null, maxLength = 160): string {
+    if (!summary || typeof summary !== 'string') return '';
+    const clean = summary.replace(/\s+/g, ' ').trim();
+    if (clean.length <= maxLength) return clean;
+    const sentenceMatch = clean.match(/^(.+?[.!?])(?:\s|$)/);
+    if (sentenceMatch && sentenceMatch[1] && sentenceMatch[1].length <= maxLength) {
+      return sentenceMatch[1];
+    }
+    const truncated = clean.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return (lastSpace > 40 ? truncated.substring(0, lastSpace) : truncated) + '...';
+  }
+
+  private _toggleDisruptionDetails() {
+    this._disruptionDetailsExpanded = !this._disruptionDetailsExpanded;
+  }
+
+  private _toggleBannerDrawer() {
+    this._bannerDrawerExpanded = !this._bannerDrawerExpanded;
   }
 
   private _showAlertDetails(
@@ -1649,8 +1792,66 @@ export class TrainDepartureBoard extends LitElement {
             <span class="announcement-ticker">${current.text}</span>
           </div>
         </div>
-        <span class="announcement-action">Details</span>
+        <button
+          class="announcement-toggle-btn"
+          aria-expanded="${this._bannerDrawerExpanded ? 'true' : 'false'}"
+          aria-label="${this._bannerDrawerExpanded ? 'Hide announcement details' : 'Show announcement details'}"
+          @click=${(e: Event) => {
+            e.stopPropagation();
+            this._toggleBannerDrawer();
+          }}
+        >
+          <span>${this._bannerDrawerExpanded ? 'Hide' : 'Details'}</span>
+          <span class="chevron" aria-hidden="true">${this._bannerDrawerExpanded ? '▲' : '▼'}</span>
+        </button>
       </div>
+      ${this._bannerDrawerExpanded
+        ? html`
+            <div class="announcement-drawer position-${position}">
+              <div class="announcement-drawer-header">
+                <span class="announcement-drawer-title">
+                  ${current.disruption?.title ||
+                  (current.isDisruption ? 'Disruption' : 'Station Announcement')}
+                </span>
+                ${current.disruption?.is_planned
+                  ? html`<span class="alert-badge planned">Planned Work</span>`
+                  : current.isDisruption
+                  ? html`<span class="alert-badge unplanned">Disruption Alert</span>`
+                  : ''}
+              </div>
+              <div class="announcement-drawer-summary">
+                ${current.disruption?.summary || current.text}
+              </div>
+              ${current.disruption?.alternative_travel
+                ? html`
+                    <div class="announcement-drawer-alt">
+                      <span aria-hidden="true">🚌</span> ${current.disruption.alternative_travel}
+                    </div>
+                  `
+                : ''}
+              <div class="announcement-drawer-actions">
+                ${this._isSafeUrl(current.disruption?.url)
+                  ? html`
+                      <a
+                        href="${current.disruption?.url || ''}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="empty-external-link"
+                      >
+                        National Rail Updates ↗
+                      </a>
+                    `
+                  : ''}
+                <button
+                  class="empty-details-btn"
+                  @click=${(e: Event) => this._showAlertDetails(current, e)}
+                >
+                  View Modal
+                </button>
+              </div>
+            </div>
+          `
+        : ''}
     `;
   }
 
@@ -1698,7 +1899,11 @@ export class TrainDepartureBoard extends LitElement {
 
     if (serviceStatus === 'station_closed') {
       icon = '🚫';
-      title = 'Station Closed';
+      if (primaryDisruption?.is_planned) {
+        title = 'Station Closed: Planned Engineering Work';
+      } else {
+        title = 'Station Closed';
+      }
       defaultMsg = 'This station is currently closed. No train services are operating.';
     } else if (serviceStatus === 'engineering_work') {
       icon = '🚧';
@@ -1719,88 +1924,116 @@ export class TrainDepartureBoard extends LitElement {
     }
 
     const statusClass = serviceStatus.replace(/_/g, '-');
+    const hasDetails = Boolean(
+      primaryDisruption?.summary ||
+      altTravels.length > 0 ||
+      stationMessages.length > 0
+    );
+
+    const briefSummary = primaryDisruption
+      ? (primaryDisruption.title || this._getBriefSummary(primaryDisruption.summary) || defaultMsg)
+      : defaultMsg;
 
     return html`
       <div class="board-message board-empty-state ${statusClass} ${serviceStatus}" role="status">
         <span class="message-icon" aria-hidden="true">${icon}</span>
         <div class="board-empty-title">${title}</div>
-        <span class="message-text">${defaultMsg}</span>
-        ${primaryDisruption
+        <div class="empty-compact-summary">${briefSummary}</div>
+        ${hasDetails
           ? html`
-              <div class="empty-disruption-details">
-                <h4 class="empty-disruption-title">
-                  ${primaryDisruption.title || 'Disruption Notice'}
-                </h4>
-                ${primaryDisruption.summary
-                  ? html`<p class="empty-state-summary">
-                      ${primaryDisruption.summary}
-                    </p>`
-                  : ''}
-              </div>
+              <button
+                class="disruption-toggle-btn"
+                aria-expanded="${this._disruptionDetailsExpanded ? 'true' : 'false'}"
+                aria-controls="disruption-details-content"
+                @click=${this._toggleDisruptionDetails}
+              >
+                <span>${this._disruptionDetailsExpanded ? 'Hide details' : 'Show details'}</span>
+                <span class="chevron" aria-hidden="true">${this._disruptionDetailsExpanded ? '▲' : '▼'}</span>
+              </button>
             `
           : ''}
-        ${stationMessages.length > 0
+        ${this._disruptionDetailsExpanded && hasDetails
           ? html`
-              <div class="empty-station-messages">
-                ${stationMessages.map(
-                  msg => html`<div class="empty-station-message">📢 ${msg}</div>`
-                )}
-              </div>
-            `
-          : ''}
-        ${altTravels.length > 0
-          ? html`
-              <div class="alternative-travel-box">
-                <div class="alternative-travel-header">
-                  <span aria-hidden="true">🚌</span> ${serviceStatus === 'engineering_work'
-                    ? 'Replacement Bus & Ticket Acceptance'
-                    : 'Alternative Travel & Ticket Acceptance'}
-                </div>
-                <div class="alternative-travel-content">
-                  ${altTravels.map(
-                    alt =>
-                      html`<div class="alternative-travel-item">${alt}</div>`
-                  )}
-                </div>
-              </div>
-            `
-          : nothing}
-        ${primaryDisruption
-          ? html`
-              <div class="empty-state-actions">
-                <button
-                  class="empty-details-btn"
-                  @click=${(e: Event) =>
-                    this._showAlertDetails(
-                      {
-                        id: primaryDisruption.id,
-                        text:
-                          primaryDisruption.title ||
-                          primaryDisruption.summary ||
-                          'Disruption',
-                        isDisruption: true,
-                        disruption: primaryDisruption,
-                      },
-                      e
-                    )}
-                >
-                  View Details
-                </button>
-                ${this._isSafeUrl(primaryDisruption.url)
+              <div id="disruption-details-content" class="disruption-expanded-content">
+                ${primaryDisruption
                   ? html`
-                      <a
-                        href="${primaryDisruption.url}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="empty-external-link"
-                      >
-                        National Rail Updates ↗
-                      </a>
+                      <div class="empty-disruption-details">
+                        <h4 class="empty-disruption-title">
+                          ${primaryDisruption.title || 'Disruption Notice'}
+                        </h4>
+                        ${primaryDisruption.summary
+                          ? html`<p class="empty-state-summary">
+                              ${primaryDisruption.summary}
+                            </p>`
+                          : ''}
+                      </div>
+                    `
+                  : ''}
+                ${stationMessages.length > 0
+                  ? html`
+                      <div class="empty-station-messages">
+                        ${stationMessages.map(
+                          msg => html`<div class="empty-station-message">📢 ${msg}</div>`
+                        )}
+                      </div>
+                    `
+                  : ''}
+                ${altTravels.length > 0
+                  ? html`
+                      <div class="alternative-travel-box">
+                        <div class="alternative-travel-header">
+                          <span aria-hidden="true">🚌</span> ${serviceStatus === 'engineering_work'
+                            ? 'Replacement Bus & Ticket Acceptance'
+                            : 'Alternative Travel & Ticket Acceptance'}
+                        </div>
+                        <div class="alternative-travel-content">
+                          ${altTravels.map(
+                            alt =>
+                              html`<div class="alternative-travel-item">${alt}</div>`
+                          )}
+                        </div>
+                      </div>
+                    `
+                  : nothing}
+                ${primaryDisruption
+                  ? html`
+                      <div class="empty-state-actions">
+                        <button
+                          class="empty-details-btn"
+                          @click=${(e: Event) =>
+                            this._showAlertDetails(
+                              {
+                                id: primaryDisruption.id,
+                                text:
+                                  primaryDisruption.title ||
+                                  primaryDisruption.summary ||
+                                  'Disruption',
+                                isDisruption: true,
+                                disruption: primaryDisruption,
+                              },
+                              e
+                            )}
+                        >
+                          View Details
+                        </button>
+                        ${this._isSafeUrl(primaryDisruption.url)
+                          ? html`
+                              <a
+                                href="${primaryDisruption.url}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="empty-external-link"
+                              >
+                                National Rail Updates ↗
+                              </a>
+                            `
+                          : ''}
+                      </div>
                     `
                   : ''}
               </div>
             `
-          : ''}
+          : nothing}
       </div>
     `;
   }
