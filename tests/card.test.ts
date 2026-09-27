@@ -1048,11 +1048,24 @@ describe('entity state unknown and empty state enrichment', () => {
     expect(card.shadowRoot!.querySelector('.alert-popup-card')).not.toBeNull();
   });
 
-  it('traps focus properly inside alert modal using Shadow DOM activeElement', async () => {
+  it('does not render announcements banner in empty state when next_trains is empty', async () => {
     const card = await mountUnknownCard({
-      service_status: 'disrupted',
+      service_status: 'station_closed',
       disruptions: [sampleDisruption],
     });
+    expect(card.shadowRoot!.querySelector('.announcements-banner')).toBeNull();
+    expect(card.shadowRoot!.querySelector('.board-empty-state')).not.toBeNull();
+  });
+
+  it('traps focus properly inside alert modal using Shadow DOM activeElement', async () => {
+    const card = await mountCard(
+      { entity: 'sensor.trains' },
+      [makeDeparture()],
+      {
+        service_status: 'disrupted',
+        disruptions: [sampleDisruption],
+      }
+    );
 
     const banner = card.shadowRoot!.querySelector('.announcements-banner') as HTMLElement;
     banner.click();

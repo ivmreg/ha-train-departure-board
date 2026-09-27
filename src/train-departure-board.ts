@@ -814,16 +814,15 @@ export class TrainDepartureBoard extends LitElement {
       color: var(--secondary-text-color);
       font-weight: 600;
     }
-    /* Amber LED announcements banner */
+    /* Announcements banner */
     .announcements-banner {
-      background: #0f0f0f;
-      color: #ffaa00;
-      border-bottom: 1px solid #2a2a2a;
+      background: var(--announcement-banner-background, rgba(255, 170, 0, 0.12));
+      color: var(--announcement-banner-color, var(--warning-color, #e65100));
+      border-bottom: 1px solid var(--divider-color, rgba(255, 170, 0, 0.25));
       padding: 8px 12px;
-      font-family: ui-monospace, SFMono-Regular, "Courier New", Consolas, monospace;
       font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -834,14 +833,14 @@ export class TrainDepartureBoard extends LitElement {
     }
     .announcements-banner.position-bottom {
       border-bottom: none;
-      border-top: 1px solid #2a2a2a;
+      border-top: 1px solid var(--divider-color, rgba(255, 170, 0, 0.25));
     }
     .announcements-banner:focus-visible {
-      outline: 2px solid #ffaa00;
+      outline: 2px solid var(--warning-color, #ffaa00);
       outline-offset: -2px;
     }
     .announcement-icon {
-      color: #ffaa00;
+      color: var(--warning-color, #e65100);
       font-size: 1.1em;
       line-height: 1;
       flex-shrink: 0;
@@ -881,6 +880,7 @@ export class TrainDepartureBoard extends LitElement {
       border: 1px solid rgba(255, 170, 0, 0.4);
       border-radius: 3px;
       padding: 1px 4px;
+      color: var(--warning-color, #e65100);
     }
     .announcement-action {
       font-size: 0.75em;
@@ -891,7 +891,7 @@ export class TrainDepartureBoard extends LitElement {
     .announcement-toggle-btn {
       background: transparent;
       border: 1px solid rgba(255, 170, 0, 0.4);
-      color: #ffaa00;
+      color: var(--warning-color, #e65100);
       border-radius: 3px;
       padding: 2px 6px;
       font-family: inherit;
@@ -906,15 +906,15 @@ export class TrainDepartureBoard extends LitElement {
     }
     .announcement-toggle-btn:hover {
       background: rgba(255, 170, 0, 0.15);
-      border-color: #ffaa00;
+      border-color: var(--warning-color, #ffaa00);
     }
     .announcement-toggle-btn:focus-visible {
-      outline: 1px solid #ffaa00;
+      outline: 1px solid var(--warning-color, #ffaa00);
     }
     .announcement-drawer {
-      background: #141414;
-      color: #e0e0e0;
-      border-bottom: 1px solid #2a2a2a;
+      background: var(--card-background-color, #fff);
+      color: var(--primary-text-color, #111);
+      border-bottom: 1px solid var(--divider-color, #e0e0e0);
       padding: 12px 16px;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 0.85rem;
@@ -928,7 +928,7 @@ export class TrainDepartureBoard extends LitElement {
     }
     .announcement-drawer.position-bottom {
       border-bottom: none;
-      border-top: 1px solid #2a2a2a;
+      border-top: 1px solid var(--divider-color, #e0e0e0);
     }
     .announcement-drawer-header {
       display: flex;
@@ -940,10 +940,10 @@ export class TrainDepartureBoard extends LitElement {
     .announcement-drawer-title {
       font-weight: 700;
       font-size: 0.95rem;
-      color: #ffaa00;
+      color: var(--warning-color, #e65100);
     }
     .announcement-drawer-summary {
-      color: #cccccc;
+      color: var(--primary-text-color, #222);
       white-space: pre-wrap;
     }
     .announcement-drawer-alt {
@@ -1400,7 +1400,7 @@ export class TrainDepartureBoard extends LitElement {
           ? html`<div class="card-header">${this.config.title}</div>`
           : ''}
         <div class="card">
-          ${showAnnouncements && announcementPos === 'top'
+          ${showAnnouncements && announcementPos === 'top' && departures.length > 0
             ? this._renderAnnouncementsBanner(announcements, 'top')
             : ''}
           ${walkTime > 0 && highlightIndex === -1 && departures.length > 0
@@ -1419,7 +1419,7 @@ export class TrainDepartureBoard extends LitElement {
                 )}
               </div>`
             : this._renderEmptyState(entity, now)}
-          ${showAnnouncements && announcementPos === 'bottom'
+          ${showAnnouncements && announcementPos === 'bottom' && departures.length > 0
             ? this._renderAnnouncementsBanner(announcements, 'bottom')
             : ''}
           ${lastUpdated || isStale || entity.attributes?.error
