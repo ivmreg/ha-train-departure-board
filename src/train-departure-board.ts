@@ -1994,7 +1994,7 @@ export class TrainDepartureBoard extends LitElement {
     let defaultMsg = 'No departures in the current window';
 
     if (serviceStatus === 'station_closed') {
-      icon = 'mdi:train-variant-off';
+      icon = 'mdi:train';
       title = 'Station Closed';
       defaultMsg = 'This station is currently closed. No train services are operating.';
     } else if (serviceStatus === 'engineering_work') {
@@ -2002,7 +2002,7 @@ export class TrainDepartureBoard extends LitElement {
       title = 'Engineering Work';
       defaultMsg = 'Engineering work is affecting services at this station.';
     } else if (serviceStatus === 'disrupted') {
-      icon = 'mdi:train-alert';
+      icon = 'mdi:alert-circle-outline';
       title = 'Service Disrupted';
       defaultMsg = 'Train services are disrupted. Please check announcements for details.';
     } else {
